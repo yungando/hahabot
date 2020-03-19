@@ -1,0 +1,560 @@
+const Discord = require('discord.js');
+const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+
+const { prefix, token } = require('./config.json');
+
+const { hahaDMID, hahaDMToken } = require('./webhooks/hahaDM.json');
+const hahaDM = new Discord.WebhookClient(hahaDMID, hahaDMToken);
+
+const { hahaLOGID, hahaLOGToken } = require('./webhooks/hahaLOG.json');
+const hahaLOG = new Discord.WebhookClient(hahaLOGID, hahaLOGToken);
+
+const { wishes, niobe } = require('./webhooks/galleries.json');
+
+client.once('ready', () => 
+{
+    console.log('Ready!');
+    client.user.setActivity('~help');
+});
+
+const events = 
+{
+	MESSAGE_REACTION_ADD: 'messageReactionAdd',
+	MESSAGE_REACTION_REMOVE: 'messageReactionRemove'
+};
+
+client.on('message', message =>
+{
+    let msg = message.content.toUpperCase();
+    let sender = message.author;
+    let args = message.content.slice(prefix.length).split(/ +/);
+    let cmd = args.shift().toLowerCase();
+
+    if (!msg.startsWith(prefix)) return;
+    if (sender.bot) return;
+
+    try
+    {
+        let commandFile = require(`./commands/${cmd}.js`);
+        commandFile.run(client, message, args);
+    }
+    catch (e)
+    {
+        console.log(e.message);
+    }
+    finally
+    {
+        hahaLOG.send(message.content, {
+            username: message.author.tag,
+            avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
+        });
+    }
+});
+
+client.on('guildMemberRemove', member =>
+{
+    try
+    {
+        let tag = member.user.id;
+        let guild = member.guild;
+
+        guild.systemChannel.send(`<@${tag}> left the server.`);
+    }
+    catch (e)
+    {
+        console.log(e.message);
+    }
+});
+
+client.on('messageReactionAdd', async (reaction, user) =>
+{
+    if (user.bot) return;
+
+    if (reaction.partial) {
+		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.log('Something went wrong when fetching the message: ', error);
+			// Return as `reaction.message.author` may be undefined/null
+			return;
+		}
+	}
+
+    let message = reaction.message;
+    let emoji = reaction.emoji;
+
+    if (message.channel.type == 'text')
+    {
+        var member = message.guild.members.cache.find(m => m.id == user.id);
+    }
+
+    if (message.author.id == '560533863290372097')
+    {        
+        if (message.embeds[0] != undefined && message.embeds[0] != 0)
+        {
+            if (message.embeds[0].footer)
+            {
+                if (message.embeds[0].footer.text.split(' - ')[0] == '#raid-schedules')
+                {
+                    if (user.bot) return;
+
+                    let oldEmbed = message.embeds[0];
+            
+                    if (emoji.id == '593898113626800129') // Add to Raid Schedule
+                    {
+                        reaction.users.remove(user);
+
+                        let roster = oldEmbed.fields[0].value;
+
+                        if (!roster.includes(user.id))
+                        {
+                            roster = roster.split('\u000D');
+                        }
+                        else
+                        {
+                            return;
+                        }
+            
+                        for (var i = 0; i < roster.length; i++)
+                        {
+                            if (roster[i].includes(user.id))
+                            {
+                                return;
+                            }
+                        }
+
+                        for (var i = 0; i < roster.length; i++)
+                        {
+                            if (!roster[i].includes('@'))
+                            {
+                                roster[i] = `${i+1}) <@${user.id}>`;
+                                break;
+                            }
+                        }
+
+                        roster = roster.join('\u000D');
+            
+                        oldEmbed.fields = [];
+                        const editedEmbed = new Discord.MessageEmbed(oldEmbed);
+            
+                        editedEmbed.addField('Roster', roster);
+
+                        var displayName = message.guild.members.cache.get(user.id).displayName;
+                        var description = editedEmbed.description.replace('\u000D', ' - ').replace(/[**]/g, '');
+                        var raidID = message.id;
+
+                        var schedule = `${displayName} **joined** - ${description} - ${raidID}`;
+                        
+                        hahaLOG.send(schedule, {
+                            username: user.tag,
+                            avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                        });
+            
+                        message.edit(editedEmbed);
+                    }
+                    else if (emoji.id == '593898113639383040') // Remove from Raid Schedule
+                    {
+                        reaction.users.remove(user);
+
+                        let roster = oldEmbed.fields[0].value;
+
+                        if (roster.includes(user.id))
+                        {
+                            roster = roster.split('\u000D');
+                        }
+                        else
+                        {
+                            return;
+                        }
+            
+                        for (var i = 0; i < roster.length; i++)
+                        {
+                            if (roster[i].includes(user.id))
+                            {
+                                roster[i] = `${i+1}) `;
+                            } 
+                        }
+
+                        const editedEmbed = new Discord.MessageEmbed(oldEmbed);
+
+                        if (!roster.join('').includes(editedEmbed.author.iconURL.split('avatars/')[1].split('/')[0]))
+                        {
+                            var i;
+                            for (i = 0; i < roster.length; i++)
+                            {
+                                if (roster[i].includes('@'))
+                                {
+                                    break;
+                                }
+                            }
+                            
+                            if (roster.join('').includes('@'))
+                            {
+                                var newHost = message.guild.members.find(m => m.id == roster[i].split('@')[1].split('>')[0]);
+
+                                var colour = newHost.displayHexColor;
+    
+                                if (colour == '#000000')
+                                {
+                                    colour = '#99aab5';
+                                }
+    
+                                editedEmbed.setAuthor(newHost.displayName, newHost.user.avatarURL({ format: "png", dynamic: true }));
+                                editedEmbed.setColor(colour);
+                            }
+                        }
+
+                        roster = roster.join('\u000D');
+            
+                        editedEmbed.fields = [];
+            
+                        editedEmbed.addField('Roster', roster);
+
+                        var displayName = message.guild.members.cache.get(user.id).displayName;
+                        var description = editedEmbed.description.replace('\u000D', ' - ').replace(/[**]/g, '');
+                        var raidID = message.id;
+
+                        var schedule = `${displayName} **left** - ${description} - ${raidID}`;
+                        
+                        hahaLOG.send(schedule, {
+                            username: user.tag,
+                            avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                        });
+            
+                        message.edit(editedEmbed);
+                    }
+                }
+                else if (message.embeds[0].footer.text.includes('~guide'))
+                {
+                    let oldEmbed = message.embeds[0];
+                    let footer = oldEmbed.footer.text;
+
+                    let gallery = footer.split('~guide ').join('').split(' (')[0];
+                    let page = parseInt(footer.split('(')[1].split('/')[0]);
+
+                    if (gallery == 'wishes' || gallery == 'wish')
+                    {
+                        gallery = wishes;
+                        footer = 'wishes';
+                    }
+                    else if (gallery == 'niobe' || gallery == 'niobelabs')
+                    {
+                        gallery = niobe;
+                        footer = 'niobe';
+                    }
+
+                    if (emoji.name == '➡' || emoji.name == '⬅')
+                    {
+                        reaction.users.remove(user);
+
+                        if (emoji.name == '➡') // right
+                        {
+                            if (page == gallery.length)
+                            {
+                                page = 1;
+                            }
+                            else
+                            {
+                                page++;
+                            }
+                        }
+                        else if (emoji.name == '⬅') // left
+                        {
+                            if (page == 1)
+                            {
+                                page = gallery.length;
+                            }
+                            else
+                            {
+                                page--;
+                            }
+                        }
+
+                        var description = gallery[page-1][0];
+                        var imageURL = gallery[page-1][1];
+
+                        const editedEmbed = new Discord.MessageEmbed(oldEmbed)
+                            .setDescription(description)
+                            .setImage(imageURL)
+                            .setFooter(`~guide ${footer} (${page}/${gallery.length})`);
+
+                        message.edit(editedEmbed);
+                    }
+                }
+            }
+        }
+    }
+    
+    if (emoji.id == '594816363722309645')
+    {
+        if (user.bot) return;
+
+        let downvote = message.reactions.filter(r => r.emoji.id == '594816363533565991').array();
+        
+        if (downvote[0] != undefined)
+        {
+            downvote[0].remove(user);
+        }
+    }
+    else if (emoji.id == '594816363533565991')
+    {
+        if (user.bot) return;
+
+        let upvote = message.reactions.filter(r => r.emoji.id == '594816363722309645').array();
+
+        if (upvote[0] != undefined)
+        {
+            upvote[0].remove(user);
+        }
+    }
+
+    // @roles reaction role
+    if (message.id == '685996115367166059')
+    {
+        if (emoji.id == '592085760824442910')
+        {
+            if (member.roles.cache.some(r => r.id == '599755089908989953'))
+            {
+                if (!member.roles.cache.some(r => r.id == '540565941977874434'))
+                {
+                    reaction.users.remove(user);
+    
+                    member.roles.add('540565941977874434');
+    
+                    var roleUpdate = `${member.displayName} **added role** - @roles`;
+    
+                    hahaLOG.send(roleUpdate, {
+                        username: user.tag,
+                        avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                    });
+                }
+                else
+                {
+                    reaction.users.remove(user);
+                    
+                    member.roles.remove('540565941977874434');
+    
+                    var roleUpdate = `${member.displayName} **removed role** - @roles`;
+    
+                    hahaLOG.send(roleUpdate, {
+                        username: user.tag,
+                        avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                    });
+                }
+            }
+            else
+            {
+                reaction.users.remove(user);
+            }
+        }
+    }
+
+    // @lfg reaction role
+    if (message.id == '683812430127956018')
+    {
+        if (emoji.id == '535644830408245249')
+        {
+            if (!member.roles.cache.some(r => r.id == '534925628680437783'))
+            {
+                reaction.users.remove(user);
+
+                member.roles.add('534925628680437783');
+
+                var roleUpdate = `${member.displayName} **added role** - @lfg`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: user.tag,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+            else
+            {
+                reaction.users.remove(user);
+                
+                member.roles.remove('534925628680437783');
+
+                var roleUpdate = `${member.displayName} **removed role** - @lfg`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: user.tag,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+        }
+    }
+
+    // @comp reaction role
+    if (message.id == '683812749268353047')
+    {
+        if (emoji.id == '539648520832155648')
+        {
+            if (!member.roles.cache.some(r => r.id == '539645535754256387'))
+            {
+                reaction.users.remove(user);
+
+                member.roles.add('539645535754256387');
+
+                var roleUpdate = `${member.displayName} **added role** - @comp`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: user.tag,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+            else
+            {
+                reaction.users.remove(user);
+                
+                member.roles.remove('539645535754256387');
+
+                var roleUpdate = `${member.displayName} **removed role** - @comp`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: user.tag,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+        }
+    }
+
+    // @division2 reaction role
+    if (message.id == '683812816779477032')
+    {
+        if (emoji.id == '683799297975910494')
+        {
+            if (!member.roles.cache.some(r => r.id == '683797344889864258'))
+            {
+                reaction.users.remove(user);
+
+                member.roles.add('683797344889864258');
+
+                var roleUpdate = `${member.displayName} **added role** - @agent`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: user.tag,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+            else
+            {
+                reaction.users.remove(user);
+                
+                member.roles.remove('683797344889864258');
+
+                var roleUpdate = `${member.displayName} **removed role** - @agent`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: user.tag,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+        }
+    }
+});
+
+client.on('message', message =>
+{
+    let sender = message.author;
+    let msg = message.content.toLowerCase();
+
+    if (sender.bot) return;
+
+    if (message.channel.type == 'dm')
+    {
+        if (message.attachments.size > 0)
+        {
+            hahaDM.send(message.content, {
+                username: message.author.tag,
+                avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true }),
+                files: [message.attachments.first().url]
+            });
+        } else
+        {
+            hahaDM.send(message.content, {
+                username: message.author.tag,
+                avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
+            });
+        }
+    }
+
+    if (msg.includes('discord.gg/' || 'discordapp.com/invite'))
+    {
+        if (message.guild.id === '534915212760055819')
+        {
+            if (sender.tag != 'ando#0404')
+            {
+                message.delete();
+                message.channel.send('**No Discord invite links allowed**');
+
+                hahaLOG.send(msg, {
+                    username: message.author.tag,
+                    avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+        }
+    }
+
+    if (msg.includes('🦀'))
+    {
+        message.react('🦀');
+    }
+
+    if (msg.includes('<a:crabrave:586918323149602816>'))
+    {
+        message.react('586918323149602816');
+    }
+    
+    if (msg === 'why the fuck my gambit hard') {
+        message.channel.send('😩');
+
+        hahaLOG.send(msg, {
+            username: message.author.tag,
+            avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
+        });
+    }
+
+    if (msg === 'why the fuck my raid schedules hard')
+    {
+        message.channel.send('<:wearyarmelion:604642596249272320>');
+
+        hahaLOG.send(msg, {
+            username: message.author.tag,
+            avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
+        });
+    }
+
+    if (msg === 'why the fuck my bread hard')
+    {
+        message.channel.send('<:wearybread:562133483020091412>');
+
+        hahaLOG.send(msg, {
+            username: message.author.tag,
+            avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
+        });
+    }
+
+    if (msg === 'thanks son')
+    {
+        if (sender.tag === 'ando#0404') {
+            message.channel.send('thanks dad');
+            console.log(`${sender.tag} thanked haha bot`);
+        } else {
+            message.channel.send('im calling the police');
+            console.log(`${sender.tag} isnt dad`);
+        }
+
+        hahaLOG.send(msg, {
+            username: message.author.tag,
+            avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
+        });
+    }
+
+    if (msg === 'b')
+    {
+        message.channel.send('b');
+        console.log(`${sender.tag} b`);
+    }
+});
+
+client.login(token);
