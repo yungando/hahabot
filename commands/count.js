@@ -27,6 +27,7 @@ exports.run = (client, message, args, tools) =>
                     '547564202638704650', // MIA
                     '534925628680437783', // lfg
                     '539645535754256387', // comp
+                    '690375204404330506', // demon
                     '683797344889864258'];// agent
 
     var rolesField = [`@everyone`];

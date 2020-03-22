@@ -6,7 +6,7 @@ exports.run = async (client, message, args, tools) =>
 {
     var members = new db.table('members');
 
-    var guild = client.guilds.find(g => g.id == '534915212760055819'); // Pub Crawl
+    var guild = client.guilds.cache.find(g => g.id == '534915212760055819'); // Pub Crawl
 
     var [action, ...restArgs] = args;
     var discordID;
@@ -20,10 +20,10 @@ exports.run = async (client, message, args, tools) =>
     {
         do
         {
-            discordID = members.all()[Math.floor(Math.random() * members.all().length)].ID;
+            discordID = members.all()[Math.floor(Math.random() * members.all().length)].discordID;
             action = 'get';
         }
-        while (!guild.members.cache.find(m => m.id == discordID));
+        while (!guild.members.cache.some(m => m.id == discordID));
     }
     else if (message.mentions.members.first() != undefined || message.mentions.members.length > 0)
     {
@@ -32,7 +32,7 @@ exports.run = async (client, message, args, tools) =>
     }
     else if (!isNaN(action))
     {
-        if (guild.members.cache.find(m => m.id == action))
+        if (guild.members.cache.some(m => m.id == action))
         {
             discordID = action;
             action = 'get';
@@ -196,10 +196,11 @@ exports.run = async (client, message, args, tools) =>
                             '594599121478746132', // bouncer
                             '534925628680437783', // lfg
                             '539645535754256387', // comp
+                            '690375204404330506', // demon
                             '683797344889864258', // agent
                             '535149630628036621']; // bots
         
-        if (guild.members.cache.find(m => m.id == discordID))
+        if (guild.members.cache.some(m => m.id == discordID))
         {
             member = guild.members.cache.find(m => m.id == discordID);
             thumbnail = member.user.avatarURL({ format: "png", dynamic: true });
@@ -216,17 +217,17 @@ exports.run = async (client, message, args, tools) =>
 
             for (let j = 0; j < roles.length; j++)
             {
-                if ((rolesCount + member.roles.cache.some(r => r.id == roles[j]).name.length + 2) > 31)
+                if ((rolesCount + member.roles.cache.find(r => r.id == roles[j]).name.length + 2) > 31)
                 {
                     rolesWW.push('\u000D');
                     rolesTS.push('\u000D');
                     rolesCount = 0;
                 }
 
-                rolesCount += (member.roles.cache.some(r => r.id == roles[j]).name.length + 2);
+                rolesCount += (member.roles.cache.find(r => r.id == roles[j]).name.length + 2);
 
                 rolesWW.push(`<@&${roles[j]}>`);
-                rolesTS.push(`@${member.roles.cache.some(r => r.id == roles[j]).name}`);
+                rolesTS.push(`@${member.roles.cache.find(r => r.id == roles[j]).name}`);
             }
         }
         else if (client.users.cache.some(m => m.id == discordID))

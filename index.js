@@ -140,7 +140,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
             
                         editedEmbed.addField('Roster', roster);
 
-                        var displayName = message.guild.members.cache.get(user.id).displayName;
+                        var displayName = message.guild.members.cache.find(m => m.id == user.id).displayName;
                         var description = editedEmbed.description.replace('\u000D', ' - ').replace(/[**]/g, '');
                         var raidID = message.id;
 
@@ -151,7 +151,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
                             avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                         });
             
-                        message.edit(editedEmbed);
+                        message.edit('', {embed: editedEmbed});
                     }
                     else if (emoji.id == '593898113639383040') // Remove from Raid Schedule
                     {
@@ -222,7 +222,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
                             avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                         });
             
-                        message.edit(editedEmbed);
+                        message.edit('', {embed: editedEmbed});
                     }
                 }
                 else if (message.embeds[0].footer.text.includes('~guide'))
@@ -290,22 +290,22 @@ client.on('messageReactionAdd', async (reaction, user) =>
     {
         if (user.bot) return;
 
-        let downvote = message.reactions.filter(r => r.emoji.id == '594816363533565991').array();
+        let downvote = message.reactions.cache.filter(r => r.emoji.id == '594816363533565991').array();
         
         if (downvote[0] != undefined)
         {
-            downvote[0].remove(user);
+            downvote[0].users.remove(user);
         }
     }
     else if (emoji.id == '594816363533565991')
     {
         if (user.bot) return;
 
-        let upvote = message.reactions.filter(r => r.emoji.id == '594816363722309645').array();
+        let upvote = message.reactions.cache.filter(r => r.emoji.id == '594816363722309645').array();
 
         if (upvote[0] != undefined)
         {
-            upvote[0].remove(user);
+            upvote[0].users.remove(user);
         }
     }
 
@@ -443,6 +443,40 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.remove('683797344889864258');
 
                 var roleUpdate = `${member.displayName} **removed role** - @agent`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: user.tag,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+        }
+    }
+
+    // @doometernal reaction role
+    if (message.id == '690376072734179390')
+    {
+        if (emoji.id == '591094845662298112')
+        {
+            if (!member.roles.cache.some(r => r.id == '690375204404330506'))
+            {
+                reaction.users.remove(user);
+
+                member.roles.add('690375204404330506');
+
+                var roleUpdate = `${member.displayName} **added role** - @demon`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: user.tag,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+            else
+            {
+                reaction.users.remove(user);
+                
+                member.roles.remove('690375204404330506');
+
+                var roleUpdate = `${member.displayName} **removed role** - @demon`;
 
                 hahaLOG.send(roleUpdate, {
                     username: user.tag,
