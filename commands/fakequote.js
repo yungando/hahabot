@@ -25,7 +25,7 @@ exports.run = (client, message, args, tools) =>
     }
 
     const embed = new Discord.MessageEmbed()
-    .setAuthor(quoteeGuildMember.displayName, quoteeUser.avatarURL({ format: "png", dynamic: true }), 'https://www.youtube.com/watch?v=6n3pFFPSlW4')
+    .setAuthor(quoteeGuildMember.displayName, quoteeUser.displayAvatarURL({ format: "png", dynamic: true }), 'https://www.youtube.com/watch?v=6n3pFFPSlW4')
     .setColor(color)
     .setDescription(fakequote)
     .setFooter(`in #${message.channel.name}`)

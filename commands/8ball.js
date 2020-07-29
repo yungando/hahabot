@@ -48,7 +48,7 @@ exports.run = (client, message, args, tools) =>
     }
 
     const questionEmbed = new Discord.MessageEmbed()
-    .setAuthor(quoteeGuildMember.displayName, quoteeUser.avatarURL({ format: "png", dynamic: true }))
+    .setAuthor(quoteeGuildMember.displayName, quoteeUser.displayAvatarURL({ format: "png", dynamic: true }))
     .setColor(color)
     .setDescription(question)
     .setFooter('~8ball')

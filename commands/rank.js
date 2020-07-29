@@ -60,7 +60,7 @@ exports.run = (client, message, args, tools) =>
 
                 if (i > 10)
                 {
-                    extraLine = `...\u000D${rank}) **${array[i].member.displayName}** _(Total: ${array[i].field})_`
+                    extraLine = `...\n${rank}) **${array[i].member.displayName}** _(Total: ${array[i].field})_`
                 }
             }
             else
@@ -71,9 +71,9 @@ exports.run = (client, message, args, tools) =>
             leaderboard.push(`${rank}) **${name}** _(Total: ${array[i].field})_`);
         }
 
-        if (leaderboard.length > 10)
+        if (leaderboard.length > leaderboardLength)
         {
-            leaderboard.length = 10;
+            leaderboard.length = leaderboardLength;
         }
 
         if (extraLine != '')
@@ -82,17 +82,23 @@ exports.run = (client, message, args, tools) =>
         }
 
         leaderboard.push(url);
-        leaderboard = leaderboard.join('\u000D');
+        leaderboard = leaderboard.join('\n');
 
         return leaderboard;
     }
 
     var guild = message.channel.guild;
+    var pint = shuffle(guild.roles.cache.get('599755089908989953').members.array()); // pint
     var locals = shuffle(guild.roles.cache.get('534919438726856735').members.array()); // locals
 
-    var url = `\u000DSee the full leaderboard: [ando.ws](https://www.youtube.com/watch?v=6n3pFFPSlW4)`;
+    var url = `\nSee the full leaderboard: [ando.ws](https://www.youtube.com/watch?v=6n3pFFPSlW4)`;
 
-    var [leaderboard, ...restArgs] = args;
+    var [leaderboard, leaderboardLength, ...restArgs] = args;
+
+    if (leaderboardLength == null)
+    {
+        leaderboardLength = 10;
+    }
 
     if (leaderboard == 'flakes')
     {
@@ -113,28 +119,7 @@ exports.run = (client, message, args, tools) =>
             .setColor('#e4590e')
             .setDescription(flakes);
 
-            message.channel.send(embed);
-    }
-    else if (leaderboard == 'totalclears')
-    {
-        var clears = [];
-
-        for (var i = 0; i < locals.length; i++)
-        {
-            if (members.get(`${locals[i].id}.clears`) > 0)
-            {
-                clears.push({member: locals[i], field: members.get(`${locals[i].id}.clears`)});
-            }
-        }
-
-        clears = sort(clears);
-
-        const embed = new Discord.MessageEmbed()
-            .setAuthor('Top Guardians by D2 Total Full Clan Raid Clears')
-            .setColor('#e4590e')
-            .setDescription(clears);
-
-            message.channel.send(embed);
+        message.channel.send(embed);
     }
     else if (leaderboard == 'regulars')
     {
@@ -142,17 +127,19 @@ exports.run = (client, message, args, tools) =>
 
         var regularsLB = [];
 
-        var regulars = ['654449509421678632', // regulars
-                        '628794671069528064', // s8
-                        '534919307784618015', // s7
-                        '552534486894772239', // s6
-                        '536913425503092736'] // s5
+        var regulars = [    '721581377367310336', // regulars - d2
+                            '698358436580163605', // s10
+                            '654449509421678632', // s9
+                            '628794671069528064', // s8
+                            '534919307784618015', // s7
+                            '552534486894772239', // s6
+                            '536913425503092736']; // s5
 
-        for (var i = 0; i < locals.length; i++)
+        for (var i = 0; i < pint.length; i++)
         {
             for (var j = 0; j < regulars.length; j++)
             {
-                if (locals[i].roles.cache.some(r => r.id == regulars[j])) // s5
+                if (pint[i].roles.cache.some(r => r.id == regulars[j])) // s5
                 {
                     roleCount++;
                 }
@@ -160,7 +147,7 @@ exports.run = (client, message, args, tools) =>
 
             if (roleCount > 0)
             {
-                regularsLB.push({member: locals[i], field: roleCount});
+                regularsLB.push({member: pint[i], field: roleCount});
             }
             
             roleCount = 0;
@@ -169,7 +156,7 @@ exports.run = (client, message, args, tools) =>
         regularsLB = sort(regularsLB);
 
         const embed = new Discord.MessageEmbed()
-            .setAuthor('Top Guardians by Pub Crawl Total Regular Roles')
+            .setAuthor('Top Members by Pub Crawl Total Regular Roles')
             .setColor('#e4590e')
             .setDescription(regularsLB);
 
@@ -181,24 +168,28 @@ exports.run = (client, message, args, tools) =>
 
         var rolesLB = [];
 
-        var roles = [   '558422209362657290', // lens of fate
-                        '654449509421678632', // regulars
+        var roles = [   '585548115243696170', // nitro
+                        '720649008531374092', // regulars - mw
+                        '721581377367310336', // regulars - d2
+                        '717603946952130561', // damascus
+                        '702535488095125606', // tiger woods
                         '663509082522779671', // fashion crawl '20
                         '643358780553428992', // undying
-                        '628794671069528064', // s8
                         '612481505482244097', // mmxix
-                        '534919307784618015', // s7
                         '580279000115707914', // iron burden
-                        '552534486894772239', // s6
-                        '579902430331011072', // fashion crawl '19
-                        '536913425503092736', // s5
-                        '585548115243696170']; // nitro
+                        '579902430331011072', // fashion crawl 19
+                        '698358436580163605', // d2 s10
+                        '654449509421678632', // d2 s9
+                        '628794671069528064', // d2 s8
+                        '534919307784618015', // d2 s7
+                        '552534486894772239', // d2 s6
+                        '536913425503092736']; // d2 s5
 
-        for (var i = 0; i < locals.length; i++)
+        for (var i = 0; i < pint.length; i++)
         {
             for (var j = 0; j < roles.length; j++)
             {
-                if (locals[i].roles.cache.some(r => r.id == roles[j])) // s5
+                if (pint[i].roles.cache.some(r => r.id == roles[j])) // s5
                 {
                     roleCount++;
                 }
@@ -206,7 +197,7 @@ exports.run = (client, message, args, tools) =>
 
             if (roleCount > 0)
             {
-                rolesLB.push({member: locals[i], field: roleCount});
+                rolesLB.push({member: pint[i], field: roleCount});
             }
             
             roleCount = 0;
@@ -215,7 +206,7 @@ exports.run = (client, message, args, tools) =>
         rolesLB = sort(rolesLB);
 
         const embed = new Discord.MessageEmbed()
-            .setAuthor('Top Guardians by Pub Crawl Total Trophy Roles')
+            .setAuthor('Top Members by Pub Crawl Total Trophy Roles')
             .setColor('#e4590e')
             .setDescription(rolesLB);
 

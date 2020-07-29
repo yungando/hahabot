@@ -45,7 +45,7 @@ client.on('message', message =>
     finally
     {
         hahaLOG.send(message.content, {
-            username: message.author.tag,
+            username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
             avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
         });
     }
@@ -63,6 +63,18 @@ client.on('guildMemberRemove', member =>
     catch (e)
     {
         console.log(e.message);
+    }
+});
+
+client.on('guildMemberUpdate', async (oldMember, newMember) =>
+{
+    let guild = oldMember.guild;
+
+    if (guild.id != '534915212760055819') return; // Pub Crawl
+
+    if ((oldMember.premiumSinceTimestamp != null) && newMember.premiumSinceTimestamp == null)
+    {
+        guild.systemChannel.send(`<@${tag}> unboosted the server.`);
     }
 });
 
@@ -107,9 +119,14 @@ client.on('messageReactionAdd', async (reaction, user) =>
 
                         let roster = oldEmbed.fields[0].value;
 
+                        if (!(message.guild.id == '534915212760055819' && message.guild.members.cache.find(m => m.id == user.id).roles.cache.some(r => r.id == '534919438726856735')))
+                        {
+                            return;
+                        }
+
                         if (!roster.includes(user.id))
                         {
-                            roster = roster.split('\u000D');
+                            roster = roster.split('\n');
                         }
                         else
                         {
@@ -133,21 +150,21 @@ client.on('messageReactionAdd', async (reaction, user) =>
                             }
                         }
 
-                        roster = roster.join('\u000D');
+                        roster = roster.join('\n');
             
-                        oldEmbed.fields = [];
+                        oldEmbed.spliceFields(0, 1);
                         const editedEmbed = new Discord.MessageEmbed(oldEmbed);
             
                         editedEmbed.addField('Roster', roster);
 
                         var displayName = message.guild.members.cache.find(m => m.id == user.id).displayName;
-                        var description = editedEmbed.description.replace('\u000D', ' - ').replace(/[**]/g, '');
+                        var description = editedEmbed.description.replace('\n', ' - ').replace(/[**]/g, '');
                         var raidID = message.id;
 
                         var schedule = `${displayName} **joined** - ${description} - ${raidID}`;
                         
                         hahaLOG.send(schedule, {
-                            username: user.tag,
+                            username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
                             avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                         });
             
@@ -159,9 +176,14 @@ client.on('messageReactionAdd', async (reaction, user) =>
 
                         let roster = oldEmbed.fields[0].value;
 
+                        if (!(message.guild.id == '534915212760055819' && message.guild.members.cache.find(m => m.id == user.id).roles.cache.some(r => r.id == '534919438726856735')))
+                        {
+                            return;
+                        }
+
                         if (roster.includes(user.id))
                         {
-                            roster = roster.split('\u000D');
+                            roster = roster.split('\n');
                         }
                         else
                         {
@@ -191,7 +213,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
                             
                             if (roster.join('').includes('@'))
                             {
-                                var newHost = message.guild.members.find(m => m.id == roster[i].split('@')[1].split('>')[0]);
+                                var newHost = message.guild.members.cache.find(m => m.id == roster[i].split('@')[1].split('>')[0]);
 
                                 var colour = newHost.displayHexColor;
     
@@ -200,25 +222,25 @@ client.on('messageReactionAdd', async (reaction, user) =>
                                     colour = '#99aab5';
                                 }
     
-                                editedEmbed.setAuthor(newHost.displayName, newHost.user.avatarURL({ format: "png", dynamic: true }));
+                                editedEmbed.setAuthor(newHost.displayName, newHost.user.displayAvatarURL({ format: "png", dynamic: true }));
                                 editedEmbed.setColor(colour);
                             }
                         }
 
-                        roster = roster.join('\u000D');
+                        roster = roster.join('\n');
             
-                        editedEmbed.fields = [];
+                        editedEmbed.spliceFields(0, 1);
             
                         editedEmbed.addField('Roster', roster);
 
                         var displayName = message.guild.members.cache.get(user.id).displayName;
-                        var description = editedEmbed.description.replace('\u000D', ' - ').replace(/[**]/g, '');
+                        var description = editedEmbed.description.replace('\n', ' - ').replace(/[**]/g, '');
                         var raidID = message.id;
 
                         var schedule = `${displayName} **left** - ${description} - ${raidID}`;
                         
                         hahaLOG.send(schedule, {
-                            username: user.tag,
+                            username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
                             avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                         });
             
@@ -286,6 +308,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
         }
     }
     
+    // Upvote/Downvote system
     if (emoji.id == '594816363722309645')
     {
         if (user.bot) return;
@@ -314,7 +337,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
     {
         if (emoji.id == '592085760824442910')
         {
-            if (member.roles.cache.some(r => r.id == '599755089908989953'))
+            if (member.roles.cache.some(r => r.id == '599755089908989953')) // pint
             {
                 if (!member.roles.cache.some(r => r.id == '540565941977874434'))
                 {
@@ -325,7 +348,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
                     var roleUpdate = `${member.displayName} **added role** - @roles`;
     
                     hahaLOG.send(roleUpdate, {
-                        username: user.tag,
+                        username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
                         avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                     });
                 }
@@ -338,7 +361,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
                     var roleUpdate = `${member.displayName} **removed role** - @roles`;
     
                     hahaLOG.send(roleUpdate, {
-                        username: user.tag,
+                        username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
                         avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                     });
                 }
@@ -350,8 +373,42 @@ client.on('messageReactionAdd', async (reaction, user) =>
         }
     }
 
+    // @destiny2 reaction role
+    if (message.id == '698383909355782194')
+    {
+        if (emoji.id == '538511232416612364')
+        {
+            if (!member.roles.cache.some(r => r.id == '698345563485372497'))
+            {
+                reaction.users.remove(user);
+
+                member.roles.add('698345563485372497');
+
+                var roleUpdate = `${member.displayName} **added role** - @guardian`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+            else
+            {
+                reaction.users.remove(user);
+                
+                member.roles.remove('698345563485372497');
+
+                var roleUpdate = `${member.displayName} **removed role** - @guardian`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+        }
+    }
+
     // @lfg reaction role
-    if (message.id == '683812430127956018')
+    if (message.id == '698384221500211242')
     {
         if (emoji.id == '535644830408245249')
         {
@@ -364,7 +421,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 var roleUpdate = `${member.displayName} **added role** - @lfg`;
 
                 hahaLOG.send(roleUpdate, {
-                    username: user.tag,
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
                     avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                 });
             }
@@ -377,7 +434,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 var roleUpdate = `${member.displayName} **removed role** - @lfg`;
 
                 hahaLOG.send(roleUpdate, {
-                    username: user.tag,
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
                     avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                 });
             }
@@ -385,7 +442,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
     }
 
     // @comp reaction role
-    if (message.id == '683812749268353047')
+    if (message.id == '698384962935717889')
     {
         if (emoji.id == '539648520832155648')
         {
@@ -398,7 +455,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 var roleUpdate = `${member.displayName} **added role** - @comp`;
 
                 hahaLOG.send(roleUpdate, {
-                    username: user.tag,
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
                     avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                 });
             }
@@ -411,41 +468,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 var roleUpdate = `${member.displayName} **removed role** - @comp`;
 
                 hahaLOG.send(roleUpdate, {
-                    username: user.tag,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
-            }
-        }
-    }
-
-    // @division2 reaction role
-    if (message.id == '683812816779477032')
-    {
-        if (emoji.id == '683799297975910494')
-        {
-            if (!member.roles.cache.some(r => r.id == '683797344889864258'))
-            {
-                reaction.users.remove(user);
-
-                member.roles.add('683797344889864258');
-
-                var roleUpdate = `${member.displayName} **added role** - @agent`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: user.tag,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
-            }
-            else
-            {
-                reaction.users.remove(user);
-                
-                member.roles.remove('683797344889864258');
-
-                var roleUpdate = `${member.displayName} **removed role** - @agent`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: user.tag,
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
                     avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                 });
             }
@@ -466,7 +489,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 var roleUpdate = `${member.displayName} **added role** - @demon`;
 
                 hahaLOG.send(roleUpdate, {
-                    username: user.tag,
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
                     avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                 });
             }
@@ -479,7 +502,75 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 var roleUpdate = `${member.displayName} **removed role** - @demon`;
 
                 hahaLOG.send(roleUpdate, {
-                    username: user.tag,
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+        }
+    }
+
+    // @modernwarfare reaction role
+    if (message.id == '694648203127029801')
+    {
+        if (emoji.id == '694640278266576968')
+        {
+            if (!member.roles.cache.some(r => r.id == '694647773060136981'))
+            {
+                reaction.users.remove(user);
+
+                member.roles.add('694647773060136981');
+
+                var roleUpdate = `${member.displayName} **added role** - @fng`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+            else
+            {
+                reaction.users.remove(user);
+                
+                member.roles.remove('694647773060136981');
+
+                var roleUpdate = `${member.displayName} **removed role** - @fng`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+        }
+    }
+
+    // @runescape reaction role
+    if (message.id == '725042996915208374')
+    {
+        if (emoji.id == '724985145337315418')
+        {
+            if (!member.roles.cache.some(r => r.id == '724980000557629592'))
+            {
+                reaction.users.remove(user);
+
+                member.roles.add('724980000557629592');
+
+                var roleUpdate = `${member.displayName} **added role** - @lumbridge`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
+                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
+                });
+            }
+            else
+            {
+                reaction.users.remove(user);
+                
+                member.roles.remove('724980000557629592');
+
+                var roleUpdate = `${member.displayName} **removed role** - @lumbridge`;
+
+                hahaLOG.send(roleUpdate, {
+                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
                     avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
                 });
             }
@@ -494,19 +585,51 @@ client.on('message', message =>
 
     if (sender.bot) return;
 
+    // auto @lfg
+    if (message.content.includes('<@&534925628680437783>'))
+    {
+        if (!message.member.roles.cache.some(r => r.id == '534925628680437783'))
+        {
+            message.member.roles.add('534925628680437783');
+
+            var roleUpdate = `${message.member.displayName} **added role** - @lfg`;
+
+            hahaLOG.send(roleUpdate, {
+                username: `${message.guild.members.cache.find(m => m.id == message.member.id).displayName} - ${message.author.tag} - ${message.member.id}`,
+                avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
+            });
+        }
+    }
+
+    // auto @comp
+    if (message.content.includes('<@&539645535754256387>'))
+    {
+        if (!message.member.roles.cache.some(r => r.id == '539645535754256387'))
+        {
+            message.member.roles.add('539645535754256387');
+
+            var roleUpdate = `${message.member.displayName} **added role** - @comp`;
+
+            hahaLOG.send(roleUpdate, {
+                username: `${message.guild.members.cache.find(m => m.id == message.member.id).displayName} - ${message.author.tag} - ${message.member.id}`,
+                avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
+            });
+        }
+    }
+
     if (message.channel.type == 'dm')
     {
         if (message.attachments.size > 0)
         {
             hahaDM.send(message.content, {
-                username: message.author.tag,
+                username: `${message.author.tag} - ${message.author.id}`,
                 avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true }),
                 files: [message.attachments.first().url]
             });
         } else
         {
             hahaDM.send(message.content, {
-                username: message.author.tag,
+                username: `${message.author.tag} - ${message.author.id}`,
                 avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
             });
         }
@@ -522,7 +645,7 @@ client.on('message', message =>
                 message.channel.send('**No Discord invite links allowed**');
 
                 hahaLOG.send(msg, {
-                    username: message.author.tag,
+                    username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
                     avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
                 });
             }
@@ -543,7 +666,7 @@ client.on('message', message =>
         message.channel.send('😩');
 
         hahaLOG.send(msg, {
-            username: message.author.tag,
+            username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
             avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
         });
     }
@@ -553,7 +676,7 @@ client.on('message', message =>
         message.channel.send('<:wearyarmelion:604642596249272320>');
 
         hahaLOG.send(msg, {
-            username: message.author.tag,
+            username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
             avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
         });
     }
@@ -563,7 +686,7 @@ client.on('message', message =>
         message.channel.send('<:wearybread:562133483020091412>');
 
         hahaLOG.send(msg, {
-            username: message.author.tag,
+            username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
             avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
         });
     }
@@ -579,7 +702,7 @@ client.on('message', message =>
         }
 
         hahaLOG.send(msg, {
-            username: message.author.tag,
+            username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
             avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
         });
     }

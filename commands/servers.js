@@ -1,6 +1,6 @@
 exports.run = (client, message, args, tools) =>
 {    
-    var guilds = client.guilds.array();
+    var guilds = client.guilds.cache.array();
 
     for (var i = 0; i < guilds.length; i++)
     {

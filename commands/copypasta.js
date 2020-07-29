@@ -15,7 +15,7 @@ exports.run = (client, message, args, tools) =>
     }
 
     const embed = new Discord.MessageEmbed()
-    .setAuthor(hahaGuild.displayName, hahaClient.avatarURL({ format: "png", dynamic: true }))
+    .setAuthor(hahaGuild.displayName, hahaClient.displayAvatarURL({ format: "png", dynamic: true }))
     .setColor(color)
     .setDescription(copypasta)
     .setFooter('~copypasta')

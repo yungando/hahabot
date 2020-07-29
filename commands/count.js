@@ -11,24 +11,32 @@ exports.run = (client, message, args, tools) =>
         return;
     }
 
-    var roles = [   '534919438726856735', // locals
-                    '654449509421678632', // regulars
+    var roles = [   '599755089908989953', // pint
+                    '534919438726856735', // locals
+                    '585548115243696170', // nitro
+                    '721581377367310336', // regulars - d2
+                    '737478676735721573', // regulars - mw
+                    '720649008531374092', // mw s4
+                    '717603946952130561', // damascus
+                    '702535488095125606', // tiger woods
                     '663509082522779671', // fashion crawl '20
                     '643358780553428992', // undying
                     '612481505482244097', // mmxix
                     '580279000115707914', // iron burden
                     '579902430331011072', // fashion crawl 19
-                    '628794671069528064', // s8
-                    '534919307784618015', // s7
-                    '552534486894772239', // s6
-                    '536913425503092736', // s5
-                    '585548115243696170', // nitro
-                    '574652778857627654', // drinking buddy
-                    '547564202638704650', // MIA
+                    '698358436580163605', // d2 s10
+                    '654449509421678632', // d2 s9
+                    '628794671069528064', // d2 s8
+                    '534919307784618015', // d2 s7
+                    '552534486894772239', // d2 s6
+                    '536913425503092736', // d2 s5
+                    '698345563485372497', // guardian
                     '534925628680437783', // lfg
                     '539645535754256387', // comp
+                    '694647773060136981', // fng
                     '690375204404330506', // demon
-                    '683797344889864258'];// agent
+                    '724980000557629592', // demon
+                    '535149630628036621'];// bots
 
     var rolesField = [`@everyone`];
     var countField = [`${guild.memberCount}`];
@@ -41,8 +49,8 @@ exports.run = (client, message, args, tools) =>
         countField.push(`${role.members.array().length}`);
     }
 
-    rolesField.join('\u000D');
-    countField.join('\u000D');
+    rolesField.join('\n');
+    countField.join('\n');
 
     let id = '560533863290372097';
     let hahaGuild = message.guild.members.cache.get(id);

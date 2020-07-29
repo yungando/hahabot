@@ -1,0 +1,8 @@
+{
+    "script": "index.js",
+    "watch": [ "commands", "webhooks", "index.js" ],
+    "watch_options": {
+        "followSymlinks": false
+    },
+    "name": "hahabot"
+}

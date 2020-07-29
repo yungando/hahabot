@@ -74,7 +74,7 @@ exports.run = (client, message, args, tools) =>
         if (!Array.isArray(quote.embeds) || !quote.embeds.length)
         {
             const embed = new Discord.MessageEmbed()
-            .setAuthor(quotee.displayName, quote.author.avatarURL({ format: "png", dynamic: true }), quote.url)
+            .setAuthor(quotee.displayName, quote.author.displayAvatarURL({ format: "png", dynamic: true }), quote.url)
             .setColor(quoteColor)
             .setDescription(quote.content)
             .setFooter(`in #${quote.channel.name}`)

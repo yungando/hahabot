@@ -87,7 +87,7 @@ exports.run = (client, message, args, tools) =>
             return roster;
         }
 
-        roster = roster.split('\u000D');
+        roster = roster.split('\n');
 
         for (let i = 0; i < newPlayers.length; i++)
         {
@@ -116,7 +116,7 @@ exports.run = (client, message, args, tools) =>
             }
         }
         
-        roster = roster.join('\u000D');
+        roster = roster.join('\n');
 
         return roster;
     }
@@ -203,7 +203,7 @@ exports.run = (client, message, args, tools) =>
             roster.push(`${i+1}) `);
         }
 
-        roster = roster.join('\u000D');
+        roster = roster.join('\n');
 
         while (!fullRaid)
         {
@@ -272,20 +272,32 @@ exports.run = (client, message, args, tools) =>
         }
         
         const raidEmbed = new Discord.MessageEmbed()
-        .setAuthor(message.member.displayName, message.author.avatarURL({ format: "png", dynamic: true }))
+        .setAuthor(message.member.displayName, message.author.displayAvatarURL({ format: "png", dynamic: true }))
         .setColor(colour)
-        .setDescription(`**${activity}** - ${time}\u000D${description}`)
+        .setDescription(`**${activity}** - ${time}\n${description}`)
         .addField('Roster', roster, false)
         .setFooter('#raid-schedules')
         .setThumbnail('https://cdn.discordapp.com/attachments/569081839134965771/599893637253431326/darkness5.png');
 
-        if (roster.replace(/[^@]/g, '').length == 6)
+        if (roster.replace(/[^@]/g, '').length == roster.split('\n').length)
         {
             activity = '';
         }
         else
         {
             activity = `${activity} - <@&534925628680437783>`;
+        }
+
+        if ((message.guild.id == '534915212760055819') && (!message.member.roles.cache.some(r => r.id == '534925628680437783')))
+        {
+            message.member.roles.add('534925628680437783');
+
+            var roleUpdate = `${message.member.displayName} **added role** - @lfg`;
+
+            hahaLOG.send(roleUpdate, {
+                username: `${message.guild.members.cache.find(m => m.id == message.member.id).displayName} - ${message.author.tag} - ${message.member.id}`,
+                avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
+            });
         }
 
         raidSchedules.send(activity, {embed: raidEmbed})
@@ -332,7 +344,7 @@ exports.run = (client, message, args, tools) =>
 
                 var newRoster = addMembers(roster, tempPlayerIds);
         
-                oldEmbed.fields = [];
+                oldEmbed.spliceFields(0, 1);
 
                 const editedEmbed = new Discord.MessageEmbed(oldEmbed);
         
@@ -390,7 +402,7 @@ exports.run = (client, message, args, tools) =>
                     }
 
                     var oldRoster = roster;
-                    var roster = roster.split('\u000D');
+                    var roster = roster.split('\n');
 
                     for (var j = 0; j < playerIDs.length; j++)
                     {
@@ -430,14 +442,14 @@ exports.run = (client, message, args, tools) =>
                                 colour = '#99aab5';
                             }
 
-                            editedEmbed.setAuthor(newHost.displayName, newHost.user.avatarURL({ format: "png", dynamic: true }));
+                            editedEmbed.setAuthor(newHost.displayName, newHost.user.displayAvatarURL({ format: "png", dynamic: true }));
                             editedEmbed.setColor(colour);
                         }
                     }
                     
-                    var newRoster = roster.join('\u000D');
+                    var newRoster = roster.join('\n');
             
-                    editedEmbed.fields = [];
+                    editedEmbed.spliceFields(0, 1);
             
                     editedEmbed.addField('Roster', newRoster);
 
@@ -481,14 +493,14 @@ exports.run = (client, message, args, tools) =>
                     .then(raid => {
 
                         let oldEmbed = raid.embeds[0];
-
-                        var raidIconID = oldEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
+                
+                        let roster = oldEmbed.fields[0].value;
                         
-                        if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (raidIconID == message.author.id))
+                        if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (inRoster(roster, message.author.id)))
                         {
                             if ((field == 'slots') || (field == 'spots'))
                             {
-                                let roster = oldEmbed.fields[0].value.split('\u000D');
+                                let roster = oldEmbed.fields[0].value.split('\n');
 
                                 if (isNaN(fieldInput))
                                 {
@@ -518,9 +530,9 @@ exports.run = (client, message, args, tools) =>
                                     }
                                 }
 
-                                roster = roster.join('\u000D');
+                                roster = roster.join('\n');
                                 
-                                oldEmbed.fields = [];
+                                oldEmbed.spliceFields(0, 1);
                                 const editedEmbed = new Discord.MessageEmbed(oldEmbed);
                         
                                 editedEmbed.addField('Raid Roster', roster);
@@ -549,11 +561,11 @@ exports.run = (client, message, args, tools) =>
                             {
                                 let description = oldEmbed.description.split(' - ');
 
-                                let time = description[1].split('\u000D');
+                                let time = description[1].split('\n');
 
                                 time[0] = fieldInput;
 
-                                time = time.join('\u000D');
+                                time = time.join('\n');
 
                                 description[1] = time;
 
@@ -568,13 +580,13 @@ exports.run = (client, message, args, tools) =>
                             }
                             else if ((field == 'desc') || (field == 'description'))
                             {
-                                let description = oldEmbed.description.split('\u000D');
+                                let description = oldEmbed.description.split('\n');
 
                                 description[1] = fieldInput;
 
                                 const editedEmbed = new Discord.MessageEmbed(oldEmbed);
 
-                                editedEmbed.setDescription(description.join('\u000D'));
+                                editedEmbed.setDescription(description.join('\n'));
 
                                 raid.edit(editedEmbed);
 
@@ -723,7 +735,7 @@ exports.run = (client, message, args, tools) =>
                     reply = reply.split('- ').join('');
 
                     const embed = new Discord.MessageEmbed()
-                    .setAuthor(quoteeGuildMember.displayName, quoteeUser.avatarURL({ format: "png", dynamic: true }))
+                    .setAuthor(quoteeGuildMember.displayName, quoteeUser.displayAvatarURL({ format: "png", dynamic: true }))
                     .setColor(color)
                     .setDescription(reply)
                     .setFooter(`in #${message.channel.name}`)
@@ -783,13 +795,13 @@ exports.run = (client, message, args, tools) =>
                         reply = reply.split('- ').join('');
     
                         const embed = new Discord.MessageEmbed()
-                        .setAuthor(quoteeGuildMember.displayName, quoteeUser.avatarURL({ format: "png", dynamic: true }))
+                        .setAuthor(quoteeGuildMember.displayName, quoteeUser.displayAvatarURL({ format: "png", dynamic: true }))
                         .setColor(color)
                         .setDescription(reply)
                         .setFooter(`in #${message.channel.name}`)
                         .setTimestamp(message.createdTimestamp);
                         
-                        message.channel.send(`**Raid Schedule successfully deleted**\u000D${roster}`, {embed: embed});
+                        message.channel.send(`**Raid Schedule successfully deleted**\n${roster}`, {embed: embed});
 
                         oldSchedules.send(deletedSchedule);
     
@@ -863,12 +875,12 @@ exports.run = (client, message, args, tools) =>
                         colour = '#99aab5';
                     }
 
-                    editedEmbed.setAuthor(newHost.displayName, newHost.user.avatarURL({ format: "png", dynamic: true }));
+                    editedEmbed.setAuthor(newHost.displayName, newHost.user.displayAvatarURL({ format: "png", dynamic: true }));
                     editedEmbed.setColor(colour);
             
                     raid.edit(editedEmbed);
 
-                    message.channel.send(`**Successfully transfered schedule ownership to** <@${tempPlayerId}>`)
+                    message.channel.send(`**Successfully transfered schedule ownership to** ${newHost.displayName}`)
                                     .then( msg => msg.delete({ timeout: 10000 }));
                 }
                 else
@@ -892,6 +904,40 @@ exports.run = (client, message, args, tools) =>
             }
         }).catch(error => message.channel.send('**Please supply a valid schedule ID to add players to**')
                                           .then( msg => msg.delete({ timeout: 10000 })));
+    }
+    else if (action == 'update')////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    {
+        if (message.author.tag != 'ando#0404') return;
+
+        var [raidID, ...restArgs] = restArgs;
+        var reply = restArgs.join(' ');
+
+        var oldSchedules = client.channels.cache.get('597651951609577472');
+
+        if (isNaN(raidID))
+        {
+            message.channel.send('**Please supply a valid schedule ID to delete**')
+                            .then( msg => msg.delete({ timeout: 10000 }));
+
+            message.delete();
+
+            return;
+        }
+        
+        findMessage(message, raidID)
+            .then(schedule =>
+            {
+                let raidEmbed = schedule.embeds[0];
+
+                raidEmbed.setDescription(schedule.embeds[0].description.replace('\u000D', '\n'));
+
+                raidEmbed.spliceFields(0, 10, [{ name : schedule.embeds[0].fields[0].name, value : schedule.embeds[0].fields[0].value.split('\u000D').join('\n') }]);
+
+                schedule.edit(raidEmbed);
+
+                message.channel.send('**Raid Schedule successfully updated**')
+                            .then( msg => msg.delete({ timeout: 10000 }));
+            });
     }
     else
     {
