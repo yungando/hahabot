@@ -27,7 +27,7 @@ exports.run = (client, message, args, tools) =>
         
         for (let current of channels)
         {
-          let target = await current.messages.fetch(messageID).catch((e) => { console.error(e) });
+          let target = await current.messages.fetch(messageID).catch((e) => { });
           if (target) return target;
         }
     }

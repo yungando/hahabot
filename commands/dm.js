@@ -37,14 +37,10 @@ exports.run = (client, message, args, tools) =>
         if (message.attachments.size > 0)
         {
             dmUser.send(dmMessage, { files: [message.attachments.first().url] });
-
-            console.log(`dm\'d ${dmUserTag}`);
         }
         else
         {
             dmUser.send(dmMessage);
-
-            console.log(`dm\'d ${dmUserTag}`);
         }
     }
 };

@@ -104,8 +104,9 @@ exports.run = async (client, message, args, tools) =>
         var rolesTS = [];
         var rolesCount = 0;
         var serverRoles = [ '580101673964273681', // barkeep
-                            '721581377367310336', // regulars - d2
-                            '737478676735721573', // regulars - mw
+                            '760887215118614659', // mw s6
+                            '737478676735721573', // mw s5
+                            '721581377367310336', // d2 s11
                             '720649008531374092', // mw s4
                             '717603946952130561', // damascus
                             '702535488095125606', // tiger woods
@@ -246,6 +247,18 @@ exports.run = async (client, message, args, tools) =>
             infoEmbed.addField('\u200B', destinyLinks2, true);
             infoEmbed.addField('\u200B', '\u200B', true);
         }
+        
+        var otherLinks = [];
+
+        if (steamID != null) 
+        {
+            otherLinks.push(`[Steam Profile](https://steamcommunity.com/profiles/${steamID})`)
+
+            ids.push(`Steam ID - ${steamID}`);
+        };
+
+        if (twitch != null) otherLinks.push(`[Twitch](${twitch})`);
+        if (youtube != null) otherLinks.push(`[Youtube](${youtube})`);
 
         if ((getall || member.roles.cache.some(r => r.name == 'fng')) && activID != null)
         {
@@ -263,12 +276,6 @@ exports.run = async (client, message, args, tools) =>
         {
             ids.push(`Battletag - ${battletag}`);
         }
-        
-        var otherLinks = [];
-
-        if (steamID != null) otherLinks.push(`[Steam Profile](https://steamcommunity.com/profiles/${steamID})`);
-        if (twitch != null) otherLinks.push(`[Twitch](${twitch})`);
-        if (youtube != null) otherLinks.push(`[Youtube](${youtube})`);
 
         if (otherLinks.length > 0)
         {

@@ -40,7 +40,7 @@ client.on('message', message =>
     }
     catch (e)
     {
-        console.log(e.message);
+
     }
     finally
     {
@@ -62,7 +62,7 @@ client.on('guildMemberRemove', member =>
     }
     catch (e)
     {
-        console.log(e.message);
+        
     }
 });
 
@@ -74,7 +74,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) =>
 
     if ((oldMember.premiumSinceTimestamp != null) && newMember.premiumSinceTimestamp == null)
     {
-        guild.systemChannel.send(`<@${tag}> unboosted the server.`);
+        guild.systemChannel.send(`<@${newMember.id}> unboosted the server.`);
     }
 });
 
@@ -87,7 +87,6 @@ client.on('messageReactionAdd', async (reaction, user) =>
 		try {
 			await reaction.fetch();
 		} catch (error) {
-			console.log('Something went wrong when fetching the message: ', error);
 			// Return as `reaction.message.author` may be undefined/null
 			return;
 		}
@@ -509,8 +508,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
         }
     }
 
-    // @modernwarfare reaction role
-    if (message.id == '694648203127029801')
+    // @callofduty reaction role
+    if (message.id == '749299967713214594')
     {
         if (emoji.id == '694640278266576968')
         {
@@ -582,6 +581,11 @@ client.on('message', message =>
 {
     let sender = message.author;
     let msg = message.content.toLowerCase();
+
+    if (sender.id == '738808856146215023')
+    {
+        message.pin();
+    }
 
     if (sender.bot) return;
 
@@ -695,10 +699,8 @@ client.on('message', message =>
     {
         if (sender.tag === 'ando#0404') {
             message.channel.send('thanks dad');
-            console.log(`${sender.tag} thanked haha bot`);
         } else {
             message.channel.send('im calling the police');
-            console.log(`${sender.tag} isnt dad`);
         }
 
         hahaLOG.send(msg, {
@@ -710,7 +712,6 @@ client.on('message', message =>
     if (msg === 'b')
     {
         message.channel.send('b');
-        console.log(`${sender.tag} b`);
     }
 });
 

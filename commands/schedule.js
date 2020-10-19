@@ -42,7 +42,7 @@ exports.run = (client, message, args, tools) =>
 
         for (let current of channels)
         {
-          let target = await current.messages.fetch(raidID).catch((e) => { console.error(e) });
+          let target = await current.messages.fetch(raidID).catch((e) => { });
           if (target) return target;
         }
     }
@@ -78,7 +78,7 @@ exports.run = (client, message, args, tools) =>
             }
             catch
             {
-                error => console.log(error);
+                
             }
         }
 

@@ -18,7 +18,7 @@ exports.run = (client, message, args, tools) =>
                 dmUser.send('Would a bot send you that');
                 dmUser.send('?');
             })
-            .catch((e) => { console.error(e) });
+            .catch((e) => { });
     }
     
     message.delete();

@@ -7,7 +7,7 @@ exports.run = (client, message, args, tools) =>
         message.channel.messages.fetch({before: message.id, limit: 1}).then(messages =>
             messages.array()[0].react('594816363722309645')
                     .then(() => messages.array()[0].react('594816363533565991')))
-                    .catch((e) => { console.error(e) });
+                    .catch((e) => { });
     }
     else if (isNaN(messageID))
     {
@@ -26,7 +26,7 @@ exports.run = (client, message, args, tools) =>
 
             for (let current of channels)
             {
-              let target = await current.messages.fetch(messageID).catch((e) => { console.error(e) });
+              let target = await current.messages.fetch(messageID).catch((e) => { });
               if (target) return target;
             }
         }
