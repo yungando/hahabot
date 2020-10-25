@@ -248,7 +248,7 @@ exports.run = (client, message, args, tools) =>
 
             var raidIconID = oldEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
 
-            if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (raidIconID == message.author.displayAvatarURL({ format: "png", dynamic: true })))
+            if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (raidIconID == message.author.id))
             {
                 if (!Array.isArray(tempPlayerIds) || !tempPlayerIds.length)
                 {
@@ -309,7 +309,7 @@ exports.run = (client, message, args, tools) =>
 
                 var raidIconID = oldEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
 
-                if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (raidIconID == message.author.displayAvatarURL({ format: "png", dynamic: true })))
+                if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (raidIconID == message.author.id))
                 {
                     if (!Array.isArray(playerIDs) || !playerIDs.length) 
                     {
@@ -418,7 +418,7 @@ exports.run = (client, message, args, tools) =>
 
                         var raidIconID = oldEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
                         
-                        if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (raidIconID == message.author.displayAvatarURL({ format: "png", dynamic: true })))
+                        if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (raidIconID == message.author.id))
                         {
                             if (field == 'time')
                             {
