@@ -40,12 +40,23 @@ client.on('message', message =>
     }
     catch (e)
     {
-
+        console.log(e);
     }
     finally
     {
+        var name;
+
+        if (message.channel.type == 'dm')
+        {
+            name = `${message.author.tag} - ${message.author.id}`;
+        }
+        else
+        {
+            name = `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`;
+        }
+
         hahaLOG.send(message.content, {
-            username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
+            username: name,
             avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
         });
     }

@@ -104,6 +104,7 @@ exports.run = async (client, message, args, tools) =>
         var rolesTS = [];
         var rolesCount = 0;
         var serverRoles = [ '580101673964273681', // barkeep
+                            '769726185198059540', // trailblazer
                             '760887215118614659', // mw s6
                             '737478676735721573', // mw s5
                             '721581377367310336', // d2 s11
