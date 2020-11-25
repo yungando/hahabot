@@ -43,12 +43,21 @@ exports.run = (client, message, args, tools) =>
         }
     }
 
-    function addMembers(roster, tempPlayerIds)
+    function addMembers(roster, tempPlayerIds)///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     {
         var newPlayer;
         var newPlayers = [];
 
-        if (!Array.isArray(tempPlayerIds) || !tempPlayerIds.length)
+        for (let i = 0; i < tempPlayerIds.length; i++)
+        {
+            if (isNaN(tempPlayerIds[i]))
+            {
+                tempPlayerIds.splice(i, 1);
+                i--;
+            }
+        }
+
+        if ((!Array.isArray(tempPlayerIds)) || (!tempPlayerIds.length) || (tempPlayerIds.length == 0))
         {
             return roster;
         }
@@ -198,13 +207,13 @@ exports.run = (client, message, args, tools) =>
             colour = '#99aab5';
         }
         
-        const raidEmbed = new Discord.MessageEmbed()
-        .setAuthor(message.member.displayName, message.author.displayAvatarURL({ format: "png", dynamic: true }))
-        .setColor(colour)
-        .setDescription(`**${activity}** - ${time}\n${description}`)
-        .addField('Roster', roster, false)
-        .setFooter('#day-one')
-        .setThumbnail('https://cdn.discordapp.com/attachments/569081839134965771/599893637253431326/darkness5.png');
+        const schedule = new Discord.MessageEmbed()
+            .setAuthor(message.member.displayName, message.author.displayAvatarURL({ format: "png", dynamic: true }))
+            .setColor(colour)
+            .setDescription(`**${activity}** - ${time}\n${description}`)
+            .addField('Roster', roster, false)
+            .setFooter('#day-one')
+            .setThumbnail('https://cdn.discordapp.com/attachments/569081839134965771/599893637253431326/darkness5.png');
 
         activity = '';
 
@@ -220,16 +229,16 @@ exports.run = (client, message, args, tools) =>
             });
         }
 
-        raidSchedules.send(activity, {embed: raidEmbed})
+        raidSchedules.send(activity, {embed: schedule})
                                         .then(function (message) {
-                                                message.edit(activity, {embed: raidEmbed.setFooter(`#day-one - ${message.id}`)})
+                                                message.edit(activity, {embed: schedule.setFooter(`#day-one - ${message.id}`)})
                                                                 });
     }
     else if (action == 'add')//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     {
-        var [raidID, ...tempPlayerIds] = restArgs;
+        var [scheduleID, ...tempPlayerIds] = restArgs;
 
-        if (isNaN(raidID))
+        if (isNaN(scheduleID))
         {
             message.channel.send('**Please supply a valid day one schedule ID to add players to**')
                             .then( msg => msg.delete({ timeout: 10000 }));
@@ -239,40 +248,38 @@ exports.run = (client, message, args, tools) =>
             return;
         }
 
-        findMessage(message, raidID)
-            .then(raid => {
+        if (!Array.isArray(tempPlayerIds) || !tempPlayerIds.length)
+        {
+            message.channel.send('**You didn\'t include any user ID\'s to add to the day one schedule**')
+                            .then( msg => msg.delete({ timeout: 10000 }));
 
-            var oldEmbed = raid.embeds[0];
+            message.delete();
 
-            var roster = oldEmbed.fields[0].value;
+            return;
+        }
 
-            var raidIconID = oldEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
+        findMessage(message, scheduleID)
+            .then(schedule => {
 
-            if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (raidIconID == message.author.id))
+            const editedEmbed = new Discord.MessageEmbed(schedule.embeds[0]);
+
+            var roster = editedEmbed.fields[0].value;
+            
+            var scheduleIconID = editedEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
+
+            if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (scheduleIconID == message.author.id))
             {
-                if (!Array.isArray(tempPlayerIds) || !tempPlayerIds.length)
-                {
-                    message.channel.send('**You didn\'t include any user ID\'s to add to the day one schedule**')
-                                    .then( msg => msg.delete({ timeout: 10000 }));
-
-                    message.delete();
-
-                    return;
-                }
-
-                var newRoster = addMembers(roster, tempPlayerIds);
-        
-                oldEmbed.spliceFields(0, 1);
-
-                const editedEmbed = new Discord.MessageEmbed(oldEmbed);
-        
-                editedEmbed.addField('Roster', newRoster);
+                var newRoster = addMembers(roster, tempPlayerIds)
 
                 var rosterDiff = newRoster.replace(/[^@]/g, '').length - roster.replace(/[^@]/g, '').length;
 
                 if (rosterDiff > 0)
                 {
-                    raid.edit(editedEmbed);
+                    editedEmbed.spliceFields(0, 1);
+            
+                    editedEmbed.addField('Roster', newRoster);
+
+                    schedule.edit(editedEmbed);
 
                     message.channel.send(`**Successfully Added \`${rosterDiff}\` player(s) to the day one schedule roster**`)
                                     .then(msg => msg.delete({ timeout: 10000 }));
@@ -288,9 +295,9 @@ exports.run = (client, message, args, tools) =>
     }
     else if (action == 'remove')//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     {
-        var [raidID, ...playerIDs] = restArgs;
+        var [scheduleID, ...playerIDs] = restArgs;
 
-        if (isNaN(raidID))
+        if (isNaN(scheduleID))
         {
             message.channel.send('**Please a supply a valid day one schedule ID to remove players from**')
                             .then( msg => msg.delete({ timeout: 10000 }));
@@ -300,60 +307,57 @@ exports.run = (client, message, args, tools) =>
             return;
         }
 
-        findMessage(message, raidID)
-            .then(raid => {
+        if (!Array.isArray(playerIDs) || !playerIDs.length) 
+        {
+            message.channel.send('**Please supply valid player IDs to remove them from a schedule**')
+                                .then( msg => msg.delete({ timeout: 10000 }));
 
-                var oldEmbed = raid.embeds[0];
+            message.delete();
 
-                var roster = oldEmbed.fields[0].value;
+            return;
+        }
 
-                var raidIconID = oldEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
+        findMessage(message, scheduleID)
+            .then(schedule => {
 
-                if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (raidIconID == message.author.id))
+                const editedEmbed = new Discord.MessageEmbed(schedule.embeds[0]);
+
+                var roster = editedEmbed.fields[0].value;
+                
+                var scheduleIconID = editedEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
+
+                if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (scheduleIconID == message.author.id))
                 {
-                    if (!Array.isArray(playerIDs) || !playerIDs.length) 
-                    {
-                        message.channel.send('**Please supply valid player IDs to remove them from a day one schedule**')
-                                            .then( msg => msg.delete({ timeout: 10000 }));
-
-                        message.delete();
-
-                        return;
-                    }
-
-                    var oldRoster = roster;
-                    var roster = roster.split('\n');
+                    var newRoster = roster.split('\n');
 
                     for (var j = 0; j < playerIDs.length; j++)
                     {
-                        for (var i = 0; i < roster.length; i++)
+                        for (var i = 0; i < newRoster.length; i++)
                         {
-                            if (roster[i].includes(playerIDs[j]))
+                            if (newRoster[i].includes(playerIDs[j]))
                             {
                                 if ((playerIDs[j] != '') && (playerIDs[j] != ' '))
                                 {
-                                    roster[i] = `${i+1}) `;
+                                    newRoster[i] = `${i+1}) `;
                                 }
                             }
                         }
                     }
 
-                    const editedEmbed = new Discord.MessageEmbed(oldEmbed);
-
-                    if (!roster.join('').includes(editedEmbed.author.iconURL.split('avatars/')[1].split('/')[0]))
+                    if (!newRoster.join('').includes(editedEmbed.author.iconURL.split('avatars/')[1].split('/')[0]))
                     {
                         var i;
-                        for (i = 0; i < roster.length; i++)
+                        for (i = 0; i < newRoster.length; i++)
                         {
-                            if (roster[i].includes('@'))
+                            if (newRoster[i].includes('@'))
                             {
                                 break;
                             }
                         }
                         
-                        if (roster.join('').includes('@'))
+                        if (newRoster.join('').includes('@'))
                         {
-                            var newHost = message.guild.members.cache.find(m => m.id == roster[i].split('@')[1].split('>')[0]);
+                            var newHost = message.guild.members.cache.find(m => m.id == newRoster[i].split('@')[1].split('>')[0]);
 
                             var colour = newHost.displayHexColor;
 
@@ -367,19 +371,19 @@ exports.run = (client, message, args, tools) =>
                         }
                     }
                     
-                    var newRoster = roster.join('\n');
-            
-                    editedEmbed.spliceFields(0, 1);
-            
-                    editedEmbed.addField('Roster', newRoster);
+                    var newRoster = newRoster.join('\n');
 
-                    var rosterDiff = oldRoster.replace(/[^@]/g, '').length - newRoster.replace(/[^@]/g, '').length;
+                    var rosterDiff = roster.replace(/[^@]/g, '').length - newRoster.replace(/[^@]/g, '').length;
 
                     if (rosterDiff > 0)
-                    {
-                        raid.edit(editedEmbed);
+                    {            
+                        editedEmbed.spliceFields(0, 1);
+            
+                        editedEmbed.addField('Roster', newRoster);
 
-                        message.channel.send(`**Successfully removed \`${rosterDiff}\` player(s) from the day one schedule roster**`)
+                        schedule.edit(editedEmbed);
+
+                        message.channel.send(`**Successfully removed \`${rosterDiff}\` player(s) from the schedule roster**`)
                                         .then(msg => msg.delete({ timeout: 10000 }));
                     }
                 }
@@ -394,12 +398,12 @@ exports.run = (client, message, args, tools) =>
     }
     else if (action == 'edit')//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     {
-        var [raidID, field, ...restArgs] = restArgs;
+        var [scheduleID, field, ...restArgs] = restArgs;
 
         field = field.toLowerCase();
         let fieldInput = restArgs.join(' ');
 
-        if (isNaN(raidID))
+        if (isNaN(scheduleID))
         {
             message.channel.send('**Please supply a valid day one schedule ID to edit**')
                             .then( msg => msg.delete({ timeout: 10000 }));
@@ -409,78 +413,71 @@ exports.run = (client, message, args, tools) =>
             return;
         }
 
-        findMessage(message, raidID)
-                    .then(raid => {
+        findMessage(message, scheduleID)
+            .then(schedule => {
 
-                        let oldEmbed = raid.embeds[0];
-                
-                        let roster = oldEmbed.fields[0].value;
+            const editedEmbed = new Discord.MessageEmbed(schedule.embeds[0]);
 
-                        var raidIconID = oldEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
-                        
-                        if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (raidIconID == message.author.id))
-                        {
-                            if (field == 'time')
-                            {
-                                let description = oldEmbed.description.split(' - ');
+            var scheduleIconID = editedEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
 
-                                let time = description[1].split('\n');
+            if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (scheduleIconID == message.author.id))
+            {
+                if (field == 'time')
+                {
+                    var description = editedEmbed.description.split(' - ');
 
-                                time[0] = fieldInput;
+                    var time = description[1].split('\n');
 
-                                time = time.join('\n');
+                    time[0] = fieldInput;
 
-                                description[1] = time;
+                    time = time.join('\n');
 
-                                const editedEmbed = new Discord.MessageEmbed(oldEmbed);
+                    description[1] = time;
 
-                                editedEmbed.setDescription(description.join(' - '));
+                    editedEmbed.setDescription(description.join(' - '));
 
-                                raid.edit(editedEmbed);
+                    schedule.edit(editedEmbed);
 
-                                message.channel.send('**Day one schedule time successfully edited**')
-                                            .then( msg => msg.delete({ timeout: 10000 }));
-                            }
-                            else if ((field == 'desc') || (field == 'description'))
-                            {
-                                let description = oldEmbed.description.split('\n');
+                    message.channel.send('**Schedule time successfully edited**')
+                                .then( msg => msg.delete({ timeout: 10000 }));
+                }
+                else if ((field == 'desc') || (field == 'description'))
+                {
+                    var description = editedEmbed.description.split('\n');
 
-                                description[1] = fieldInput;
+                    description[1] = fieldInput;
 
-                                const editedEmbed = new Discord.MessageEmbed(oldEmbed);
+                    editedEmbed.setDescription(description.join('\n'));
 
-                                editedEmbed.setDescription(description.join('\n'));
+                    schedule.edit(editedEmbed);
 
-                                raid.edit(editedEmbed);
+                    message.channel.send('**Schedule description successfully edited**')
+                                .then( msg => msg.delete({ timeout: 10000 }));
+                }
+                else
+                {
+                    message.channel.send('**Please supply a valid schedule field to edit**')
+                                    .then( msg => msg.delete({ timeout: 10000 }));
 
-                                message.channel.send('**Day one schedule description successfully edited**')
-                                            .then( msg => msg.delete({ timeout: 10000 }));
-                            }
-                            else
-                            {
-                                message.channel.send('**Please supply a valid field to edit**')
-                                                .then( msg => msg.delete({ timeout: 10000 }));
+                    message.delete();
 
-                                message.delete();
-
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            message.channel.send('**You do not have permission to edit this day one schedule**')
-                                            .then( msg => msg.delete({ timeout: 10000 }));
-                        }
-                    })
-                    .catch(error => message.channel.send('**Please supply a valid day one schedule ID to edit**')
-                                                    .then( msg => msg.delete({ timeout: 10000 })))
+                    return;
+                }
+            }
+            else
+            {
+                message.channel.send('**You do not have permission to edit this day one schedule**')
+                                .then( msg => msg.delete({ timeout: 10000 }));
+            }
+        })
+        .catch(error => message.channel.send('**Please supply a valid day one schedule ID to edit**')
+                                        .then( msg => msg.delete({ timeout: 10000 })))
     }
     else if (action == 'alert')//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     {
-        var [raidID, ...restArgs] = restArgs;
-        var reply = restArgs.join(' ');
+        var [scheduleID, ...alert] = restArgs;
 
-        if (isNaN(raidID))
+        if (isNaN(scheduleID))
         {
             message.channel.send(`**Could not alert roster. You didn't include a message ID.**`)
                             .then( msg => msg.delete({ timeout: 10000 }));
@@ -490,15 +487,22 @@ exports.run = (client, message, args, tools) =>
             return;
         }
 
-        findMessage(message, raidID)
-            .then(raid => {
+        findMessage(message, scheduleID)
+            .then(schedule => {
 
-                var raidEmbed = raid.embeds[0];
+                const editedEmbed = new Discord.MessageEmbed(schedule.embeds[0]);
 
-                var roster = raidEmbed.fields[0].value;
+                var roster = editedEmbed.fields[0].value;
 
                 if ((message.member.roles.cache.some(r => r.name === 'bouncer') || (inRoster(roster, message.author.id))))
                 {
+                    if (alert[0] == '-')
+                    {
+                        alert.shift();
+                    }
+
+                    alert = alert.join(' ');
+
                     var quoteeUser = message.author;
                     var quoteeGuildMember = message.member;
 
@@ -509,16 +513,14 @@ exports.run = (client, message, args, tools) =>
                         color = '#99aab5';
                     }
 
-                    reply = reply.split('- ').join('');
-
-                    const embed = new Discord.MessageEmbed()
-                    .setAuthor(quoteeGuildMember.displayName, quoteeUser.displayAvatarURL({ format: "png", dynamic: true }))
-                    .setColor(color)
-                    .setDescription(reply)
-                    .setFooter(`in #${message.channel.name}`)
-                    .setTimestamp(message.createdTimestamp);
+                    const alertEmbed = new Discord.MessageEmbed()
+                        .setAuthor(quoteeGuildMember.displayName, quoteeUser.displayAvatarURL({ format: "png", dynamic: true }))
+                        .setColor(color)
+                        .setDescription(alert)
+                        .setFooter(`in #${message.channel.name}`)
+                        .setTimestamp(message.createdTimestamp);
                     
-                    message.channel.send(roster, {embed: embed});
+                    message.channel.send(roster, {embed: alertEmbed});
                 }
                 else
                 {
@@ -531,12 +533,9 @@ exports.run = (client, message, args, tools) =>
     }
     else if (action == 'delete')////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     {
-        var [raidID, ...restArgs] = restArgs;
-        var reply = restArgs.join(' ');
+        var [scheduleID, ...alert] = restArgs;
 
-        var oldSchedules = client.channels.cache.get('597651951609577472');
-
-        if (isNaN(raidID))
+        if (isNaN(scheduleID))
         {
             message.channel.send('**Please supply a valid schedule ID to delete**')
                             .then( msg => msg.delete({ timeout: 10000 }));
@@ -546,19 +545,26 @@ exports.run = (client, message, args, tools) =>
             return;
         }
         
-        findMessage(message, raidID)
+        findMessage(message, scheduleID)
             .then(schedule => {
 
-                let raidEmbed = schedule.embeds[0];
-
-                let roster = raidEmbed.fields[0].value;
-
-                const deletedSchedule = new Discord.MessageEmbed(raidEmbed)
-                
                 if (message.member.roles.cache.some(r => r.name === 'bouncer'))
                 {
-                    if (reply.length != 0)
+                    const deletedSchedule = new Discord.MessageEmbed(schedule.embeds[0]);
+                    
+                    var oldSchedules = client.channels.cache.get('597651951609577472');
+
+                    if (alert[0] == '-')
                     {
+                        alert.shift();
+                    }
+
+                    alert = alert.join(' ');
+
+                    if (alert.length != 0)
+                    {
+                        var roster = deletedSchedule.fields[0].value;
+
                         var quoteeUser = message.author;
                         var quoteeGuildMember = message.member;
     
@@ -568,31 +574,25 @@ exports.run = (client, message, args, tools) =>
                         {
                             color = '#99aab5';
                         }
-
-                        reply = reply.split('- ').join('');
     
                         const embed = new Discord.MessageEmbed()
                         .setAuthor(quoteeGuildMember.displayName, quoteeUser.displayAvatarURL({ format: "png", dynamic: true }))
                         .setColor(color)
-                        .setDescription(reply)
+                        .setDescription(alert)
                         .setFooter(`in #${message.channel.name}`)
                         .setTimestamp(message.createdTimestamp);
                         
-                        message.channel.send(`**Day one schedule successfully deleted**\n${roster}`, {embed: embed});
-
-                        oldSchedules.send(deletedSchedule);
-    
-                        schedule.delete();
+                        message.channel.send(`**Schedule successfully deleted**\n${roster}`, {embed: embed});
                     }
                     else
                     {
-                        message.channel.send('**Day one schedule successfully deleted**')
+                        message.channel.send('**Schedule successfully deleted**')
                                     .then( msg => msg.delete({ timeout: 10000 }));
-
-                        oldSchedules.send(deletedSchedule);
-
-                        schedule.delete();
                     }
+
+                    oldSchedules.send(deletedSchedule);
+
+                    schedule.delete();
                 }
                 else
                 {
@@ -606,9 +606,9 @@ exports.run = (client, message, args, tools) =>
     }
     else if (action == 'transfer')////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     {
-        var [raidID, ...tempPlayerId] = restArgs;
+        var [scheduleID, tempPlayerId, ...restArgs] = restArgs;
 
-        if (isNaN(raidID))
+        if (isNaN(scheduleID))
         {
             message.channel.send('**Please supply a valid day one schedule ID to transfer ownership**')
                             .then( msg => msg.delete({ timeout: 10000 }));
@@ -618,112 +618,62 @@ exports.run = (client, message, args, tools) =>
             return;
         }
 
-        findMessage(message, raidID)
-            .then(raid => {
-
-            var oldEmbed = raid.embeds[0];
-
-            var roster = oldEmbed.fields[0].value;
-            
-            var raidIconID = oldEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
-
-            if (message.member.roles.cache.some(r => r.name === 'bouncer'))
-            {
-                if (!Array.isArray(tempPlayerId) || !tempPlayerId.length)
-                {
-                    message.channel.send('**You didn\'t include any user ID\'s to add to the schedule**')
-                                    .then( msg => msg.delete({ timeout: 10000 }));
-
-                    message.delete();
-
-                    return;
-                }
-
-                if (inRoster(roster, tempPlayerId))
-                {
-                    var newHost = message.guild.members.cache.find(m => m.id == tempPlayerId);
-
-                    const editedEmbed = new Discord.MessageEmbed(oldEmbed);
-
-                    var colour = newHost.displayHexColor;
-
-                    if (colour == '#000000')
-                    {
-                        colour = '#99aab5';
-                    }
-
-                    editedEmbed.setAuthor(newHost.displayName, newHost.user.displayAvatarURL({ format: "png", dynamic: true }));
-                    editedEmbed.setColor(colour);
-            
-                    raid.edit(editedEmbed);
-
-                    message.channel.send(`**Successfully transfered schedule ownership to** ${newHost.displayName}`)
-                                    .then( msg => msg.delete({ timeout: 10000 }));
-                }
-                else
-                {
-                    message.channel.send('**Please supply a valid member ID**')
-                                .then( msg => msg.delete({ timeout: 10000 }));
-
-                    message.delete();
-
-                    return;
-                }
-            }
-            else
-            {
-                message.channel.send('**You do not have permission to add players to this schedule**')
-                                .then( msg => msg.delete({ timeout: 10000 }));
-
-                message.delete();
-
-                return;
-            }
-        }).catch(error => message.channel.send('**Please supply a valid schedule ID to add players to**')
-                                          .then( msg => msg.delete({ timeout: 10000 })));
-    }
-    else if (action == 'update')////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    {
-        if (message.author.tag != 'ando#0404') return;
-
-        var [raidID, ...restArgs] = restArgs;
-        var reply = restArgs.join(' ');
-
-        var oldSchedules = client.channels.cache.get('597651951609577472');
-
-        if (isNaN(raidID))
+        if (!Array.isArray(tempPlayerId) || !tempPlayerId.length)
         {
-            message.channel.send('**Please supply a valid schedule ID to delete**')
+            message.channel.send('**Please supply a valid user ID to transfer ownership**')
                             .then( msg => msg.delete({ timeout: 10000 }));
 
             message.delete();
 
             return;
         }
-        
-        findMessage(message, raidID)
-            .then(schedule =>
+
+        findMessage(message, scheduleID)
+            .then(schedule => {
+
+                const editedEmbed = new Discord.MessageEmbed(schedule.embeds[0]);
+
+                var roster = editedEmbed.fields[0].value;
+
+                if (message.member.roles.cache.some(r => r.name === 'bouncer'))
+                {
+                    if (inRoster(roster, tempPlayerId))
+                    {
+                        var newHost = message.guild.members.cache.find(m => m.id == tempPlayerId);
+    
+                        var colour = newHost.displayHexColor;
+    
+                        if (colour == '#000000')
+                        {
+                            colour = '#99aab5';
+                        }
+    
+                        editedEmbed.setAuthor(newHost.displayName, newHost.user.displayAvatarURL({ format: "png", dynamic: true }));
+                        editedEmbed.setColor(colour);
+                
+                        schedule.edit(editedEmbed);
+    
+                        message.channel.send(`**Successfully transfered schedule ownership to** ${newHost.displayName}`)
+                                        .then( msg => msg.delete({ timeout: 10000 }));
+                    }
+                    else
+                    {
+                        message.channel.send('**Please supply a valid schedule ID to transfer ownership**')
+                                    .then( msg => msg.delete({ timeout: 10000 }));
+                    }
+                }
+            else
             {
-                let raidEmbed = schedule.embeds[0];
-
-                raidEmbed.setDescription(schedule.embeds[0].description.replace('\u000D', '\n'));
-
-                raidEmbed.spliceFields(0, 10, [{ name : schedule.embeds[0].fields[0].name, value : schedule.embeds[0].fields[0].value.split('\u000D').join('\n') }]);
-
-                schedule.edit(raidEmbed);
-
-                message.channel.send('**Raid Schedule successfully updated**')
-                            .then( msg => msg.delete({ timeout: 10000 }));
-            });
+                message.channel.send('**You do not have permission to add players to this schedule**')
+                                .then( msg => msg.delete({ timeout: 10000 }));
+            }
+        }).catch(error => message.channel.send('**Please supply a valid schedule ID to add players to**')
+                                          .then( msg => msg.delete({ timeout: 10000 })));
     }
     else
     {
         message.channel.send('**Please supply a valid action**')
         .then( msg => msg.delete({ timeout: 10000 }));
-
-        message.delete();
-
-        return;
     }
 
     message.delete();

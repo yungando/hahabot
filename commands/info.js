@@ -92,7 +92,7 @@ exports.run = async (client, message, args, tools) =>
         var battletag = members.get(`${discordID}.battletag`);
         var activID = members.get(`${discordID}.activID`);
 
-        var platforms = ['ignore', 'xb', 'ps', 'pc'];
+        var platforms = ['ignore', 'xb', 'ps', 'pc', 'blizzard', 'stadia'];
 
         var member;
         var description = [`<@${discordID}>`];
@@ -104,6 +104,7 @@ exports.run = async (client, message, args, tools) =>
         var rolesTS = [];
         var rolesCount = 0;
         var serverRoles = [ '580101673964273681', // barkeep
+                            '780086229207220255', // DSC
                             '769726185198059540', // trailblazer
                             '760887215118614659', // mw s6
                             '737478676735721573', // mw s5
@@ -132,7 +133,6 @@ exports.run = async (client, message, args, tools) =>
                             '534925628680437783', // lfg
                             '539645535754256387', // comp
                             '694647773060136981', // fng
-                            '690375204404330506', // demon
                             '724980000557629592', // lumbridge
                             '535149630628036621']; // bots
         

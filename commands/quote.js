@@ -78,11 +78,7 @@ exports.run = (client, message, args, tools) =>
     }
     
     function createEmbed(request, quote)
-    {
-        let quoteGuild = request.guild.id;
-        let quoteChannel = quote.channel.id;
-        let quoteMessageID = quote.id;
-        
+    {        
         if (!Array.isArray(quote.embeds) || !quote.embeds.length)
         {
             const embed = new Discord.MessageEmbed()
@@ -97,9 +93,7 @@ exports.run = (client, message, args, tools) =>
         }
         else
         {
-            let embedQuote = quote.embeds[0];
-
-            const embedEmbed = new Discord.MessageEmbed(embedQuote)
+            const embedEmbed = new Discord.MessageEmbed(quote.embeds[0])
 
             if (request.channel.id == '593896171291017221')
             {
@@ -112,11 +106,11 @@ exports.run = (client, message, args, tools) =>
                                     message.edit({embed: embedEmbed.setFooter(`#raid-schedules - ${message.id}`)}))
                                                         });
             }
-            else if (request.channel.id == '623530668676349957')
+            else if (request.channel.id == '769728197125341217')
             {
                 request.channel.send({embed:embedEmbed})
                                             .then(function (message) {
-                                                    message.edit({embed: embedEmbed.setFooter(`#garden-of-salvation - ${message.id}`)})
+                                                    message.edit({embed: embedEmbed.setFooter(`#day-one - ${message.id}`)})
                                                                     });
             }
             else 

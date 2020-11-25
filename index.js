@@ -111,6 +111,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
         var member = message.guild.members.cache.find(m => m.id == user.id);
     }
 
+    // SCHEDULES
     if (message.author.id == '560533863290372097')
     {        
         if (message.embeds[0] != undefined && message.embeds[0] != 0)
@@ -120,37 +121,30 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 if (message.embeds[0].footer.text.split(' - ')[0] == '#raid-schedules')
                 {
                     if (user.bot) return;
-
-                    let oldEmbed = message.embeds[0];
             
                     if (emoji.id == '593898113626800129') // Add to Raid Schedule
                     {
                         reaction.users.remove(user);
 
-                        let roster = oldEmbed.fields[0].value;
-
-                        if (!(message.guild.id == '534915212760055819' && message.guild.members.cache.find(m => m.id == user.id).roles.cache.some(r => r.id == '534919438726856735')))
+                        if (message.guild.id == '534915212760055819')
                         {
-                            return;
-                        }
-
-                        if (!roster.includes(user.id))
-                        {
-                            roster = roster.split('\n');
-                        }
-                        else
-                        {
-                            return;
-                        }
-            
-                        for (var i = 0; i < roster.length; i++)
-                        {
-                            if (roster[i].includes(user.id))
+                            if (!message.guild.members.cache.find(m => m.id == user.id).roles.cache.some(r => r.id == '534919438726856735'))
                             {
                                 return;
                             }
                         }
 
+                        const editedEmbed = new Discord.MessageEmbed(message.embeds[0]);
+
+                        var roster = editedEmbed.fields[0].value;
+
+                        if (roster.includes(user.id))
+                        {
+                            return;
+                        }
+
+                        roster = roster.split('\n');
+                        
                         for (var i = 0; i < roster.length; i++)
                         {
                             if (!roster[i].includes('@'))
@@ -162,8 +156,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
 
                         roster = roster.join('\n');
             
-                        oldEmbed.spliceFields(0, 1);
-                        const editedEmbed = new Discord.MessageEmbed(oldEmbed);
+                        editedEmbed.spliceFields(0, 1);
             
                         editedEmbed.addField('Roster', roster);
 
@@ -184,21 +177,24 @@ client.on('messageReactionAdd', async (reaction, user) =>
                     {
                         reaction.users.remove(user);
 
-                        let roster = oldEmbed.fields[0].value;
+                        if (message.guild.id == '534915212760055819')
+                        {
+                            if (!message.guild.members.cache.find(m => m.id == user.id).roles.cache.some(r => r.id == '534919438726856735'))
+                            {
+                                return;
+                            }
+                        }
 
-                        if (!(message.guild.id == '534915212760055819' && message.guild.members.cache.find(m => m.id == user.id).roles.cache.some(r => r.id == '534919438726856735')))
+                        const editedEmbed = new Discord.MessageEmbed(message.embeds[0]);
+
+                        var roster = editedEmbed.fields[0].value;
+
+                        if (!roster.includes(user.id))
                         {
                             return;
                         }
 
-                        if (roster.includes(user.id))
-                        {
-                            roster = roster.split('\n');
-                        }
-                        else
-                        {
-                            return;
-                        }
+                        roster = roster.split('\n');
             
                         for (var i = 0; i < roster.length; i++)
                         {
@@ -207,8 +203,6 @@ client.on('messageReactionAdd', async (reaction, user) =>
                                 roster[i] = `${i+1}) `;
                             } 
                         }
-
-                        const editedEmbed = new Discord.MessageEmbed(oldEmbed);
 
                         if (!roster.join('').includes(editedEmbed.author.iconURL.split('avatars/')[1].split('/')[0]))
                         {
@@ -245,9 +239,9 @@ client.on('messageReactionAdd', async (reaction, user) =>
 
                         var displayName = message.guild.members.cache.get(user.id).displayName;
                         var description = editedEmbed.description.replace('\n', ' - ').replace(/[**]/g, '');
-                        var raidID = message.id;
+                        var scheduleID = message.id;
 
-                        var schedule = `${displayName} **left** - ${description} - ${raidID}`;
+                        var schedule = `${displayName} **left** - ${description} - ${scheduleID}`;
                         
                         hahaLOG.send(schedule, {
                             username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
@@ -259,26 +253,26 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 }
                 else if (message.embeds[0].footer.text.includes('~guide'))
                 {
-                    let oldEmbed = message.embeds[0];
-                    let footer = oldEmbed.footer.text;
-
-                    let gallery = footer.split('~guide ').join('').split(' (')[0];
-                    let page = parseInt(footer.split('(')[1].split('/')[0]);
-
-                    if (gallery == 'wishes' || gallery == 'wish')
-                    {
-                        gallery = wishes;
-                        footer = 'wishes';
-                    }
-                    else if (gallery == 'niobe' || gallery == 'niobelabs')
-                    {
-                        gallery = niobe;
-                        footer = 'niobe';
-                    }
-
                     if (emoji.name == '➡' || emoji.name == '⬅')
                     {
                         reaction.users.remove(user);
+
+                        const editedEmbed = new Discord.MessageEmbed(message.embeds[0]);
+
+                        var footer = editedEmbed.footer.text;
+                        var gallery = footer.split('~guide ').join('').split(' (')[0];
+                        var page = parseInt(footer.split('(')[1].split('/')[0]);
+
+                        if (gallery == 'wishes' || gallery == 'wish')
+                        {
+                            gallery = wishes;
+                            footer = 'wishes';
+                        }
+                        else if (gallery == 'niobe' || gallery == 'niobelabs')
+                        {
+                            gallery = niobe;
+                            footer = 'niobe';
+                        }
 
                         if (emoji.name == '➡') // right
                         {
@@ -305,11 +299,12 @@ client.on('messageReactionAdd', async (reaction, user) =>
 
                         var description = gallery[page-1][0];
                         var imageURL = gallery[page-1][1];
+                        
+                        editedEmbed.setDescription(description);
 
-                        const editedEmbed = new Discord.MessageEmbed(oldEmbed)
-                            .setDescription(description)
-                            .setImage(imageURL)
-                            .setFooter(`~guide ${footer} (${page}/${gallery.length})`);
+                        editedEmbed.setImage(imageURL);
+
+                        editedEmbed.setFooter(`~guide ${footer} (${page}/${gallery.length})`);
 
                         message.edit(editedEmbed);
                     }
@@ -485,40 +480,6 @@ client.on('messageReactionAdd', async (reaction, user) =>
         }
     }
 
-    // @doometernal reaction role
-    if (message.id == '690376072734179390')
-    {
-        if (emoji.id == '591094845662298112')
-        {
-            if (!member.roles.cache.some(r => r.id == '690375204404330506'))
-            {
-                reaction.users.remove(user);
-
-                member.roles.add('690375204404330506');
-
-                var roleUpdate = `${member.displayName} **added role** - @demon`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
-            }
-            else
-            {
-                reaction.users.remove(user);
-                
-                member.roles.remove('690375204404330506');
-
-                var roleUpdate = `${member.displayName} **removed role** - @demon`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
-            }
-        }
-    }
-
     // @callofduty reaction role
     if (message.id == '749299967713214594')
     {
@@ -590,12 +551,27 @@ client.on('messageReactionAdd', async (reaction, user) =>
 
 client.on('message', message =>
 {
-    let sender = message.author;
-    let msg = message.content.toLowerCase();
+    var sender = message.author;
+    var msg = message.content.toLowerCase();
 
-    if (sender.id == '738808856146215023')
+    // Bungie Notifications
+    if ((sender.id == '738808856146215023') && (message.guild.id == '534915212760055819'))
     {
-        message.pin();
+        const mFilter = m => (m.author.id == '560533863290372097' && m.system == true);
+
+        message.channel.messages.fetchPinned().then(pins =>
+            {                
+                message.channel.awaitMessages(mFilter, { max: 1, time : 10000 }).then( notif => notif.first().delete({ timeout: 10000 }));
+
+                if (pins.size >= 50)
+                {
+                    pins.sort((pinA, pinB) => pinA.createdTimestamp - pinB.createdTimestamp).first().unpin().then( message.pin() );
+                }
+                else
+                {
+                    message.pin();
+                }
+            });
     }
 
     if (sender.bot) return;
@@ -632,6 +608,7 @@ client.on('message', message =>
         }
     }
 
+    // dm webhook
     if (message.channel.type == 'dm')
     {
         if (message.attachments.size > 0)
@@ -650,6 +627,7 @@ client.on('message', message =>
         }
     }
 
+    // Discord Links
     if (msg.includes('discord.gg/' || 'discordapp.com/invite'))
     {
         if (message.guild.id === '534915212760055819')
@@ -657,7 +635,7 @@ client.on('message', message =>
             if (sender.tag != 'ando#0404')
             {
                 message.delete();
-                message.channel.send('**No Discord invite links allowed**');
+                message.channel.send('**No Discord invite links allowed**').then(msg => msg.delete({ timeout: 10000 }));
 
                 hahaLOG.send(msg, {
                     username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
@@ -676,41 +654,15 @@ client.on('message', message =>
     {
         message.react('586918323149602816');
     }
-    
-    if (msg === 'why the fuck my gambit hard') {
-        message.channel.send('😩');
-
-        hahaLOG.send(msg, {
-            username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
-            avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
-        });
-    }
-
-    if (msg === 'why the fuck my raid schedules hard')
-    {
-        message.channel.send('<:wearyarmelion:604642596249272320>');
-
-        hahaLOG.send(msg, {
-            username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
-            avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
-        });
-    }
-
-    if (msg === 'why the fuck my bread hard')
-    {
-        message.channel.send('<:wearybread:562133483020091412>');
-
-        hahaLOG.send(msg, {
-            username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
-            avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
-        });
-    }
 
     if (msg === 'thanks son')
     {
-        if (sender.tag === 'ando#0404') {
+        if (sender.tag === 'ando#0404')
+        {
             message.channel.send('thanks dad');
-        } else {
+        } 
+        else
+        {
             message.channel.send('im calling the police');
         }
 
