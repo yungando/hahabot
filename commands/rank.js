@@ -3,15 +3,18 @@ const db = require('quick.db');
 
 exports.run = (client, message, args, tools) =>
 {
-    if (message.channel.id != '534930722759245825' && message.channel.id != '626559189296349234' && message.channel.id != '579882323995262976')
-    {
-        message.channel.send('**Please use the `~rank` command in <#534930722759245825>**')
-        .then( msg => msg.delete({ timeout: 10000 }));
+    if ((message.channel.parent.id != '781922324622475335') && (message.channel.id != '534930722759245825') && (message.channel.id != '724671647369396325'))
+        {
+            if (message.guild.id == '534915212760055819')
+            {
+                message.channel.send('**Please use the `~rank` command in a Stats channel.**')
+                .then( msg => msg.delete({ timeout: 10000 }));
 
-        message.delete();
+                message.delete();
 
-        return;
-    }
+                return;
+            }
+        }
 
     var members = new db.table('members');
 

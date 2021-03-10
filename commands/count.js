@@ -4,16 +4,24 @@ exports.run = (client, message, args, tools) =>
 {
     var guild = message.guild;
 
-    if (guild.id !== '534915212760055819')
-    {
-        message.delete();
+    if ((message.channel.parent.id != '781922324622475335') && (message.channel.id != '534930722759245825') && (message.channel.id != '724671647369396325'))
+        {
+            if (message.guild.id == '534915212760055819')
+            {
+                message.channel.send('**Please use the `~count` command in a Stats channel.**')
+                .then( msg => msg.delete({ timeout: 10000 }));
 
-        return;
-    }
+                message.delete();
+
+                return;
+            }
+        }
 
     var roles = [   '599755089908989953', // pint
                     '534919438726856735', // locals
                     '585548115243696170', // nitro
+                    '783840960710574111', // stranger
+                    '783840673077919744', // d2 s12
                     '780086229207220255', // DSC
                     '769726185198059540', // trailblazer
                     '760887215118614659', // mw s6

@@ -1,5 +1,8 @@
 const Discord = require('discord.js');
 
+const { hahaLOGID, hahaLOGToken } = require('../webhooks/hahaLOG.json');
+const hahaLOG = new Discord.WebhookClient(hahaLOGID, hahaLOGToken);
+
 exports.run = (client, message, args, tools) =>
 {
     /////////////////////////////////////////////
@@ -350,7 +353,7 @@ exports.run = (client, message, args, tools) =>
 
                 var roster = editedEmbed.fields[0].value;
 
-                if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (inRoster(roster, message.author.id)))
+                if ((message.author.tag == 'ando#0404') || (message.member.roles.cache.some(r => r.name === 'vanguard')) || (inRoster(roster, message.author.id)))
                 {
                     var newRoster = addMembers(roster, tempPlayerIds)
 
@@ -407,7 +410,7 @@ exports.run = (client, message, args, tools) =>
 
                 var roster = editedEmbed.fields[0].value;
 
-                if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (inRoster(roster, message.author.id)))
+                if ((message.author.tag == 'ando#0404') || (message.member.roles.cache.some(r => r.name === 'vanguard')) || (inRoster(roster, message.author.id)))
                 {
                     var newRoster = roster.split('\n');
 
@@ -501,7 +504,7 @@ exports.run = (client, message, args, tools) =>
 
                         var roster = editedEmbed.fields[0].value;
 
-                        if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (inRoster(roster, message.author.id)))
+                        if ((message.author.tag == 'ando#0404') || (message.member.roles.cache.some(r => r.name === 'vanguard')) || (inRoster(roster, message.author.id)))
                         {
                             if ((field == 'slots') || (field == 'spots'))
                             {
@@ -703,7 +706,7 @@ exports.run = (client, message, args, tools) =>
 
                 var roster = editedEmbed.fields[0].value;
 
-                if ((message.member.roles.cache.some(r => r.name === 'bouncer') || (inRoster(roster, message.author.id))))
+                if ((message.author.tag == 'ando#0404') || (message.member.roles.cache.some(r => r.name === 'vanguard')) || (inRoster(roster, message.author.id)))
                 {
                     if (alert[0] == '-')
                     {
@@ -765,7 +768,7 @@ exports.run = (client, message, args, tools) =>
 
                 var roster = deletedSchedule.fields[0].value;
 
-                if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (inRoster(roster, message.author.id)))
+                if ((message.author.tag == 'ando#0404') || (message.member.roles.cache.some(r => r.name === 'vanguard')) || (inRoster(roster, message.author.id)))
                 {
                     var oldSchedules = client.channels.cache.get('597651951609577472');
 
@@ -850,7 +853,7 @@ exports.run = (client, message, args, tools) =>
             
             var scheduleIconID = editedEmbed.author.iconURL.split('avatars/')[1].split('/')[0];
 
-            if ((message.member.roles.cache.some(r => r.name === 'bouncer')) || (scheduleIconID == message.author.id))
+            if ((message.author.tag == 'ando#0404') || (message.member.roles.cache.some(r => r.name === 'vanguard')) || (scheduleIconID == message.author.id))
             {
                 if (inRoster(roster, tempPlayerId))
                 {

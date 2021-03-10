@@ -70,7 +70,7 @@ exports.run = async (client, message, args, tools) =>
 
     if (action == 'get')
     {
-        if (message.channel.id != '534930722759245825' && message.channel.id != '626559189296349234' && message.channel.id != '579882323995262976' && message.channel.id != '724671647369396325')
+        if ((message.channel.parent.id != '781922324622475335') && (message.channel.id != '534930722759245825') && (message.channel.id != '724671647369396325'))
         {
             if (message.guild.id == '534915212760055819')
             {
@@ -104,6 +104,10 @@ exports.run = async (client, message, args, tools) =>
         var rolesTS = [];
         var rolesCount = 0;
         var serverRoles = [ '580101673964273681', // barkeep
+                            '594599121478746132', // bouncer
+                            '781921972875558943', // vanguard
+                            '783840960710574111', // stranger
+                            '783840673077919744', // d2 s12
                             '780086229207220255', // DSC
                             '769726185198059540', // trailblazer
                             '760887215118614659', // mw s6
@@ -128,7 +132,6 @@ exports.run = async (client, message, args, tools) =>
                             '574652778857627654', // drinking buddy
                             '599755089908989953', // pint
                             '540565941977874434', // roles
-                            '594599121478746132', // bouncer
                             '698345563485372497', // guardian
                             '534925628680437783', // lfg
                             '539645535754256387', // comp
@@ -290,7 +293,7 @@ exports.run = async (client, message, args, tools) =>
     }
     else if (action == 'set')
     {
-        if (message.author.tag != 'ando#0404')
+        if ((!message.author.tag == 'ando#0404') && (!message.member.roles.cache.some(r => r.name === 'vanguard')))
         {
             message.channel.send('**You do not have the correct permissions**')
                         .then( msg => msg.delete({ timeout: 10000 }));
@@ -355,9 +358,9 @@ exports.run = async (client, message, args, tools) =>
             return;
         }
     }
-    else if (action == 'setall')
+    else if (action == 'setd2')
     {
-        if (message.author.tag != 'ando#0404')
+        if ((!message.author.tag == 'ando#0404') && (!message.member.roles.cache.some(r => r.name === 'vanguard')))
         {
             message.channel.send('**You do not have the correct permissions**')
                         .then( msg => msg.delete({ timeout: 10000 }));
@@ -382,13 +385,23 @@ exports.run = async (client, message, args, tools) =>
     }
     else if (action == 'delete')
     {
+        if (message.author.tag != 'ando#0404')
+        {
+            message.channel.send('**You do not have the correct permissions**')
+                        .then( msg => msg.delete({ timeout: 10000 }));
+
+            message.delete();
+
+            return;
+        }
+
         var [discordID, field, input, ...ignore] = restArgs;
 
         members.delete(`${discordID}`);
     }
-    else if (action == 'addflakes')
+    else if ((action == 'addflakes') || (action == 'addflake'))
     {
-        if (message.author.tag != 'ando#0404')
+        if ((!message.author.tag == 'ando#0404') && (!message.member.roles.cache.some(r => r.name === 'vanguard')))
         {
             message.channel.send('**You do not have the correct permissions**')
                         .then( msg => msg.delete({ timeout: 10000 }));

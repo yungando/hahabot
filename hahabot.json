@@ -4,5 +4,8 @@
     "watch_options": {
         "followSymlinks": false
     },
-    "name": "hahabot"
+    "name": "hahabot",
+	"log_date_format": "DD-MM-YYYY",
+	"error_file": "hahaERR.log",
+	"out_file": "hahaOUT.log"
 }

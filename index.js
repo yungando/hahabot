@@ -1,6 +1,9 @@
 const Discord = require('discord.js');
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 
+const db = require('quick.db');
+var servers = new db.table('servers');
+
 const { prefix, token } = require('./config.json');
 
 const { hahaDMID, hahaDMToken } = require('./webhooks/hahaDM.json');
@@ -11,10 +14,132 @@ const hahaLOG = new Discord.WebhookClient(hahaLOGID, hahaLOGToken);
 
 const { wishes, niobe } = require('./webhooks/galleries.json');
 
+function getTimestamp(ts)
+{
+    var str =   ts.getUTCFullYear() + "/" +
+                ("0" + (ts.getUTCMonth()+1)).slice(-2) + "/" +
+                ("0" + ts.getUTCDate()).slice(-2) + " " +
+                ("0" + ts.getUTCHours()).slice(-2) + ":" +
+                ("0" + ts.getUTCMinutes()).slice(-2) + ":" +
+                ("0" + ts.getUTCSeconds()).slice(-2) + ' (UTC)';
+
+    return str;
+}
+
+function getTimeSince(ts)
+{
+    var seconds = Math.floor((new Date() - ts) / 1000);
+
+    var interval = seconds / 31536000;
+
+    if (interval > 1)
+    {
+        if (Math.floor(interval) == 1)
+        {
+            return 'a year';
+        }
+
+        return Math.floor(interval) + " years";
+    }
+
+    interval = seconds / 2592000;
+
+    if (interval > 1)
+    {
+        if (Math.floor(interval) == 1)
+        {
+            return 'a month';
+        }
+
+        return Math.floor(interval) + " months";
+    }
+
+    interval = seconds / 86400;
+
+    if (interval > 1)
+    {
+        if (Math.floor(interval) == 1)
+        {
+            return 'a day';
+        }
+
+        return Math.floor(interval) + " days";
+    }
+
+    interval = seconds / 3600;
+
+    if (interval > 1)
+    {
+        if (Math.floor(interval) == 1)
+        {
+            return 'an hour';
+        }
+
+        return Math.floor(interval) + " hours";
+    }
+
+    interval = seconds / 60;
+
+    if (interval > 1)
+    {
+        if (Math.floor(interval) == 1)
+        {
+            return 'a minute';
+        }
+
+        return Math.floor(interval) + " minutes";
+    }
+
+    if (Math.floor(seconds) == 1)
+    {
+        return 'a second';
+    }
+
+    return Math.floor(seconds) + " seconds";
+}
+
+function sendLog(content, user, guild)
+{
+    var username = `${user.tag} - ${user.id}`;
+    var displayPic = user.displayAvatarURL({ format: "png", dynamic: true });
+
+    if (user == client.user)
+    {
+        username = 'hahabot';
+    }
+
+    if (guild)
+    {
+        if (guild.members.cache.find(m => m.id == user.id))
+        {
+            var member = guild.members.cache.find(m => m.id == user.id);
+    
+            if (member.nickname)
+            {
+                var displayName = member.nickname;
+                
+                username = `${displayName} - ${user.tag} - ${user.id}`;
+                
+                var displayLength = username.length - 80;
+    
+                if (displayLength > 0)
+                {
+                    username = `${displayName.slice(0, (displayName.length - displayLength - 1))}… - ${user.tag} - ${user.id}`;
+                }
+            }
+        }
+    }
+
+    hahaLOG.send(content.slice(0, 2000), {
+        username: username,
+        avatarURL: displayPic
+    });
+}
+
 client.once('ready', () => 
 {
     console.log('Ready!');
-    client.user.setActivity('~help');
+    sendLog('hahabot ready', client.user);
 });
 
 const events = 
@@ -23,7 +148,7 @@ const events =
 	MESSAGE_REACTION_REMOVE: 'messageReactionRemove'
 };
 
-client.on('message', message =>
+client.on('message', async (message) =>
 {
     let msg = message.content.toUpperCase();
     let sender = message.author;
@@ -40,40 +165,98 @@ client.on('message', message =>
     }
     catch (e)
     {
-        console.log(e);
+        sendLog(e, client.user);
     }
     finally
     {
-        var name;
-
-        if (message.channel.type == 'dm')
-        {
-            name = `${message.author.tag} - ${message.author.id}`;
-        }
-        else
-        {
-            name = `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`;
-        }
-
-        hahaLOG.send(message.content, {
-            username: name,
-            avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
-        });
+        sendLog(message.content, message.author, message.guild);
     }
 });
 
-client.on('guildMemberRemove', member =>
+client.on('guildMemberAdd', async (member) =>
 {
     try
     {
-        let tag = member.user.id;
-        let guild = member.guild;
+        var channelID = servers.get(`${member.guild.id}.joinMessagesID`);
 
-        guild.systemChannel.send(`<@${tag}> left the server.`);
+        if (channelID != null)
+        {
+            var joinMessages = member.guild.channels.cache.find(c => c.id == channelID);
+
+            if (joinMessages == null)
+            {
+                servers.delete(`${member.guild.id}.joinMessagesID`)
+
+                return;
+            }
+
+            var now = new Date();
+
+            var desc = [    `• Profile: <@${member.user.id}>`,
+                            `• Created: \`${getTimestamp(member.user.createdAt)}\` (${getTimeSince(member.user.createdAt)} ago)`,
+                            `• Joined: \`${getTimestamp(member.joinedAt)}\`` ];
+
+            const notification = new Discord.MessageEmbed()
+                .setAuthor(`${member.user.tag} (${member.user.id})`, member.user.displayAvatarURL({ format: "png", dynamic: true }))
+                .setColor('#4cff4c')
+                .setDescription(desc.join('\n'))
+                .setFooter('User joined')
+                .setTimestamp(now);
+
+            joinMessages.send({ embed:notification });
+        }
     }
     catch (e)
     {
-        
+        sendLog(e, client.user);
+    }
+});
+
+client.on('guildMemberRemove', async (member) =>
+{
+    try
+    {
+        var channelID = servers.get(`${member.guild.id}.leaveMessagesID`);
+
+        if (channelID != null)
+        {
+            var leaveMessages = member.guild.channels.cache.find(c => c.id == channelID);
+
+            if (leaveMessages == null)
+            {
+                servers.delete(`${member.guild.id}.leaveMessagesID`)
+
+                return;
+            }
+
+            var now = new Date();
+
+            var desc = [    `• Profile: <@${member.user.id}>`,
+                            `• Joined: \`${getTimestamp(member.joinedAt)}\` (${getTimeSince(member.joinedAt)} ago)`,
+                            `• Left: \`${getTimestamp(now)}\`` ];
+
+            var roles = [];
+
+            member.roles.cache.sort((roleA, roleB) => roleB.rawPosition - roleA.rawPosition).filter(role => role.name != '@everyone').each(role => roles.push(`<@&${role.id}>`));
+
+            if (roles.length != 0)
+            {
+                desc.push(`• Roles: ${roles.join(' ')}`);
+            }
+
+            const notification = new Discord.MessageEmbed()
+                .setAuthor(`${member.user.tag} (${member.user.id})`, member.user.displayAvatarURL({ format: "png", dynamic: true }))
+                .setColor('#2f3136')
+                .setDescription(desc.join('\n'))
+                .setFooter('User left')
+                .setTimestamp(now);
+
+            leaveMessages.send({ embed:notification });
+        }
+    }
+    catch (e)
+    {
+        sendLog(e, client.user);
     }
 });
 
@@ -83,7 +266,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) =>
 
     if (guild.id != '534915212760055819') return; // Pub Crawl
 
-    if ((oldMember.premiumSinceTimestamp != null) && newMember.premiumSinceTimestamp == null)
+    if ((oldMember.roles.cache.some(r => r.name === 'nitro')) && (!newMember.roles.cache.some(r => r.name === 'nitro')))
     {
         guild.systemChannel.send(`<@${newMember.id}> unboosted the server.`);
     }
@@ -93,11 +276,16 @@ client.on('messageReactionAdd', async (reaction, user) =>
 {
     if (user.bot) return;
 
-    if (reaction.partial) {
-		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
-		try {
+    if (reaction.partial)
+    {
+        // If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+        
+        try
+        {
 			await reaction.fetch();
-		} catch (error) {
+        }
+        catch (error)
+        {
 			// Return as `reaction.message.author` may be undefined/null
 			return;
 		}
@@ -165,11 +353,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                         var raidID = message.id;
 
                         var schedule = `${displayName} **joined** - ${description} - ${raidID}`;
-                        
-                        hahaLOG.send(schedule, {
-                            username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                            avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                        });
+
+                        sendLog(schedule, user, message.guild);
             
                         message.edit('', {embed: editedEmbed});
                     }
@@ -242,11 +427,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                         var scheduleID = message.id;
 
                         var schedule = `${displayName} **left** - ${description} - ${scheduleID}`;
-                        
-                        hahaLOG.send(schedule, {
-                            username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                            avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                        });
+
+                        sendLog(schedule, user, message.guild);
             
                         message.edit('', {embed: editedEmbed});
                     }
@@ -351,11 +533,20 @@ client.on('messageReactionAdd', async (reaction, user) =>
                     member.roles.add('540565941977874434');
     
                     var roleUpdate = `${member.displayName} **added role** - @roles`;
-    
-                    hahaLOG.send(roleUpdate, {
-                        username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                        avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                    });
+
+                    sendLog(roleUpdate, user, message.guild);
+
+                    setTimeout(function()
+                    {
+                        if (member.roles.cache.some(r => r.id == '540565941977874434'))
+                        {
+                            member.roles.remove('540565941977874434');
+
+                            roleUpdate = `${member.displayName} **removed role** - @roles`;
+
+                            sendLog(roleUpdate, user, message.guild);
+                        }
+                    }, 120000)
                 }
                 else
                 {
@@ -364,11 +555,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                     member.roles.remove('540565941977874434');
     
                     var roleUpdate = `${member.displayName} **removed role** - @roles`;
-    
-                    hahaLOG.send(roleUpdate, {
-                        username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                        avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                    });
+
+                    sendLog(roleUpdate, user, message.guild);
                 }
             }
             else
@@ -390,11 +578,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.add('698345563485372497');
 
                 var roleUpdate = `${member.displayName} **added role** - @guardian`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
+                
+                sendLog(roleUpdate, user, message.guild);
             }
             else
             {
@@ -403,11 +588,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.remove('698345563485372497');
 
                 var roleUpdate = `${member.displayName} **removed role** - @guardian`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
+                
+                sendLog(roleUpdate, user, message.guild);
             }
         }
     }
@@ -424,11 +606,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.add('534925628680437783');
 
                 var roleUpdate = `${member.displayName} **added role** - @lfg`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
+                
+                sendLog(roleUpdate, user, message.guild);
             }
             else
             {
@@ -437,11 +616,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.remove('534925628680437783');
 
                 var roleUpdate = `${member.displayName} **removed role** - @lfg`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
+                
+                sendLog(roleUpdate, user, message.guild);
             }
         }
     }
@@ -458,11 +634,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.add('539645535754256387');
 
                 var roleUpdate = `${member.displayName} **added role** - @comp`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
+                
+                sendLog(roleUpdate, user, message.guild);
             }
             else
             {
@@ -471,11 +644,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.remove('539645535754256387');
 
                 var roleUpdate = `${member.displayName} **removed role** - @comp`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
+                
+                sendLog(roleUpdate, user, message.guild);
             }
         }
     }
@@ -492,11 +662,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.add('694647773060136981');
 
                 var roleUpdate = `${member.displayName} **added role** - @fng`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
+                
+                sendLog(roleUpdate, user, message.guild);
             }
             else
             {
@@ -505,11 +672,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.remove('694647773060136981');
 
                 var roleUpdate = `${member.displayName} **removed role** - @fng`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
+                
+                sendLog(roleUpdate, user, message.guild);
             }
         }
     }
@@ -526,11 +690,8 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.add('724980000557629592');
 
                 var roleUpdate = `${member.displayName} **added role** - @lumbridge`;
-
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
+                
+                sendLog(roleUpdate, user, message.guild);
             }
             else
             {
@@ -539,11 +700,64 @@ client.on('messageReactionAdd', async (reaction, user) =>
                 member.roles.remove('724980000557629592');
 
                 var roleUpdate = `${member.displayName} **removed role** - @lumbridge`;
+                
+                sendLog(roleUpdate, user, message.guild);
+            }
+        }
+    }
 
-                hahaLOG.send(roleUpdate, {
-                    username: `${message.guild.members.cache.find(m => m.id == user.id).displayName} - ${user.tag} - ${user.id}`,
-                    avatarURL: user.displayAvatarURL({ format: "png", dynamic: true })
-                });
+    // @runescape reaction role
+    if (message.id == '725042996915208374')
+    {
+        if (emoji.id == '724985145337315418')
+        {
+            if (!member.roles.cache.some(r => r.id == '724980000557629592'))
+            {
+                reaction.users.remove(user);
+
+                member.roles.add('724980000557629592');
+
+                var roleUpdate = `${member.displayName} **added role** - @lumbridge`;
+                
+                sendLog(roleUpdate, user, message.guild);
+            }
+            else
+            {
+                reaction.users.remove(user);
+                
+                member.roles.remove('724980000557629592');
+
+                var roleUpdate = `${member.displayName} **removed role** - @lumbridge`;
+                
+                sendLog(roleUpdate, user, message.guild);
+            }
+        }
+    }
+
+    // @minecraft reaction role
+    if (message.id == '800101427434750003')
+    {
+        if (emoji.id == '764714085262163978')
+        {
+            if (!member.roles.cache.some(r => r.id == '799797564437168128'))
+            {
+                reaction.users.remove(user);
+
+                member.roles.add('799797564437168128');
+
+                var roleUpdate = `${member.displayName} **added role** - @villager`;
+                
+                sendLog(roleUpdate, user, message.guild);
+            }
+            else
+            {
+                reaction.users.remove(user);
+                
+                member.roles.remove('799797564437168128');
+
+                var roleUpdate = `${member.displayName} **removed role** - @villager`;
+                
+                sendLog(roleUpdate, user, message.guild);
             }
         }
     }
@@ -551,11 +765,11 @@ client.on('messageReactionAdd', async (reaction, user) =>
 
 client.on('message', message =>
 {
-    var sender = message.author;
+    var user = message.author;
     var msg = message.content.toLowerCase();
 
     // Bungie Notifications
-    if ((sender.id == '738808856146215023') && (message.guild.id == '534915212760055819'))
+    if ((user.id == '738808856146215023') && (message.guild.id == '534915212760055819'))
     {
         const mFilter = m => (m.author.id == '560533863290372097' && m.system == true);
 
@@ -574,7 +788,7 @@ client.on('message', message =>
             });
     }
 
-    if (sender.bot) return;
+    if (user.bot) return;
 
     // auto @lfg
     if (message.content.includes('<@&534925628680437783>'))
@@ -584,11 +798,8 @@ client.on('message', message =>
             message.member.roles.add('534925628680437783');
 
             var roleUpdate = `${message.member.displayName} **added role** - @lfg`;
-
-            hahaLOG.send(roleUpdate, {
-                username: `${message.guild.members.cache.find(m => m.id == message.member.id).displayName} - ${message.author.tag} - ${message.member.id}`,
-                avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
-            });
+                
+            sendLog(roleUpdate, user, message.guild);
         }
     }
 
@@ -600,11 +811,8 @@ client.on('message', message =>
             message.member.roles.add('539645535754256387');
 
             var roleUpdate = `${message.member.displayName} **added role** - @comp`;
-
-            hahaLOG.send(roleUpdate, {
-                username: `${message.guild.members.cache.find(m => m.id == message.member.id).displayName} - ${message.author.tag} - ${message.member.id}`,
-                avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
-            });
+                
+            sendLog(roleUpdate, user, message.guild);
         }
     }
 
@@ -632,15 +840,13 @@ client.on('message', message =>
     {
         if (message.guild.id === '534915212760055819')
         {
-            if (sender.tag != 'ando#0404')
+            if (user.tag != 'ando#0404')
             {
                 message.delete();
-                message.channel.send('**No Discord invite links allowed**').then(msg => msg.delete({ timeout: 10000 }));
 
-                hahaLOG.send(msg, {
-                    username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
-                    avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
-                });
+                message.channel.send('**No Discord invite links allowed**').then(msg => msg.delete({ timeout: 10000 }));
+                
+                sendLog(msg, message.author, message.guild);
             }
         }
     }
@@ -657,7 +863,7 @@ client.on('message', message =>
 
     if (msg === 'thanks son')
     {
-        if (sender.tag === 'ando#0404')
+        if (user.tag === 'ando#0404')
         {
             message.channel.send('thanks dad');
         } 
@@ -665,11 +871,8 @@ client.on('message', message =>
         {
             message.channel.send('im calling the police');
         }
-
-        hahaLOG.send(msg, {
-            username: `${message.member.displayName} - ${message.author.tag} - ${message.author.id}`,
-            avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
-        });
+        
+        sendLog(msg, user, message.guild);
     }
 
     if (msg === 'b')

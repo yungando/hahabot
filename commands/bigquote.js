@@ -23,7 +23,7 @@ exports.run = (client, message, args, tools) =>
     
     async function findMessage(message, quoteID)
     {
-        let channels = client.channels.cache.filter(c => c.type == 'text').array();
+        let channels = client.channels.cache.filter(c => (c.type == 'text' || c.type == 'news' )).array();
 
         for (let current of channels)
         {
