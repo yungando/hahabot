@@ -1,8 +1,14 @@
 const Discord = require('discord.js');
-const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'], restRequestTimeout: 60000 });
 
 const db = require('quick.db');
 var servers = new db.table('servers');
+
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+const ffmpeg = require("fluent-ffmpeg");
+
+const fs = require('fs');
+const fetch = require('node-fetch');
 
 const { prefix, token } = require('./config.json');
 
@@ -124,13 +130,13 @@ function sendLog(content, user, guild)
     
                 if (displayLength > 0)
                 {
-                    username = `${displayName.slice(0, (displayName.length - displayLength - 1))}… - ${user.tag} - ${user.id}`;
+                    username = `${displayName.toString().slice(0, (displayName.length - displayLength - 1))}… - ${user.tag} - ${user.id}`;
                 }
             }
         }
     }
 
-    hahaLOG.send(content.slice(0, 2000), {
+    hahaLOG.send(content.toString().slice(0, 2000), {
         username: username,
         avatarURL: displayPic
     });
@@ -139,7 +145,7 @@ function sendLog(content, user, guild)
 client.once('ready', () => 
 {
     console.log('Ready!');
-    sendLog('hahabot ready', client.user);
+    sendLog('ready', client.user);
 });
 
 const events = 
@@ -763,7 +769,7 @@ client.on('messageReactionAdd', async (reaction, user) =>
     }
 });
 
-client.on('message', message =>
+client.on('message', async (message) =>
 {
     var user = message.author;
     var msg = message.content.toLowerCase();
@@ -848,6 +854,83 @@ client.on('message', message =>
                 
                 sendLog(msg, message.author, message.guild);
             }
+        }
+    }
+
+    // Reddit Videos
+    if (msg.includes('reddit.com'))
+    {
+        message.channel.startTyping();
+
+        try
+        {
+            var words = msg.split(/ +/);
+            var redditURL;
+    
+            for (let i = 0; i < words.length; i++)
+            {
+                if (words[i].includes('reddit.com'))
+                {
+                    redditURL = `${words[i].split('?')[0]}.json`;
+                }
+            }
+    
+            var jsonReq = new XMLHttpRequest();
+            jsonReq.open("GET", redditURL, false);
+            jsonReq.send(null);
+            var jsonObject = JSON.parse(jsonReq.responseText);
+
+            if (jsonObject[0].data.children[0].data.secure_media == null) return message.channel.stopTyping();
+            
+            var videoURL = jsonObject[0].data.children[0].data.secure_media.reddit_video.fallback_url.split('?')[0];
+            var redditPostID = videoURL.split('https://v.redd.it/')[1].split('/')[0];
+            var audioURL = `https://v.redd.it/${redditPostID}/DASH_audio.mp4`;
+
+            var ffmpegCommand = new ffmpeg();
+
+            ffmpegCommand.addInput(videoURL);
+
+            fetch(audioURL)
+                .then(response =>
+                {
+                    if (response.status === 200)
+                    {
+                        ffmpegCommand.addInput(audioURL);
+                    }
+
+                    ffmpegCommand.output(`./redditvideos/${redditPostID}.mp4`)
+                        .on('err', function(err)
+                        {
+                            fs.unlink(`./redditvideos/${redditPostID}.mp4`, (fsErr) =>
+                            {
+                                if (err) throw err;
+                            });
+
+                            sendLog(err, client.user);
+                        })
+                        .on('end', function()
+                        {
+                            var attachment = new Discord.MessageAttachment(`./redditvideos/${redditPostID}.mp4`, `${redditPostID}.mp4`);
+
+                            message.channel.send({files: [attachment]})
+                                .then(() =>
+                                {
+                                    message.channel.stopTyping();
+
+                                    fs.unlink(`./redditvideos/${redditPostID}.mp4`, (err) =>
+                                    {
+                                        if (err) throw err;
+                                    });
+                                });
+                        })
+                        .run();
+                });
+        }
+        catch (e)
+        {
+            message.channel.stopTyping();
+
+            sendLog(e, client.user);
         }
     }
 
