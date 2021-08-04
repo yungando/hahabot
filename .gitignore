@@ -108,6 +108,5 @@ package-lock.json
 package.json
 config.json
 json.sqlite
-webhooks/clears.json
-webhooks/hahaDM.json
-webhooks/hahaLOG.json
+webhooks/
+redditvideos/

@@ -4,7 +4,6 @@ const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 const db = require('quick.db');
 var servers = new db.table('servers');
 
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const ffmpeg = require("fluent-ffmpeg");
 
 const fs = require('fs');
@@ -866,6 +865,7 @@ client.on('message', async (message) =>
         {
             var words = msg.split(/ +/);
             var redditURL;
+            var redditJSON;
     
             for (let i = 0; i < words.length; i++)
             {
@@ -874,57 +874,66 @@ client.on('message', async (message) =>
                     redditURL = `${words[i].split('?')[0]}.json`;
                 }
             }
-    
-            var jsonReq = new XMLHttpRequest();
-            jsonReq.open("GET", redditURL, false);
-            jsonReq.send(null);
-            var jsonObject = JSON.parse(jsonReq.responseText);
 
-            if (jsonObject[0].data.children[0].data.secure_media == null) return message.channel.stopTyping();
+            await fetch(redditURL)
+                .then(response => response.json())
+                .then(data =>
+                {
+                    redditJSON = data;
+                });
+
+            if (redditJSON[0].data.children[0].data.secure_media == null) return message.channel.stopTyping();
+            if (redditJSON[0].data.children[0].data.secure_media.reddit_video == null) return message.channel.stopTyping();
             
-            var videoURL = jsonObject[0].data.children[0].data.secure_media.reddit_video.fallback_url.split('?')[0];
+            var videoURL = redditJSON[0].data.children[0].data.secure_media.reddit_video.fallback_url.split('?')[0];
             var redditPostID = videoURL.split('https://v.redd.it/')[1].split('/')[0];
             var audioURL = `https://v.redd.it/${redditPostID}/DASH_audio.mp4`;
 
-            var ffmpegCommand = new ffmpeg();
+            var dir = './redditvideos';
 
+            if (!fs.existsSync(dir))
+            {
+                fs.mkdirSync(dir);
+            }
+
+            var ffmpegCommand = new ffmpeg();
             ffmpegCommand.addInput(videoURL);
 
-            fetch(audioURL)
+            await fetch(audioURL)
                 .then(response =>
                 {
                     if (response.status === 200)
                     {
                         ffmpegCommand.addInput(audioURL);
                     }
+                });
 
-                    ffmpegCommand.output(`./redditvideos/${redditPostID}.mp4`)
-                        .on('err', function(err)
+            ffmpegCommand.output(`${dir}/${redditPostID}.mp4`)
+                .on('err', function(err)
+                {
+                    fs.unlink(`${dir}/${redditPostID}.mp4`, (fsErr) =>
+                    {
+                        if (fsErr) throw fsErr;
+                    });
+
+                    sendLog(err, client.user);
+                })
+                .on('end', function()
+                {
+                    var attachment = new Discord.MessageAttachment(`${dir}/${redditPostID}.mp4`, `${redditPostID}.mp4`);
+
+                    message.channel.send({files: [attachment]})
+                        .then(() =>
                         {
-                            fs.unlink(`./redditvideos/${redditPostID}.mp4`, (fsErr) =>
+                            message.channel.stopTyping();
+
+                            fs.unlink(`${dir}/${redditPostID}.mp4`, (err) =>
                             {
                                 if (err) throw err;
                             });
-
-                            sendLog(err, client.user);
-                        })
-                        .on('end', function()
-                        {
-                            var attachment = new Discord.MessageAttachment(`./redditvideos/${redditPostID}.mp4`, `${redditPostID}.mp4`);
-
-                            message.channel.send({files: [attachment]})
-                                .then(() =>
-                                {
-                                    message.channel.stopTyping();
-
-                                    fs.unlink(`./redditvideos/${redditPostID}.mp4`, (err) =>
-                                    {
-                                        if (err) throw err;
-                                    });
-                                });
-                        })
-                        .run();
-                });
+                        });
+                })
+                .run();
         }
         catch (e)
         {
