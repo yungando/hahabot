@@ -103,10 +103,8 @@ dist
 # TernJS port file
 .tern-port
 
-# haha bot
-package-lock.json
-package.json
+# hahabot
 config.json
 json.sqlite
-webhooks/
+webhooks.json
 redditvideos/
