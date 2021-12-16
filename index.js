@@ -58,8 +58,8 @@ for (const file of commandFiles)
     {
         console.log('Started refreshing application commands.');
 
-        await rest.put(Routes.applicationGuildCommands(clientId, guildId),
-        //await rest.put(Routes.applicationCommands(client_id),
+        //await rest.put(Routes.applicationGuildCommands(clientId, guildId),
+        await rest.put(Routes.applicationCommands(clientId),
         {
             body: commands
         });
