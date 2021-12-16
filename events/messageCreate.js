@@ -64,13 +64,13 @@ module.exports =
         }
 
         // auto-archive game threads
-        if (message.channel.parentId == '918170682943225917')
+        if (message.channel.parentId == '785540936457125888')
         {
             clearTimeout(client.archiveTimers.get(`${message.channel.id}`));
 
             let timeout = setTimeout(function()
             {
-                message.channel.setParent('918170761313783889', { lockPermissions: true });
+                message.channel.setParent('917120901584150589', { lockPermissions: true });
             },
             (1000 * 60 * 60 * 24 * 21));
 
@@ -78,13 +78,13 @@ module.exports =
         }
     
         // un-archive game threads
-        if (message.channel.parentId == '918170761313783889')
+        if (message.channel.parentId == '917120901584150589')
         {
-            message.channel.setParent('918170682943225917', { lockPermissions: true });
+            message.channel.setParent('785540936457125888', { lockPermissions: true });
 
             let timeout = setTimeout(function()
             {
-                message.channel.setParent('918170761313783889', { lockPermissions: true });
+                message.channel.setParent('917120901584150589', { lockPermissions: true });
             },
             (1000 * 60 * 60 * 24 * 21));
 
