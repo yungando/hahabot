@@ -1,4 +1,4 @@
-const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 
 const db = require('quick.db');
 var servers = new db.table('servers');
@@ -41,7 +41,7 @@ module.exports =
                     desc.push(`• Roles: ${roles.join(' ')}`);
                 }
 
-                const notification = new Discord.MessageEmbed()
+                const notification = new MessageEmbed()
                     .setAuthor(`${member.user.tag} (${member.user.id})`, member.user.displayAvatarURL({ format: "png", dynamic: true }))
                     .setColor('#2f3136')
                     .setDescription(desc.join('\n'))

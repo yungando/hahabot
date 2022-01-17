@@ -1,4 +1,4 @@
-const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 
 const db = require('quick.db');
 var servers = new db.table('servers');
@@ -32,7 +32,7 @@ module.exports =
                                 `• Created: <t:${Math.round(member.user.createdTimestamp / 1000)}:F> (<t:${Math.round(member.user.createdTimestamp / 1000)}:R>)`,
                                 `• Joined: <t:${Math.round(member.joinedTimestamp / 1000)}:F> (<t:${Math.round(member.joinedTimestamp / 1000)}:R>)` ];
 
-                const notification = new Discord.MessageEmbed()
+                const notification = new MessageEmbed()
                     .setAuthor(`${member.user.tag} (${member.user.id})`, member.user.displayAvatarURL({ format: "png", dynamic: true }))
                     .setColor('#4cff4c')
                     .setDescription(desc.join('\n'))

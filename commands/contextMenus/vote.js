@@ -2,7 +2,7 @@ module.exports =
 {
     name: 'vote',
     type: '3',
-    execute(client, interaction)
+    async execute(client, interaction)
     {
         const message = interaction.options.getMessage('message');
 

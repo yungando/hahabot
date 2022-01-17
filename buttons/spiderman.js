@@ -1,5 +1,3 @@
-const sendLog = require("../utils/sendLog.js");
-
 module.exports =
 {
     async execute(client, interaction)

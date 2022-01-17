@@ -6,16 +6,16 @@ module.exports =
     {
        type: 3,
        name: 'input',
-       description: 'Hex colour code, Role name or \`off\`. Examples: \`#1a1a1a\`, \`MW S4\` or \`off\`',
+       description: 'Hex colour code, Role name or "off". Examples: "#1a1a1a", "MW S4" or "off"',
        required: true
     }],
-    execute(client, interaction)
+    async execute(client, interaction)
     {
         var input = interaction.options.getString('input');
 
         var member = interaction.member;
 
-        if (input == 'off')
+        if (input.toLowerCase() == 'off')
         {
             if (member.roles.highest.name.includes('vanity'))
             {
@@ -94,7 +94,7 @@ module.exports =
 
         for (var i = 0; i < memberRoles.size; i++)
         {
-            if (memberRoles.at(i).name.toLowerCase() == input)
+            if (memberRoles.at(i).name.toLowerCase() == input.toLowerCase())
             {
                 vanityRole = memberRoles.at(i);
 
@@ -129,7 +129,7 @@ module.exports =
             {
                 member.roles.highest.delete().then(r => addRole());
 
-                interaction.reply({ content: `Applied vanity role: \`#${input}\``, ephemeral: true });
+                interaction.reply({ content: `Applied vanity role: \`${vanityRole.name}\``, ephemeral: true });
 
                 return;
             }
@@ -137,7 +137,7 @@ module.exports =
             {
                 member.roles.remove(member.roles.highest).then(r => addRole());
 
-                interaction.reply({ content: `Applied vanity role: \`#${input}\``, ephemeral: true });
+                interaction.reply({ content: `Applied vanity role: \`${vanityRole.name}\``, ephemeral: true });
 
                 return;
             }
@@ -146,7 +146,7 @@ module.exports =
         {
             addRole();
 
-            interaction.reply({ content: `Applied vanity role: \`#${input}\``, ephemeral: true });
+            interaction.reply({ content: `Applied vanity role: \`${vanityRole.name}\``, ephemeral: true });
 
             return;
         }

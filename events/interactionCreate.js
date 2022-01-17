@@ -18,7 +18,6 @@ module.exports =
             }
             catch (error)
             {
-                console.log(error);
                 sendLog(client, error.toString(), client.user);
             }
             finally
@@ -41,7 +40,6 @@ module.exports =
             }
             catch (error)
             {
-                console.log(error);
                 sendLog(client, error.toString(), client.user);
             }
             finally
@@ -64,7 +62,6 @@ module.exports =
             }
             catch (error)
             {
-                console.log(error);
                 sendLog(client, error.toString(), client.user);
             }
             finally
