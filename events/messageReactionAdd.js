@@ -1,42 +1,28 @@
-const sendLog = require("../utils/sendLog.js");
+const sendLog = require('../utils/sendLog.js');
 
-module.exports = 
-{
-    async execute(client, messageReaction, user)
-    {
-        if (messageReaction.partial) await messageReaction.fetch();
-        if (user.partial) await user.fetch();
+module.exports = {
+  async execute(client, messageReaction, user) {
+    if (messageReaction.partial) await messageReaction.fetch();
+    if (user.partial) await user.fetch();
 
-        if (user.bot) return;
+    if (user.bot) return;
 
-        try
-        {
-            let message = messageReaction.message;
-            let emoji = messageReaction.emoji;
-            
-            // Upvote/Downvote system
-            if (emoji.id == '594816363722309645')
-            {    
-                let downvote = message.reactions.cache.get('594816363533565991');
-                
-                if (downvote != undefined)
-                {
-                    downvote.users.remove(user);
-                }
-            }
-            else if (emoji.id == '594816363533565991')
-            {    
-                let upvote = message.reactions.cache.get('594816363722309645');
-        
-                if (upvote != undefined)
-                {
-                    upvote.users.remove(user);
-                }
-            }
-        }
-        catch (error)
-        {
-            sendLog(client, error.toString(), client.user);
-        }
+    try {
+      const { message } = messageReaction;
+      const { emoji } = messageReaction;
+
+      // Upvote/Downvote system
+      if (emoji.id === '594816363722309645') {
+        const downvote = message.reactions.cache.get('594816363533565991');
+
+        if (downvote) downvote.users.remove(user);
+      } else if (emoji.id === '594816363533565991') {
+        const upvote = message.reactions.cache.get('594816363722309645');
+
+        if (upvote) upvote.users.remove(user);
+      }
+    } catch (error) {
+      sendLog(client, error.toString(), client.user);
     }
+  },
 };

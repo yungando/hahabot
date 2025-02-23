@@ -1,258 +1,210 @@
-const { WebhookClient, MessageActionRow, MessageButton, MessageAttachment } = require('discord.js');
+const { WebhookClient, MessageAttachment } = require('discord.js');
 
-const ffmpeg = require("fluent-ffmpeg");
-const fs = require('fs');
+const FfmpegCommand = require('fluent-ffmpeg');
+const fs = require('node:fs');
 const fetch = require('node-fetch');
+
+const { clientId, clientSecret, refreshToken } = require('../redditConfig.json');
+const Snoowrap = require('snoowrap');
 
 const { hahaDMID, hahaDMToken } = require('../webhooks.json');
 const hahaDM = new WebhookClient({ id: hahaDMID, token: hahaDMToken });
 
-const sendLog = require("../utils/sendLog.js");
-const sortCategory = require("../utils/sortCategory.js");
+const sendLog = require('../utils/sendLog.js');
+const sortCategory = require('../utils/sortCategory.js');
 
-module.exports =
-{
-    async execute(client, message)
-    {
-        if (message.partial) await message.fetch();
+const getRedditPostID = (redditURL) => {
+  const { pathname } = URL.parse(redditURL);
 
-        try
-        {
-            if (message.content == '~spiderman')
-            {
-                if (message.author.tag == 'ando#0404')
-                {
-                    const buttonRow = new MessageActionRow()
-                        .addComponents(
-                            new MessageButton()
-                                .setStyle('DANGER')
-                                .setCustomId('spiderman')
-                                .setLabel('I have seen Spiderman: No Way Home and would like access to the spoilers channel')
-                        );
-        
-                    message.channel.send({ content: 'Click at your own risk.', components: [ buttonRow ] });
-                }
+  const [postId] = pathname.split('comments/')[1].split('/');
 
-                message.delete();
-            }
+  return postId;
+};
 
-            if (message.content.includes('🦀'))
-            {
-                message.react('🦀');
-            }
-        
-            if (message.content.includes('<a:crabrave:586918323149602816>'))
-            {
-                message.react('586918323149602816');
-            }
+const getAudioURL = async (mediaId) => {
+  const bitrateArray = ['256', '128', '64'];
 
-            if (message.author.bot) return; /////////////////////////////////////////////////////
+  for (const bitrate of bitrateArray) {
+    const testUrl = await fetch(`https://v.redd.it/${mediaId}/DASH_AUDIO_${bitrate}.mp4`);
+    if (testUrl.ok) return testUrl.url;
+  }
 
-            if (message.content === 'b')
-            {
-                message.channel.send('b');
-            }
-        
-            if (message.content === 'thanks son')
-            {
-                if (message.author.tag === 'ando#0404')
-                {
-                    message.channel.send('thanks dad');
-                }
-                else
-                {
-                    message.channel.send('im calling the police');
-                }
-                
-                sendLog(client, message.content, message.author, message.guild);
-            }
+  const baseUrl = await fetch(`https://v.redd.it/${mediaId}/DASH_audio.mp4`);
+  if (baseUrl.ok) return baseUrl.url;
 
-            // auto-archive game threads
-            if (message.channel.parentId == '785540936457125888')
-            {
-                clearTimeout(client.archiveTimers.get(`${message.channel.id}`));
+  return null;
+};
 
-                let timeout = setTimeout(function()
-                {
-                    let archivedCategory = message.guild.channels.cache.find(channel => channel.id === '917120901584150589');
+module.exports = {
+  async execute(client, message) {
+    if (message.partial) await message.fetch();
 
-                    message.channel.setParent(archivedCategory, { lockPermissions: true })
-                        .then(() =>
-                        {
-                            sortCategory(archivedCategory);
-                        });
-                },
-                (1000 * 60 * 60 * 24 * 21));
+    try {
+      if (message.content.includes('🦀')) {
+        message.react('🦀');
+      }
 
-                client.archiveTimers.set(`${message.channel.id}`, timeout);
-            }
-        
-            // un-archive game threads
-            if (message.channel.parentId == '917120901584150589')
-            {
-                let gamesCategory = message.guild.channels.cache.find(channel => channel.id === '785540936457125888');
+      if (message.content.includes('<a:crabrave:586918323149602816>')) {
+        message.react('586918323149602816');
+      }
 
-                message.channel.setParent(gamesCategory, { lockPermissions: true })
-                    .then(() =>
-                    {
-                        sortCategory(gamesCategory);
-                    });
+      if (message.author.bot) return; // ///////////////////////////////////////////////////
 
-                let timeout = setTimeout(function()
-                {
-                    let archivedCategory = message.guild.channels.cache.find(channel => channel.id === '917120901584150589');
+      if (message.content === 'b') {
+        message.channel.send('b');
+      }
 
-                    message.channel.setParent(archivedCategory, { lockPermissions: true })
-                        .then(() =>
-                        {
-                            sortCategory(archivedCategory);
-                        });
-                },
-                (1000 * 60 * 60 * 24 * 21));
-
-                client.archiveTimers.set(`${message.channel.id}`, timeout);
-            }
-
-            // dm webhook
-            if (message.channel.type == 'DM')
-            {
-                var messageContent = message.content;
-
-                if (messageContent == '')
-                {
-                    messageContent = ' ';
-                }
-
-                if (message.attachments.size > 0)
-                {
-                    hahaDM.send({
-                        content: messageContent,
-                        username: `${message.author.tag} - ${message.author.id}`,
-                        avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true }),
-                        files: message.attachments
-                    });
-                }
-                else
-                {
-                    hahaDM.send({
-                        content: messageContent,
-                        username: `${message.author.tag} - ${message.author.id}`,
-                        avatarURL: message.author.displayAvatarURL({ format: "png", dynamic: true })
-                    });
-                }
-            }
-
-            // Reddit Videos
-            if (message.content.includes('reddit.com'))
-            {
-                message.channel.sendTyping();
-
-                try
-                {
-                    var words = message.content.split(/ +/);
-                    var redditURL;
-                    var redditJSON;
-            
-                    for (let i = 0; i < words.length; i++)
-                    {
-                        if (words[i].includes('reddit.com'))
-                        {
-                            redditURL = `${words[i].split('?')[0]}.json`;
-                        }
-                    }
-
-                    await fetch(redditURL)
-                        .then(response => response.json())
-                        .then(data =>
-                        {
-                            redditJSON = data;
-                        });
-
-                    if (redditJSON[0].data.children[0].data.secure_media == null || redditJSON[0].data.children[0].data.secure_media.reddit_video == null)
-                    {
-                        if (redditJSON[0].data.children[0].data.url)
-                        {
-                            if (redditJSON[0].data.children[0].data.domain == 'gfycat.com')
-                            {
-                                if (message.channel.type == 'GUILD_TEXT') message.suppressEmbeds(true);
-    
-                                message.reply(`${redditJSON[0].data.children[0].data.url}`);
-                            }
-
-                            if (redditJSON[0].data.children[0].data.domain == 'imgur.com')
-                            {
-                                if (message.channel.type == 'GUILD_TEXT') message.suppressEmbeds(true);
-
-                                var videoURLArray = redditJSON[0].data.children[0].data.url.split('.');
-
-                                videoURLArray.pop();
-    
-                                message.reply(`${videoURLArray.join('.')}.mp4`);
-                            }
-                        }
-
-                        return;
-                    }
-                    
-                    var videoURL = redditJSON[0].data.children[0].data.secure_media.reddit_video.fallback_url.split('?')[0];
-                    var redditPostID = videoURL.split('https://v.redd.it/')[1].split('/')[0];
-                    var audioURL = `https://v.redd.it/${redditPostID}/DASH_audio.mp4`;
-
-                    var dir = './redditvideos';
-
-                    if (!fs.existsSync(dir))
-                    {
-                        fs.mkdirSync(dir);
-                    }
-
-                    var ffmpegCommand = new ffmpeg();
-                    ffmpegCommand.addInput(videoURL);
-
-                    await fetch(audioURL)
-                        .then(response =>
-                        {
-                            if (response.status === 200)
-                            {
-                                ffmpegCommand.addInput(audioURL);
-                            }
-                        });
-
-                    ffmpegCommand.output(`${dir}/${redditPostID}.mp4`)
-                        .on('err', function(err)
-                        {
-                            fs.unlink(`${dir}/${redditPostID}.mp4`, (fsErr) =>
-                            {
-                                if (fsErr) throw fsErr;
-                            });
-
-                            sendLog(client, err, client.user);
-                        })
-                        .on('end', function()
-                        {
-                            var attachment = new MessageAttachment(`${dir}/${redditPostID}.mp4`, `${redditPostID}.mp4`);
-
-                            message.reply({ files: [attachment] })
-                                .then(() =>
-                                {
-                                    if (message.channel.type == 'GUILD_TEXT') message.suppressEmbeds(true);
-
-                                    fs.unlink(`${dir}/${redditPostID}.mp4`, (err) =>
-                                    {
-                                        if (err) throw err;
-                                    });
-                                });
-                        })
-                        .run();
-                }
-                catch (error)
-                {
-                    sendLog(client, error, client.user);
-                }
-            }
+      if (message.content === 'thanks son') {
+        if (message.author.tag === 'ando#0404') {
+          message.channel.send('thanks dad');
+        } else {
+          message.channel.send('im calling the police');
         }
-        catch (error)
-        {
-            sendLog(client, error.toString(), client.user);
+
+        sendLog(client, message.content, message.author, message.guild);
+      }
+
+      // auto-archive game threads
+      if (message.channel.parentId === '785540936457125888') {
+        clearTimeout(client.archiveTimers.get(`${message.channel.id}`));
+
+        const timeout = setTimeout(
+          () => {
+            const archivedCategory = message.guild.channels.cache.find((channel) => channel.id === '917120901584150589');
+
+            message.channel.setParent(archivedCategory, { lockPermissions: true })
+              .then(() => {
+                sortCategory(archivedCategory);
+              });
+          },
+          (1000 * 60 * 60 * 24 * 21),
+        );
+
+        client.archiveTimers.set(`${message.channel.id}`, timeout);
+      }
+
+      // un-archive game threads
+      if (message.channel.parentId === '917120901584150589') {
+        const gamesCategory = message.guild.channels.cache.find((channel) => channel.id === '785540936457125888');
+
+        message.channel.setParent(gamesCategory, { lockPermissions: true })
+          .then(() => {
+            sortCategory(gamesCategory);
+          });
+
+        const timeout = setTimeout(
+          () => {
+            const archivedCategory = message.guild.channels.cache.find((channel) => channel.id === '917120901584150589');
+
+            message.channel.setParent(archivedCategory, { lockPermissions: true })
+              .then(() => {
+                sortCategory(archivedCategory);
+              });
+          },
+          (1000 * 60 * 60 * 24 * 21),
+        );
+
+        client.archiveTimers.set(`${message.channel.id}`, timeout);
+      }
+
+      // dm webhook
+      if (message.channel.type === 'DM') {
+        let messageContent = message.content;
+
+        if (messageContent === '') {
+          messageContent = ' ';
         }
+
+        if (message.attachments.size > 0) {
+          hahaDM.send({
+            content: messageContent,
+            username: `${message.author.tag} - ${message.author.id}`,
+            avatarURL: message.author.displayAvatarURL({ format: 'png', dynamic: true }),
+            files: message.attachments,
+          });
+        } else {
+          hahaDM.send({
+            content: messageContent,
+            username: `${message.author.tag} - ${message.author.id}`,
+            avatarURL: message.author.displayAvatarURL({ format: 'png', dynamic: true }),
+          });
+        }
+      }
+
+      // Reddit Videos
+      if (message.content.includes('reddit.com')) {
+        message.channel.sendTyping();
+
+        try {
+          const reddit = new Snoowrap({
+            userAgent: 'hahabot by u/couldie',
+            clientId,
+            clientSecret,
+            refreshToken,
+          });
+
+          const words = message.content.split(/ +/);
+          const redditPostId = getRedditPostID(words.find((word) => word.includes('reddit.com')));
+
+          const redditPostData = (await reddit.getSubmission(redditPostId).fetch()).toJSON();
+
+          if (!redditPostData.is_video) return;
+
+          if (!redditPostData.secure_media?.reddit_video) {
+            if (redditPostData.url) {
+              if (redditPostData.domain === 'imgur.com') {
+                if (message.channel.type === 'GUILD_TEXT') message.suppressEmbeds(true);
+
+                const videoURLArray = redditPostData.url.split('.');
+
+                videoURLArray.pop();
+
+                message.reply(`${videoURLArray.join('.')}.mp4`);
+              }
+            }
+            return;
+          }
+
+          const [videoURL] = redditPostData.secure_media.reddit_video.fallback_url.split('?');
+          const [mediaId] = videoURL.split('https://v.redd.it/')[1].split('/');
+
+          const dir = './redditvideos';
+
+          if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+
+          const ffmpegCommand = new FfmpegCommand();
+          ffmpegCommand.addInput(videoURL);
+
+          const audioURL = await getAudioURL(mediaId);
+          if (audioURL) ffmpegCommand.addInput(audioURL);
+
+          ffmpegCommand.output(`${dir}/${mediaId}.mp4`)
+            .on('err', (err) => {
+              fs.unlink(`${dir}/${mediaId}.mp4`, (fsErr) => {
+                if (fsErr) throw fsErr;
+              });
+
+              sendLog(client, err, client.user);
+            })
+            .on('end', () => {
+              const attachment = new MessageAttachment(`${dir}/${mediaId}.mp4`, `${mediaId}.mp4`);
+
+              message.reply({ files: [attachment] })
+                .then(() => {
+                  if (message.channel.type === 'GUILD_TEXT') message.suppressEmbeds(true);
+
+                  fs.unlink(`${dir}/${mediaId}.mp4`, (err) => {
+                    if (err) throw err;
+                  });
+                });
+            })
+            .run();
+        } catch (error) {
+          sendLog(client, error, client.user);
+        }
+      }
+    } catch (error) {
+      sendLog(client, error.toString(), client.user);
     }
+  },
 };

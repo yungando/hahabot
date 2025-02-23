@@ -108,3 +108,4 @@ config.json
 json.sqlite
 webhooks.json
 redditvideos/
+redditConfig.json
