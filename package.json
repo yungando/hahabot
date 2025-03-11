@@ -22,5 +22,9 @@
   "devDependencies": {
     "eslint": "^9.21.0",
     "eslint-config-eslint": "^11.0.0"
+  },
+  "engines": {
+    "node": ">=22.13.1",
+    "npm": ">=10.9.2"
   }
 }
