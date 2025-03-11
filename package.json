@@ -13,8 +13,8 @@
     "snoowrap": "^1.23.0"
   },
   "scripts": {
-    "start": "npx pm2 start hahabot.json",
-    "stop": "npx pm2 stop hahabot",
+    "start": "npx pm2 start hahabot.config.js",
+    "stop": "npx pm2 stop hahabot.config.js",
     "dev": "node index.js"
   },
   "author": "yungando",
