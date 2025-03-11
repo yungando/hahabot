@@ -109,3 +109,5 @@ json.sqlite
 webhooks.json
 redditvideos/
 redditConfig.json
+.DS_Store
+.vscode/

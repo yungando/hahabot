@@ -1,11 +1,10 @@
 {
   "script": "index.js",
   "watch": [
-    "buttons",
     "events",
     "utils",
     "commands",
-    "webhooks.json",
+    "*.json",
     "index.js"
   ],
   "watch_options": {
@@ -13,7 +12,7 @@
   },
   "name": "hahabot",
   "log_date_format": "DD-MM HH:mm",
-  "error_file": "hahaERR.log",
-  "out_file": "hahaOUT.log",
+  "error_file": "hahabot_error.log",
+  "out_file": "hahabot_out.log",
   "node_args": "--trace-warnings"
 }

@@ -1,25 +1,30 @@
+const { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags } = require('discord.js');
+
 module.exports = {
   name: 'bird',
   description: 'would a bot send you this',
+  type: ApplicationCommandType.ChatInput,
   options: [{
-    type: 6,
     name: 'user',
     description: 'who\'s getting birded',
+    type: ApplicationCommandOptionType.User,
     required: true,
   }],
-  default_permission: false,
-  permissions: [{
-    id: '269555580425863168',
-    type: 2,
-    permission: true,
-  }],
+  default_member_permissions: '0',
+  guilds: [
+    '534915212760055819',
+    '568227296767639552',
+    '358046343803174912',
+  ],
   async execute(client, interaction) {
+    console.log({ interaction });
+
     const dmUser = interaction.options.getUser('user');
 
     const bird = '＜￣｀ヽ、　　　　　　　／￣>\n　ゝ、　　＼　／⌒ヽ,ノ 　/´\n　　　ゝ、　`（ ( ͡° ͜ʖ ͡°) ／\n　　 　　>　 　 　,ノ\n　　　　　∠_,,,/´”\nWould a bot send you that\n?';
 
     dmUser.send(bird);
 
-    interaction.reply({ content: '( ͡° ͜ʖ ͡°)', ephemeral: true });
+    return interaction.reply({ content: '( ͡° ͜ʖ ͡°)', flags: MessageFlags.Ephemeral });
   },
 };

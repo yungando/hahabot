@@ -1,6 +1,6 @@
-const { MessageEmbed } = require('discord.js');
-const { QuickDB } = require('quick.db');
+const { EmbedBuilder } = require('discord.js');
 
+const { QuickDB } = require('quick.db');
 const db = new QuickDB();
 const servers = db.table('servers');
 
@@ -11,13 +11,13 @@ module.exports = {
     if (member.partial) await member.fetch();
 
     try {
-      const channelId = servers.get(`${member.guild.id}.joinMessagesID`);
+      const channelId = await servers.get(`${member.guild.id}.joinMessagesID`);
 
       if (channelId !== null) {
         const joinMessages = member.guild.channels.cache.find((c) => c.id === channelId);
 
         if (joinMessages === null) {
-          servers.delete(`${member.guild.id}.joinMessagesID`);
+          await servers.delete(`${member.guild.id}.joinMessagesID`);
 
           return;
         }
@@ -27,11 +27,10 @@ module.exports = {
         const desc = [
           `• Profile: <@${member.user.id}>`,
           `• Created: <t:${Math.round(member.user.createdTimestamp / 1000)}:F> (<t:${Math.round(member.user.createdTimestamp / 1000)}:R>)`,
-          `• Joined: <t:${Math.round(member.joinedTimestamp / 1000)}:F> (<t:${Math.round(member.joinedTimestamp / 1000)}:R>)`,
-        ];
+          `• Joined: <t:${Math.round(member.joinedTimestamp / 1000)}:F> (<t:${Math.round(member.joinedTimestamp / 1000)}:R>)`];
 
-        const notification = new MessageEmbed()
-          .setAuthor(`${member.user.tag} (${member.user.id})`, member.user.displayAvatarURL({ format: 'png', dynamic: true }))
+        const notification = new EmbedBuilder()
+          .setAuthor(`${member.user.username} (${member.user.id})`, member.user.displayAvatarURL({ extension: 'png' }))
           .setColor('#4cff4c')
           .setDescription(desc.join('\n'))
           .setFooter('User joined')

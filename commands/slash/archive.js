@@ -1,34 +1,34 @@
-const sortCategory = require('../../utils/sortCategory.js');
+const { ApplicationCommandType, MessageFlags, InteractionContextType } = require('discord.js');
+
+const { sortCategory } = require('../../utils/archives.js');
 
 module.exports = {
   name: 'archive',
   description: 'Archive this channel.',
-  default_permission: false,
-  permissions: [{
-    id: '269555580425863168',
-    type: 2,
-    permission: true,
-  }],
+  type: ApplicationCommandType.ChatInput,
+  default_member_permissions: '0',
+  guilds: [
+    '534915212760055819',
+  ],
+  contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
-    if (interaction.guild.id !== '534915212760055819') return interaction.reply({ content: 'Can\t do that in this server.', ephemeral: true });
-
-    const { channel: channelToArchive } = interaction;
-    const gamesCategory = interaction.guild.channels.cache.find((channel) => channel.id === '785540936457125888');
-    const archivedCategory = interaction.guild.channels.cache.find((channel) => channel.id === '917120901584150589');
-    const retiredCategory = interaction.guild.channels.cache.find((channel) => channel.id === '562373109555134496');
+    const { channel_id: channelToArchive } = interaction;
+    const gamesCategory = interaction.guild.channels.cache.find((c) => c.id === '785540936457125888');
+    const archivedCategory = interaction.guild.channels.cache.find((c) => c.id === '917120901584150589');
+    const retiredCategory = interaction.guild.channels.cache.find((c) => c.id === '562373109555134496');
 
     if (channelToArchive.parent === gamesCategory) {
       clearTimeout(client.archiveTimers.get(`${channelToArchive.id}`));
 
-      channelToArchive.setParent(archivedCategory, { lockPermissions: true })
-        .then(() => {
-          sortCategory(archivedCategory);
-        });
+      await channelToArchive.setParent(archivedCategory, { lockPermissions: true });
 
-      return interaction.reply({ content: `Moved <#${channelToArchive.id}> to \`#${archivedCategory.name}\``, ephemeral: true });
+      sortCategory(archivedCategory);
+
+      interaction.reply({ content: `Moved <#${channelToArchive.id}> to \`#${archivedCategory.name}\``, flags: MessageFlags.Ephemeral });
+    } else {
+      channelToArchive.setParent(retiredCategory, { lockPermissions: true });
+
+      interaction.reply({ content: `Moved <#${channelToArchive.id}> to \`#${retiredCategory.name}\``, flags: MessageFlags.Ephemeral });
     }
-    channelToArchive.setParent(retiredCategory, { lockPermissions: true });
-
-    return interaction.reply({ content: `Moved <#${channelToArchive.id}> to \`#${retiredCategory.name}\``, ephemeral: true });
   },
 };

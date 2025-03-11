@@ -8,8 +8,7 @@ module.exports = {
     if (user.bot) return;
 
     try {
-      const { message } = messageReaction;
-      const { emoji } = messageReaction;
+      const { message, emoji } = messageReaction;
 
       // Upvote/Downvote system
       if (emoji.id === '594816363722309645') {
