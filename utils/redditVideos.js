@@ -1,4 +1,4 @@
-const { AttachmentBuilder, ChannelType, MessageFlags } = require('discord.js');
+const { AttachmentBuilder, ChannelType } = require('discord.js');
 
 const FfmpegCommand = require('fluent-ffmpeg');
 const fs = require('node:fs');
