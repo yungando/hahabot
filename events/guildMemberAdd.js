@@ -14,7 +14,7 @@ module.exports = {
       const channelId = await servers.get(`${member.guild.id}.joinMessagesID`);
 
       if (channelId !== null) {
-        const joinMessages = member.guild.channels.cache.find((c) => c.id === channelId);
+        const joinMessages = await member.guild.channels.fetch(channelId);
 
         if (joinMessages === null) {
           await servers.delete(`${member.guild.id}.joinMessagesID`);

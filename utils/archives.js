@@ -3,10 +3,11 @@ const sendLog = require('./sendLog.js');
 const threeWeeksInMs = 1000 * 60 * 60 * 24 * 21;
 
 const sortCategory = async (channelCategory) => {
-  const sortedCategory = channelCategory.children.sort((a, b) => a.name.localeCompare(b.name));
+  // eslint-disable-next-line max-len
+  const sortedCategory = channelCategory.children.cache.sorted((a, b) => a.name.localeCompare(b.name));
   const categoryPositions = [];
 
-  for (let i = 0; i < sortedCategory.size; i + 1) {
+  for (let i = 0; i < sortedCategory.size; i += 1) {
     categoryPositions.push({ channel: sortedCategory.at(i).id, position: i });
   }
 
@@ -14,8 +15,8 @@ const sortCategory = async (channelCategory) => {
 };
 
 const scheduleArchive = async (client, channelToArchive, timeElapsed = 0) => {
-  const pollo = client.guilds.cache.find((guild) => guild.id === '534915212760055819');
-  const archivedCategory = pollo.channels.cache.find((channel) => channel.id === '917120901584150589');
+  const pollo = await client.guilds.fetch('534915212760055819');
+  const archivedCategory = await pollo.channels.fetch('917120901584150589');
 
   clearTimeout(client.archiveTimers.get(`${channelToArchive.id}`));
 
@@ -34,7 +35,7 @@ const scheduleArchive = async (client, channelToArchive, timeElapsed = 0) => {
 };
 
 const restoreChannel = async (client, channelToRestore) => {
-  const gamesCategory = channelToRestore.guild.channels.cache.filter((channel) => (channel.parentId === '785540936457125888'));
+  const gamesCategory = await channelToRestore.guild.channels.fetch('785540936457125888');
 
   await channelToRestore.setParent(gamesCategory, { lockPermissions: true });
 
@@ -46,9 +47,9 @@ const restoreChannel = async (client, channelToRestore) => {
 };
 
 const initArchives = async (client) => {
-  const pollo = client.guilds.cache.find((g) => g.id === '534915212760055819');
-  const gamesCategory = pollo.channels.cache.filter((channel) => channel.parentId === '785540936457125888');
-  const archivedCategory = pollo.channels.cache.find((channel) => channel.id === '917120901584150589');
+  const pollo = await client.guilds.fetch('534915212760055819');
+  const gamesCategory = await pollo.channels.cache.filter((channel) => channel.parentId === '785540936457125888');
+  const archivedCategory = await pollo.channels.fetch('917120901584150589');
 
   const nowTimestamp = Date.now();
 

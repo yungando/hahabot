@@ -10,13 +10,16 @@ module.exports = {
     try {
       const { message, emoji } = messageReaction;
 
+      const upvoteId = '594816363722309645';
+      const downvoteId = '594816363722309645';
+
       // Upvote/Downvote system
-      if (emoji.id === '594816363722309645') {
-        const downvote = message.reactions.cache.get('594816363533565991');
+      if (emoji.id === upvoteId) {
+        const downvote = message.reactions.cache.get(downvoteId);
 
         if (downvote) downvote.users.remove(user);
-      } else if (emoji.id === '594816363533565991') {
-        const upvote = message.reactions.cache.get('594816363722309645');
+      } else if (emoji.id === downvoteId) {
+        const upvote = message.reactions.cache.get(upvoteId);
 
         if (upvote) upvote.users.remove(user);
       }

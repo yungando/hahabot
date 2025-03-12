@@ -24,16 +24,6 @@ const clearCommands = async (client) => {
   try {
     console.log('Starting clearing old commands.');
 
-    // const clientId = client.application.id;
-    // await rest.put(Routes.applicationCommands(clientId), { body: [] });
-
-    // const guilds = client.guilds.cache;
-
-    // for (const guild of guilds) {
-    //   const [guildId] = guild;
-    //   await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: [] });
-    // }
-
     client.commands.clear();
     client.contextMenus.clear();
     // eslint-disable-next-line no-param-reassign

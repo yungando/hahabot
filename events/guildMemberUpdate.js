@@ -5,12 +5,16 @@ module.exports = {
     if (oldMember.partial) await oldMember.fetch();
     if (newMember.partial) await newMember.fetch();
 
+    const polloId = '534915212760055819';
+    const nitroRoleId = '585548115243696170';
+
     try {
       const { guild } = oldMember;
 
-      if (guild.id !== '534915212760055819') return; // pollo
+      if (guild.id !== polloId) return; // pollo
 
-      if (oldMember.roles.cache.some((role) => role.id === '585548115243696170') && !newMember.roles.cache.some((role) => role.id === '585548115243696170')) {
+      // eslint-disable-next-line max-len
+      if (oldMember.roles.cache.some((role) => role.id === nitroRoleId) && !newMember.roles.cache.some((role) => role.id === nitroRoleId)) {
         guild.systemChannel.send(`<@${newMember.id}> unboosted the server.`);
       }
     } catch (error) {

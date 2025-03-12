@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const { hahaLOGID, hahaLOGToken } = require('../webhooks.json');
 const hahaLOG = new Discord.WebhookClient({ id: hahaLOGID, token: hahaLOGToken });
 
-const sendLog = (client, content, user, guild) => {
+const sendLog = async (client, content, user, guild) => {
   let username = `${user.username} - ${user.id}`;
   const displayPic = user.displayAvatarURL({ extension: 'png' });
 
@@ -13,7 +13,7 @@ const sendLog = (client, content, user, guild) => {
 
   if (guild) {
     if (guild.members.cache.has((m) => m.id === user.id)) {
-      const member = guild.members.cache.find(() => member.id === user.id);
+      const member = await guild.members.fetch(user.id);
 
       if (member.nickname) {
         const displayName = member.nickname;

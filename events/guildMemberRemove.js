@@ -14,7 +14,7 @@ module.exports = {
       const channelId = await servers.get(`${member.guild.id}.leaveMessagesID`);
 
       if (channelId !== null) {
-        const leaveMessages = member.guild.channels.cache.find((c) => c.id === channelId);
+        const leaveMessages = await member.guild.channels.fetch(channelId);
 
         if (leaveMessages === null) {
           await servers.delete(`${member.guild.id}.leaveMessagesID`);
@@ -29,12 +29,14 @@ module.exports = {
           `• Joined: <t:${Math.round(member.joinedTimestamp / 1000)}:F> (<t:${Math.round(member.joinedTimestamp / 1000)}:R>)`,
           `• Left: <t:${Math.round(now.getTime() / 1000)}:F> (<t:${Math.round(now.getTime() / 1000)}:R>)`];
 
-        const roles = [];
+        const sortedMemberRoles = member.roles.cache.sorted((roleA, roleB) => (
+          roleB.rawPosition - roleA.rawPosition
+        ));
 
-        member.roles.cache.sort((roleA, roleB) => (roleB.rawPosition - roleA.rawPosition).filter((role) => role.name !== '@everyone').each((role) => roles.push(`<@&${role.id}>`)));
+        const roleTagArray = sortedMemberRoles.filter((role) => role.name !== '@everyone').map((role) => `<@&${role.id}>`);
 
-        if (roles.length !== 0) {
-          desc.push(`• Roles: ${roles.join(' ')}`);
+        if (roleTagArray.length !== 0) {
+          desc.push(`• Roles: ${roleTagArray.join(' ')}`);
         }
 
         const notification = new EmbedBuilder()

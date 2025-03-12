@@ -21,7 +21,7 @@ const client = new Client(
       Partials.Channel,
       Partials.GuildMember,
       Partials.Message,
-      Partials.Message,
+      Partials.Reaction,
     ],
     restRequestTimeout: 60000,
   },
