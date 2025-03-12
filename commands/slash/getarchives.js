@@ -15,28 +15,30 @@ module.exports = {
     try {
       const hahabot = client.user;
 
+      const nowTimestamp = Date.now();
+
       const { archiveTimers } = client;
       const timerArray = [];
 
-      for (const [key, value] of archiveTimers) {
-        timerArray.push({ channelId: key, timeout: value });
+      for (const [channelId, timeout] of archiveTimers) {
+        const { name: channelName } = await interaction.guild.channels.fetch(channelId);
+        timerArray.push({ channelName, channelId, timeout });
       }
 
-      const sortTimerArray = timerArray.sort(async (a, b) => {
-        const { name: channelNameA } = await interaction.guild.channels.cache.get(a.channelId);
-        const { name: channelNameB } = await interaction.guild.channels.cache.get(b.channelId);
+      const sortedTimerArray = timerArray.toSorted((a, b) => {
+        const compared = a.channelName.localeCompare(b.channelName);
 
-        return channelNameA.localeCompare(channelNameB);
+        return compared;
       });
 
       const channelIdArray = [];
       const timeLeftArray = [];
 
-      for (const { channelId, timeout } of sortTimerArray) {
+      for (const { channelId, timeout } of sortedTimerArray) {
         // eslint-disable-next-line max-len
-        const archivesOn = Math.ceil((timeout._idleStart + timeout._idleTimeout + Date.now()) / 1000);
-        timeLeftArray.push(`<t:${archivesOn}:R>`);
+        const archivesOn = Math.ceil((timeout._idleStart + timeout._idleTimeout + nowTimestamp) / 1000);
         channelIdArray.push(`<#${channelId}>`);
+        timeLeftArray.push(`<t:${archivesOn}:R>`);
       }
 
       const archivesEmbed = new EmbedBuilder()
