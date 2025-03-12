@@ -2,51 +2,40 @@ const {
   ApplicationCommandOptionType, ApplicationCommandType, MessageFlags, InteractionContextType,
 } = require('discord.js');
 
-// async function addRole(member, vanityRole) {
-//   if (member.roles.highest !== vanityRole) {
-//     if (member.guild.roles.cache.some((r) => r.name === `${vanityRole.name} - vanity`)) {
-//       member.roles.add(member.guild.roles.cache.find((r) => r.name === `${vanityRole.name} - vanity`).id);
-//     } else {
-//       const newRole = await member.guild.roles.create(
-//         {
-//           name: `${vanityRole.name} - vanity`,
-//           color: `${vanityRole.hexColor}`,
-//           position: member.guild.roles.cache.find((r) => r.name === 'haha').position,
-//           permissions: [],
-//         },
-//       );
+const createNewRole = async (name, colour, guild) => {
+  const hahaRole = await guild.members.me.roles.botRole;
+  const newRole = await guild.roles.create(
+    {
+      name: `${name} - vanity`,
+      color: `${colour}`,
+      position: hahaRole.position,
+      permissions: [],
+    },
+  );
+  return newRole;
+};
 
-//       member.roles.add(newRole);
-//     }
-//   }
-// }
+const getVanityRole = async (member, vanityRoleName, vanityRoleColour = vanityRoleName) => {
+  const matchingRole = await member.guild.roles.cache.find((role) => role.name === `${vanityRoleName} - vanity`);
+  if (matchingRole) return matchingRole;
 
-// async function addHexRole(member, input) {
-//   if (member.guild.roles.cache.some((r) => r.name === `#${input} - vanity`)) {
-//     member.roles.add(member.guild.roles.cache.find((r) => r.name === `#${input} - vanity`).id);
-//   } else {
-//     const newRole = await member.guild.roles.create(
-//       {
-//         name: `#${input} - vanity`,
-//         color: `${input}`,
-//         position: member.guild.roles.cache.find((r) => r.name === 'haha').position,
-//         permissions: [],
-//       },
-//     );
+  const newRole = await createNewRole(vanityRoleName, vanityRoleColour, member.guild);
+  return newRole;
+};
 
-//     member.roles.add(newRole);
-//   }
-// }
+const handleRemoveRole = async (member) => {
+  const memberRoleToRemove = await member.roles.cache.find((role) => role.name.includes('vanity'));
 
-// async function removeVanityRole(memberRoles) {
-//   const memberRoleToRemove = memberRoles.find((role) => role.name.includes('vanity'));
+  if (!memberRoleToRemove) return;
 
-//   if (memberRoleToRemove.members.size < 2) {
-//     await memberRoles.delete(memberRoleToRemove);
-//   } else {
-//     await memberRoles.remove(memberRoleToRemove);
-//   }
-// }
+  await member.guild.members.fetch();
+
+  if (memberRoleToRemove.members.size < 2) {
+    await member.guild.roles.delete(memberRoleToRemove);
+  } else {
+    await member.roles.remove(memberRoleToRemove);
+  }
+};
 
 module.exports = {
   name: 'transmog',
@@ -79,61 +68,56 @@ module.exports = {
   }],
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
-    // const input = interaction.options.getString('input');
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    // const { member } = interaction;
-    // const memberRoles = member.roles.cache;
+    const { member } = interaction;
+    const subcommand = await interaction.options.getSubcommand();
 
-    // if (input.toLowerCase() === 'off') {
-    //   removeVanityRole(memberRoles);
+    switch (subcommand) {
+      case 'off': {
+        await handleRemoveRole(member);
+        return interaction.editReply({ content: 'Transmog disabled.', flags: MessageFlags.Ephemeral });
+      }
+      case 'hex': {
+        const input = await interaction.options.getString('input').toUpperCase();
+        const hexInput = input.startsWith('#') ? input.slice(1) : input;
 
-    //   return interaction.reply({ content: 'Transmog disabled.', flags: MessageFlags.Ephemeral });
-    // }
+        const hexRegex = /^[0-9A-F]{6}$/i;
 
-    // if (input.startsWith('#')) {
-    //   const hexReg = /^[0-9A-F]{6}$/i;
+        if (!hexRegex.test(hexInput)) return interaction.editReply({ content: 'Invalid hex colour code.', flags: MessageFlags.Ephemeral });
 
-    //   const hexInput = input.slice(1).toUpperCase();
+        await handleRemoveRole(member);
+        const vanityRole = await getVanityRole(member, `#${hexInput}`);
 
-    //   if (hexReg.test(`${hexInput}`)) {
-    //     removeVanityRole(memberRoles);
+        await member.roles.add(vanityRole);
 
-    //     addHexRole(member, hexInput);
+        return interaction.editReply({ content: `Applied vanity role: <@&${vanityRole.id}>`, flags: MessageFlags.Ephemeral });
+      }
+      case 'role': {
+        const selectedRole = await interaction.options.getRole('role');
 
-    //     return interaction.reply({ content: `Applied vanity colour: \`#${hexInput}\``, flags: MessageFlags.Ephemeral });
-    //   }
-    // }
+        if (!member.roles.cache.some((role) => role.name === selectedRole.name)) {
+          return interaction.editReply({ content: 'You can only transmog roles you you have acquired. Please select a different role.', flags: MessageFlags.Ephemeral });
+        }
 
-    // const vanityRole = memberRoles.find((role) => role.name.toLowerCase() === input.toLowerCase());
+        if (selectedRole.hexColor === '#000000') {
+          return interaction.editReply({ content: 'You cannot transmog roles with the default colour. Please select a different role.', flags: MessageFlags.Ephemeral });
+        }
 
-    // if (!vanityRole) return interaction.reply({ content: 'Could not find role by that name on your profile.', flags: MessageFlags.Ephemeral });
+        if (member.roles.highest === selectedRole || member.roles.highest.name === `${selectedRole.name} - vanity`) {
+          return interaction.editReply({ content: 'You cannot transmog your existing highest role. Please select a different role.', flags: MessageFlags.Ephemeral });
+        }
 
-    // if (vanityRole.hexColor === '#000000') return interaction.reply({ content: 'You cannot transmog roles with the default colour,', flags: MessageFlags.Ephemeral });
+        await handleRemoveRole(member);
+        const vanityRole = await getVanityRole(member, selectedRole.name, selectedRole.hexColor);
 
-    // if (member.roles.highest === vanityRole || member.roles.highest.name === `${vanityRole.name} - vanity`) {
-    //   return interaction.reply({ content: 'That role is already your highest role so cannot be transmogged.', flags: MessageFlags.Ephemeral });
-    // }
+        await member.roles.add(vanityRole);
 
-    // if (member.roles.highest.name.includes('vanity')) {
-    //   if (member.roles.highest.members.size < 2) {
-    //     await member.roles.highest.delete();
-
-    //     addRole(member);
-
-    //     return interaction.reply({ content: `Applied vanity role: \`${vanityRole.name}\``, flags: MessageFlags.Ephemeral });
-    //   }
-    //   await member.roles.remove(member.roles.highest);
-
-    //   addRole(member);
-
-    //   return interaction.reply({ content: `Applied vanity role: \`${vanityRole.name}\``, flags: MessageFlags.Ephemeral });
-    // }
-    // addRole(member);
-
-    // return interaction.reply({ content: `Applied vanity role: \`${vanityRole.name}\``, flags: MessageFlags.Ephemeral });
-
-    return interaction.reply({ content: '( ͡° ͜ʖ ͡°)', flags: MessageFlags.Ephemeral });
-
-    // return interaction.reply({ content: `\`\`\`${JSON.stringify(interaction)}\`\`\``, flags: MessageFlags.Ephemeral });
+        return interaction.editReply({ content: `Applied vanity role: <@&${vanityRole.id}>`, flags: MessageFlags.Ephemeral });
+      }
+      default: {
+        return interaction.editReply({ content: '( ͡° ͜ʖ ͡°)', flags: MessageFlags.Ephemeral });
+      }
+    }
   },
 };
