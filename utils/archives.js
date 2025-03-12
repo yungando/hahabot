@@ -55,13 +55,14 @@ const initArchives = async (client) => {
 
   gamesCategory.forEach(async (channel) => {
     await channel.messages.fetch();
+    const lastMessage = await channel.messages.cache.first();
 
-    if ((threeWeeksInMs + channel.lastMessage.createdTimestamp - nowTimestamp) < 0) {
+    if ((threeWeeksInMs + lastMessage.createdTimestamp - nowTimestamp) < 0) {
       await channel.setParent(archivedCategory, { lockPermissions: true });
 
       sortCategory(archivedCategory);
     } else {
-      scheduleArchive(client, channel, channel.lastMessage.createdTimestamp - nowTimestamp);
+      scheduleArchive(client, channel, lastMessage.createdTimestamp - nowTimestamp);
     }
   });
 };
