@@ -9,12 +9,23 @@ const Snoowrap = require('snoowrap');
 
 const sendLog = require('./sendLog.js');
 
-const getRedditPostID = (redditURL) => {
-  const { pathname } = URL.parse(redditURL);
+const getMediaId = async (pathname) => {
+  const reddit = new Snoowrap({
+    userAgent: 'hahabot by u/couldie',
+    clientId,
+    clientSecret,
+    refreshToken,
+  });
 
-  const [postId] = pathname.split('comments/')[1].split('/');
+  const [redditPostId] = pathname.split('comments/')[1].split('/');
 
-  return postId;
+  const redditPostData = (await reddit.getSubmission(redditPostId).fetch()).toJSON();
+
+  if (!redditPostData.is_video) return null;
+
+  const [fallbackURL] = redditPostData.secure_media.reddit_video.fallback_url.split('?');
+
+  return URL.parse(fallbackURL).pathname.split('/')[1];
 };
 
 const getAudioMetadata = async (mediaId) => {
@@ -58,41 +69,15 @@ const getVideoUrl = async (mediaId, audioFileSize) => {
   return null;
 };
 
-const redditVideos = async (client, message) => {
+const redditVideos = async (client, message, redditURL) => {
   try {
-    const reddit = new Snoowrap({
-      userAgent: 'hahabot by u/couldie',
-      clientId,
-      clientSecret,
-      refreshToken,
-    });
+    const { hostname, pathname } = URL.parse(redditURL);
 
-    const words = message.content.split(/ +/);
-    const redditPostId = getRedditPostID(words.find((word) => word.includes('reddit.com')));
+    const mediaId = (hostname !== 'v.redd.it') ? await getMediaId(pathname) : pathname.split('/')[1];
 
-    const redditPostData = (await reddit.getSubmission(redditPostId).fetch()).toJSON();
-
-    if (!redditPostData.is_video) return;
+    if (!mediaId) return;
 
     message.react('<a:dance:592076212256374784>');
-
-    if (!redditPostData.secure_media?.reddit_video) {
-      if (redditPostData.url) {
-        if (redditPostData.domain === 'imgur.com') {
-          if (message.channel.type === 'GUILD_TEXT') message.suppressEmbeds(true);
-
-          const videoURLArray = redditPostData.url.split('.');
-
-          videoURLArray.pop();
-
-          message.reply(`${videoURLArray.join('.')}.mp4`);
-        }
-      }
-      return;
-    }
-
-    const [fallbackURL] = redditPostData.secure_media.reddit_video.fallback_url.split('?');
-    const [mediaId] = fallbackURL.split('https://v.redd.it/')[1].split('/');
 
     const ffmpegCommand = new FfmpegCommand();
 
@@ -120,10 +105,10 @@ const redditVideos = async (client, message) => {
         const attachment = new AttachmentBuilder(`${dir}/${mediaId}.mp4`, { name: `${mediaId}.mp4` });
 
         message.reply({ files: [attachment] })
-          .then(() => {
+          .then(async () => {
             if (message.channel.type === ChannelType.GuildText) message.suppressEmbeds(true);
 
-            const messageReaction = message.reactions.cache.get('<592076212256374784>');
+            const messageReaction = await message.reactions.cache.get('592076212256374784');
             if (messageReaction) messageReaction.users.remove(client.user);
 
             fs.unlink(`${dir}/${mediaId}.mp4`, (err) => {
@@ -133,7 +118,7 @@ const redditVideos = async (client, message) => {
       })
       .run();
   } catch (error) {
-    const messageReaction = message.reactions.cache.get('<592076212256374784>');
+    const messageReaction = await message.reactions.cache.get('592076212256374784');
     if (messageReaction) messageReaction.users.remove(client.user);
 
     console.log(error);

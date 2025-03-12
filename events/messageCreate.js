@@ -40,7 +40,8 @@ module.exports = {
       if (message.channel.parentId === '917120901584150589') restoreChannel(client, message.channel);
 
       // Reddit Videos
-      if (message.content.includes('reddit.com')) redditVideos(client, message);
+      const [redditURLMatch] = message.content.match(/[^\s]*?(reddit\.com|v\.redd\.it)[^\s]*/i) || [];
+      if (redditURLMatch) redditVideos(client, message, redditURLMatch);
 
       // dm webhook
       if (message.channel.type === ChannelType.DM) {
