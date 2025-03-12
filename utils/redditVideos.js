@@ -71,7 +71,11 @@ const getVideoUrl = async (mediaId, audioFileSize) => {
 
 const redditVideos = async (client, message, redditURL) => {
   try {
-    const { hostname, pathname } = URL.parse(redditURL);
+    const parsedRedditURL = URL.parse(redditURL);
+
+    if (!parsedRedditURL) return;
+
+    const { hostname, pathname } = parsedRedditURL;
 
     const mediaId = (hostname !== 'v.redd.it') ? await getMediaId(pathname) : pathname.split('/')[1];
 
