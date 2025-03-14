@@ -11,7 +11,7 @@ module.exports = {
       const { message, emoji } = messageReaction;
 
       const upvoteId = '594816363722309645';
-      const downvoteId = '594816363722309645';
+      const downvoteId = '594816363533565991';
 
       // Upvote/Downvote system
       if (emoji.id === upvoteId) {
