@@ -7,7 +7,6 @@ module.exports = {
       'events',
       'utils',
       'index.js',
-      '*.json',
     ],
     watch_options: {
       followSymlinks: false,

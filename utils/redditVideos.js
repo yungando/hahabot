@@ -4,7 +4,7 @@ const FfmpegCommand = require('fluent-ffmpeg');
 const fs = require('node:fs');
 const fetch = require('node-fetch');
 
-const { clientId, clientSecret, refreshToken } = require('../redditConfig.json');
+const { REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_REFRESH_TOKEN } = process.env;
 const Snoowrap = require('snoowrap');
 
 const sendLog = require('./sendLog.js');
@@ -12,9 +12,9 @@ const sendLog = require('./sendLog.js');
 const getMediaId = async (pathname) => {
   const reddit = new Snoowrap({
     userAgent: 'hahabot by u/couldie',
-    clientId,
-    clientSecret,
-    refreshToken,
+    clientId: REDDIT_CLIENT_ID,
+    clientSecret: REDDIT_CLIENT_SECRET,
+    refreshToken: REDDIT_REFRESH_TOKEN,
   });
 
   const [redditPostId] = pathname.split('comments/')[1].split('/');

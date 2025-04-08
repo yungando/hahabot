@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.39.1",
     "better-sqlite3": "^11.8.1",
     "discord.js": "^14.18.0",
     "fluent-ffmpeg": "^2.1.2",
@@ -13,9 +14,9 @@
     "snoowrap": "^1.23.0"
   },
   "scripts": {
-    "start": "npx pm2 start pm2.config.js",
+    "start": "npx dotenvx run -- pm2 start pm2.config.js",
     "stop": "npx pm2 stop pm2.config.js",
-    "dev": "node index.js"
+    "dev": "dotenvx run -- node index.js"
   },
   "author": "yungando",
   "license": "ISC",

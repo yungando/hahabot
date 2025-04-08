@@ -1,8 +1,8 @@
 const fs = require('node:fs');
-const { token } = require('../config.json');
+const { DISCORD_TOKEN } = process.env;
 
 const { REST, Routes, ApplicationCommandType } = require('discord.js');
-const rest = new REST().setToken(token);
+const rest = new REST().setToken(DISCORD_TOKEN);
 
 const syncEvents = async (client) => {
   const eventFiles = fs.readdirSync('./events').filter((file) => file.endsWith('.js'));

@@ -2,7 +2,7 @@ const {
   Client, Collection, GatewayIntentBits, Partials,
 } = require('discord.js');
 
-const { token } = require('./config.json');
+const { DISCORD_TOKEN } = process.env;
 const { syncEvents } = require('./utils/interactions.js');
 
 const client = new Client(
@@ -36,4 +36,4 @@ client.archiveTimers = new Collection();
 
 syncEvents(client);
 
-client.login(token);
+client.login(DISCORD_TOKEN);

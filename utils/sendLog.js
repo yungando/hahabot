@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 
-const { hahaLOGID, hahaLOGToken } = require('../webhooks.json');
-const hahaLOG = new Discord.WebhookClient({ id: hahaLOGID, token: hahaLOGToken });
+const { WEBHOOK_DM_ID, WEBHOOK_DM_TOKEN } = process.env;
+const hahaLOG = new Discord.WebhookClient({ id: WEBHOOK_DM_ID, token: WEBHOOK_DM_TOKEN });
 
 const sendLog = async (client, content, user, guild) => {
   let username = `${user.username} - ${user.id}`;

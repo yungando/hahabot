@@ -1,7 +1,7 @@
 const { WebhookClient, ChannelType } = require('discord.js');
 
-const { hahaDMID, hahaDMToken } = require('../webhooks.json');
-const hahaDM = new WebhookClient({ id: hahaDMID, token: hahaDMToken });
+const { WEBHOOK_LOG_ID, hahaDMToken: WEBHOOK_LOG_TOKEN } = process.env;
+const hahaDM = new WebhookClient({ id: WEBHOOK_LOG_ID, token: WEBHOOK_LOG_TOKEN });
 
 const sendLog = require('../utils/sendLog.js');
 const { scheduleArchive, restoreChannel } = require('../utils/archives.js');
