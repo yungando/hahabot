@@ -40,7 +40,7 @@ module.exports = {
       if (message.channel.parentId === '917120901584150589') restoreChannel(client, message.channel);
 
       // Reddit Videos
-      const [redditURLMatch] = message.content.match(/[^\s]*?(reddit\.com|v\.redd\.it)[^\s]*/i) || [];
+      const [redditURLMatch] = message.content.match(/https?:\/\/(?:www\.|old\.)?(?:reddit\.com\/r\/[^/\s]+\/(?:s\/[a-zA-Z0-9]+|comments\/[a-z0-9]+(?:\/[^\s/?#]*)?)|redd\.it\/[a-z0-9]+|v\.redd\.it\/[a-zA-Z0-9]+)/gi) || [];
       if (redditURLMatch) redditVideos(client, message, redditURLMatch);
 
       // dm webhook

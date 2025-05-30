@@ -1,6 +1,7 @@
 const { ApplicationCommandType, MessageFlags, InteractionContextType } = require('discord.js');
 
 const { sortCategory } = require('../../utils/archives.js');
+const sendLog = require('../../utils/sendLog.js');
 
 module.exports = {
   name: 'archive',
@@ -34,7 +35,7 @@ module.exports = {
         interaction.reply({ content: `Moved <#${channelToArchive.id}> to \`#${retiredCategory.name}\``, flags: MessageFlags.Ephemeral });
       }
     } catch (error) {
-      console.log(error);
+      sendLog(client, error, client.user);
     }
   },
 };

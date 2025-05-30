@@ -17,8 +17,6 @@ module.exports = {
     '358046343803174912',
   ],
   async execute(client, interaction) {
-    console.log({ interaction });
-
     const dmUser = interaction.options.getUser('user');
 
     const bird = '＜￣｀ヽ、　　　　　　　／￣>\n　ゝ、　　＼　／⌒ヽ,ノ 　/´\n　　　ゝ、　`（ ( ͡° ͜ʖ ͡°) ／\n　　 　　>　 　 　,ノ\n　　　　　∠_,,,/´”\nWould a bot send you that\n?';

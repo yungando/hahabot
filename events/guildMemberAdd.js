@@ -39,7 +39,6 @@ module.exports = {
         joinMessages.send({ embeds: [notification] });
       }
     } catch (error) {
-      console.log(error);
       sendLog(client, error, client.user);
     }
   },

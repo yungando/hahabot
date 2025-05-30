@@ -2,6 +2,8 @@ const {
   ApplicationCommandType, MessageFlags, InteractionContextType, EmbedBuilder,
 } = require('discord.js');
 
+const sendLog = require('../../utils/sendLog.js');
+
 module.exports = {
   name: 'getarchives',
   description: 'Output all pending channel archive timeouts.',
@@ -52,7 +54,7 @@ module.exports = {
 
       interaction.reply({ embeds: [archivesEmbed], flags: MessageFlags.Ephemeral });
     } catch (error) {
-      console.log(error);
+      sendLog(client, error, client.user);
     }
   },
 };

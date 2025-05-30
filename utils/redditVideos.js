@@ -9,25 +9,6 @@ const Snoowrap = require('snoowrap');
 
 const sendLog = require('./sendLog.js');
 
-const getMediaId = async (pathname) => {
-  const reddit = new Snoowrap({
-    userAgent: 'hahabot by u/couldie',
-    clientId: REDDIT_CLIENT_ID,
-    clientSecret: REDDIT_CLIENT_SECRET,
-    refreshToken: REDDIT_REFRESH_TOKEN,
-  });
-
-  const [redditPostId] = pathname.split('comments/')[1].split('/');
-
-  const redditPostData = (await reddit.getSubmission(redditPostId).fetch()).toJSON();
-
-  if (!redditPostData.is_video) return null;
-
-  const [fallbackURL] = redditPostData.secure_media.reddit_video.fallback_url.split('?');
-
-  return URL.parse(fallbackURL).pathname.split('/')[1];
-};
-
 const getAudioMetadata = async (mediaId) => {
   const bitrateArray = ['256', '128', '64'];
 
@@ -69,16 +50,57 @@ const getVideoUrl = async (mediaId, audioFileSize) => {
   return null;
 };
 
-const redditVideos = async (client, message, redditURL) => {
+const parseRedditUrl = (redditUrl) => {
+  const cleanUrl = redditUrl.split(/[?#]/)[0];
+
+  const shortMatch = cleanUrl.match(/\/r\/[^/]+\/s\/([a-zA-Z0-9]+)/);
+  const postMatch = cleanUrl.match(/(?:https?:\/\/)?(?:www\.|old\.)?reddit\.com\/r\/[^/]+\/comments\/([a-z0-9]+)/i);
+  const shareMatch = cleanUrl.match(/^https:\/\/redd\.it\/([a-z0-9]+)/i);
+  const videoMatch = cleanUrl.match(/^https:\/\/v\.redd\.it\/([a-zA-Z0-9]+)/);
+
+  if (shortMatch) return { url: cleanUrl, type: 'shortLink', id: shortMatch[1] };
+  if (postMatch) return { url: cleanUrl, type: 'post', id: postMatch[1] };
+  if (shareMatch) return { url: cleanUrl, type: 'post', id: shareMatch[1] };
+  if (videoMatch) return { url: cleanUrl, type: 'video', id: videoMatch[1] };
+
+  return { url: cleanUrl, type: 'unknown', id: null };
+};
+
+const getIdFromShortLink = async (redditUrlInfo) => {
+  if (redditUrlInfo.type !== 'shortLink') return null;
+
+  const res = await fetch(redditUrlInfo.url, { redirect: 'follow' });
+  const finalUrl = res.url;
+
+  const [, postMatch] = finalUrl.match(/\/comments\/([a-z0-9]+)/i);
+
+  return postMatch;
+};
+
+const getMediaId = async (redditUrlInfo) => {
+  const postId = (redditUrlInfo.type === 'post') ? redditUrlInfo.id : await getIdFromShortLink(redditUrlInfo);
+
+  const reddit = new Snoowrap({
+    userAgent: 'hahabot by u/couldie',
+    clientId: REDDIT_CLIENT_ID,
+    clientSecret: REDDIT_CLIENT_SECRET,
+    refreshToken: REDDIT_REFRESH_TOKEN,
+  });
+
+  const postData = (await reddit.getSubmission(postId).fetch()).toJSON();
+  if (!postData.is_video) return null;
+
+  const [fallbackURL] = postData.secure_media.reddit_video.fallback_url.split('?');
+
+  return URL.parse(fallbackURL).pathname.split('/')[1];
+};
+
+const redditVideos = async (client, message, redditUrl) => {
   try {
-    const parsedRedditURL = URL.parse(redditURL);
+    const redditUrlInfo = parseRedditUrl(redditUrl);
+    if (redditUrlInfo.type === 'unknown') return;
 
-    if (!parsedRedditURL) return;
-
-    const { hostname, pathname } = parsedRedditURL;
-
-    const mediaId = (hostname !== 'v.redd.it') ? await getMediaId(pathname) : pathname.split('/')[1];
-
+    const mediaId = (redditUrlInfo.type === 'video') ? redditUrlInfo.id : await getMediaId(redditUrlInfo);
     if (!mediaId) return;
 
     message.react('<a:dance:592076212256374784>');
@@ -89,7 +111,6 @@ const redditVideos = async (client, message, redditURL) => {
     if (audioMetadata.url.length) ffmpegCommand.addInput(audioMetadata.url);
 
     const videoURL = await getVideoUrl(mediaId, audioMetadata.size);
-
     if (!videoURL) return;
 
     ffmpegCommand.addInput(videoURL);
@@ -124,8 +145,6 @@ const redditVideos = async (client, message, redditURL) => {
   } catch (error) {
     const messageReaction = await message.reactions.cache.get('592076212256374784');
     if (messageReaction) messageReaction.users.remove(client.user);
-
-    console.log(error);
     sendLog(client, error, client.user);
   }
 };
