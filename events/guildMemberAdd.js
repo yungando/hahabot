@@ -30,15 +30,16 @@ module.exports = {
           `• Joined: <t:${Math.round(member.joinedTimestamp / 1000)}:F> (<t:${Math.round(member.joinedTimestamp / 1000)}:R>)`];
 
         const notification = new EmbedBuilder()
-          .setAuthor(`${member.user.username} (${member.user.id})`, member.user.displayAvatarURL({ extension: 'png' }))
+          .setAuthor({ name: `${member.user.username} (${member.user.id})`, iconURL: member.user.displayAvatarURL({ extension: 'png' }) })
           .setColor('#4cff4c')
           .setDescription(desc.join('\n'))
-          .setFooter('User joined')
+          .setFooter({ text: 'User joined' })
           .setTimestamp(now);
 
         joinMessages.send({ embeds: [notification] });
       }
     } catch (error) {
+      console.log(error);
       sendLog(client, error, client.user);
     }
   },

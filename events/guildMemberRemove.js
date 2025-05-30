@@ -8,7 +8,7 @@ const sendLog = require('../utils/sendLog.js');
 
 module.exports = {
   async execute(client, member) {
-    if (member.partial) await member.fetch();
+    // if (member.partial) await member.fetch();
 
     try {
       const channelId = await servers.get(`${member.guild.id}.leaveMessagesID`);
@@ -40,15 +40,16 @@ module.exports = {
         }
 
         const notification = new EmbedBuilder()
-          .setAuthor(`${member.user.username} (${member.user.id})`, member.user.displayAvatarURL({ extension: 'png' }))
+          .setAuthor({ name: `${member.user.username} (${member.user.id})`, iconURL: member.user.displayAvatarURL({ extension: 'png' }) })
           .setColor('#2f3136')
           .setDescription(desc.join('\n'))
-          .setFooter('User left')
+          .setFooter({ text: 'User left' })
           .setTimestamp(now);
 
         leaveMessages.send({ embeds: [notification] });
       }
     } catch (error) {
+      console.log(error);
       sendLog(client, error, client.user);
     }
   },
