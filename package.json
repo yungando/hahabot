@@ -8,6 +8,7 @@
     "better-sqlite3": "^11.8.1",
     "discord.js": "^14.18.0",
     "fluent-ffmpeg": "^2.1.2",
+    "globals": "^16.2.0",
     "node-fetch": "^2.7.0",
     "pm2": "^5.1.2",
     "quick.db": "^9.1.7",

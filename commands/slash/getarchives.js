@@ -37,7 +37,7 @@ module.exports = {
       const timeLeftArray = [];
 
       for (const { channelId, timeout } of sortedTimerArray) {
-        // eslint-disable-next-line max-len
+        // eslint-disable-next-line no-underscore-dangle, max-len
         const archivesOn = Math.ceil((timeout._idleStart + timeout._idleTimeout + nowTimestamp) / 1000);
         channelIdArray.push(`<#${channelId}>`);
         timeLeftArray.push(`<t:${archivesOn}:R>`);
