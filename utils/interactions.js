@@ -109,5 +109,8 @@ const loadCommands = async (client) => {
 };
 
 module.exports = {
-  syncEvents, clearCommands, registerCommands, loadCommands,
+  syncEvents,
+  clearCommands,
+  registerCommands,
+  loadCommands,
 };

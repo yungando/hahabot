@@ -8,7 +8,7 @@ const sendLog = require('../utils/sendLog.js');
 
 module.exports = {
   async execute(client, member) {
-    // if (member.partial) await member.fetch();
+    if (member.partial) await member.fetch();
 
     try {
       const channelId = await servers.get(`${member.guild.id}.leaveMessagesID`);
@@ -27,7 +27,8 @@ module.exports = {
         const desc = [
           `• Profile: <@${member.user.id}>`,
           `• Joined: <t:${Math.round(member.joinedTimestamp / 1000)}:F> (<t:${Math.round(member.joinedTimestamp / 1000)}:R>)`,
-          `• Left: <t:${Math.round(now.getTime() / 1000)}:F> (<t:${Math.round(now.getTime() / 1000)}:R>)`];
+          `• Left: <t:${Math.round(now.getTime() / 1000)}:F> (<t:${Math.round(now.getTime() / 1000)}:R>)`,
+        ];
 
         const sortedMemberRoles = member.roles.cache.sorted((roleA, roleB) => (
           roleB.rawPosition - roleA.rawPosition
@@ -49,7 +50,15 @@ module.exports = {
         leaveMessages.send({ embeds: [notification] });
       }
     } catch (error) {
-      sendLog(client, error, client.user);
+      const errorPayload = {
+        logType: 'error',
+        details: `Failed attempting to send 'User Left' notification for <@${member.id} in ${member.guild.name}`,
+        error,
+        user: member.user,
+        guild: member.guild,
+      };
+
+      sendLog(client, errorPayload);
     }
   },
 };

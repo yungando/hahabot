@@ -10,6 +10,6 @@ module.exports = {
     await initArchives(client);
 
     console.log('ready');
-    sendLog(client, 'ready', client.user);
+    sendLog(client, { logType: 'string', message: 'ready' });
   },
 };

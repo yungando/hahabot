@@ -95,58 +95,65 @@ const getMediaId = async (redditUrlInfo) => {
   return URL.parse(fallbackURL).pathname.split('/')[1];
 };
 
-const redditVideos = async (client, message, redditUrl) => {
+module.exports = async (client, message, redditUrl) => {
   try {
     const redditUrlInfo = parseRedditUrl(redditUrl);
     if (redditUrlInfo.type === 'unknown') return;
 
-    const mediaId = (redditUrlInfo.type === 'video') ? redditUrlInfo.id : await getMediaId(redditUrlInfo);
+    const mediaId = (redditUrlInfo.type === 'video')
+      ? redditUrlInfo.id
+      : await getMediaId(redditUrlInfo);
+
     if (!mediaId) return;
 
     message.react('<a:dance:592076212256374784>');
 
-    const ffmpegCommand = new FfmpegCommand();
+    const ffmpeg = new FfmpegCommand();
 
     const audioMetadata = await getAudioMetadata(mediaId);
-    if (audioMetadata.url.length) ffmpegCommand.addInput(audioMetadata.url);
+    if (audioMetadata.url.length) ffmpeg.addInput(audioMetadata.url);
 
     const videoURL = await getVideoUrl(mediaId, audioMetadata.size);
     if (!videoURL) return;
 
-    ffmpegCommand.addInput(videoURL);
+    ffmpeg.addInput(videoURL);
 
     const dir = './redditvideos';
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
 
-    ffmpegCommand.output(`${dir}/${mediaId}.mp4`)
+    await ffmpeg.output(`${dir}/${mediaId}.mp4`)
       .on('err', (err) => {
         fs.unlink(`${dir}/${mediaId}.mp4`, (fsErr) => {
           if (fsErr) throw fsErr;
         });
 
-        sendLog(client, err, client.user);
-      })
-      .on('end', () => {
-        const attachment = new AttachmentBuilder(`${dir}/${mediaId}.mp4`, { name: `${mediaId}.mp4` });
-
-        message.reply({ files: [attachment] })
-          .then(async () => {
-            if (message.channel.type === ChannelType.GuildText) message.suppressEmbeds(true);
-
-            const messageReaction = await message.reactions.cache.get('592076212256374784');
-            if (messageReaction) messageReaction.users.remove(client.user);
-
-            fs.unlink(`${dir}/${mediaId}.mp4`, (err) => {
-              if (err) throw err;
-            });
-          });
+        throw err;
       })
       .run();
+
+    const attachment = new AttachmentBuilder(`${dir}/${mediaId}.mp4`, { name: `${mediaId}.mp4` });
+
+    await message.reply({ files: [attachment] });
+
+    if (message.channel.type === ChannelType.GuildText) message.suppressEmbeds(true);
+
+    const messageReaction = await message.reactions.cache.get('592076212256374784');
+    if (messageReaction) messageReaction.users.remove(client.user);
+
+    fs.unlink(`${dir}/${mediaId}.mp4`);
   } catch (error) {
     const messageReaction = await message.reactions.cache.get('592076212256374784');
     if (messageReaction) messageReaction.users.remove(client.user);
-    sendLog(client, error, client.user);
+
+    const errorPayload = {
+      logType: 'error',
+      details: 'Failed attempting to handle reddit video.',
+      message,
+      error,
+      user: message.author,
+      guild: message.guild,
+    };
+
+    sendLog(client, errorPayload);
   }
 };
-
-module.exports = { redditVideos };

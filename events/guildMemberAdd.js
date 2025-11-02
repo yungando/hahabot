@@ -22,24 +22,31 @@ module.exports = {
           return;
         }
 
-        const now = new Date();
-
         const desc = [
           `• Profile: <@${member.user.id}>`,
           `• Created: <t:${Math.round(member.user.createdTimestamp / 1000)}:F> (<t:${Math.round(member.user.createdTimestamp / 1000)}:R>)`,
-          `• Joined: <t:${Math.round(member.joinedTimestamp / 1000)}:F> (<t:${Math.round(member.joinedTimestamp / 1000)}:R>)`];
+          `• Joined: <t:${Math.round(member.joinedTimestamp / 1000)}:F> (<t:${Math.round(member.joinedTimestamp / 1000)}:R>)`,
+        ];
 
         const notification = new EmbedBuilder()
           .setAuthor({ name: `${member.user.username} (${member.user.id})`, iconURL: member.user.displayAvatarURL({ extension: 'png' }) })
           .setColor('#4cff4c')
           .setDescription(desc.join('\n'))
           .setFooter({ text: 'User joined' })
-          .setTimestamp(now);
+          .setTimestamp(new Date());
 
         joinMessages.send({ embeds: [notification] });
       }
     } catch (error) {
-      sendLog(client, error, client.user);
+      const errorPayload = {
+        logType: 'error',
+        details: `Failed attempting to send 'User Joined' notification for <@${member.id} in ${member.guild.name}`,
+        error,
+        user: member.user,
+        guild: member.guild,
+      };
+
+      sendLog(client, errorPayload);
     }
   },
 };

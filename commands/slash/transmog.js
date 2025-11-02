@@ -1,6 +1,11 @@
 const {
-  ApplicationCommandOptionType, ApplicationCommandType, MessageFlags, InteractionContextType,
+  ApplicationCommandOptionType,
+  ApplicationCommandType,
+  MessageFlags,
+  InteractionContextType,
 } = require('discord.js');
+
+const sendLog = require('../../utils/sendLog.js');
 
 const createNewRole = async (name, colour, guild) => {
   const hahaRole = await guild.members.me.roles.botRole;
@@ -73,6 +78,15 @@ module.exports = {
     const { member } = interaction;
     const subcommand = await interaction.options.getSubcommand();
 
+    const logPayload = {
+      logType: 'command',
+      message: interaction.toString(),
+      user: interaction.user,
+      guild: interaction.guild,
+    };
+
+    sendLog(client, logPayload);
+
     switch (subcommand) {
       case 'off': {
         await handleRemoveRole(member);
@@ -81,7 +95,6 @@ module.exports = {
       case 'hex': {
         const input = await interaction.options.getString('input').toUpperCase();
         const hexInput = input.startsWith('#') ? input.slice(1) : input;
-
         const hexRegex = /^[0-9A-F]{6}$/i;
 
         if (!hexRegex.test(hexInput)) return interaction.editReply({ content: 'Invalid hex colour code.', flags: MessageFlags.Ephemeral });

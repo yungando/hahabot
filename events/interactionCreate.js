@@ -13,9 +13,15 @@ module.exports = {
       try {
         await command.execute(client, interaction);
       } catch (error) {
-        sendLog(client, error.toString(), client.user);
-      } finally {
-        sendLog(client, interaction.toString(), interaction.user, interaction.guild);
+        const errorPayload = {
+          logType: 'error',
+          details: `Failed attempting to handle interaction: ${interaction.toString()}`,
+          error,
+          user: interaction.user,
+          guild: interaction.guild,
+        };
+
+        sendLog(client, errorPayload);
       }
 
       return;
@@ -28,9 +34,15 @@ module.exports = {
     try {
       await contextMenu.execute(client, interaction);
     } catch (error) {
-      sendLog(client, error.toString(), client.user);
-    } finally {
-      sendLog(client, interaction.commandName, interaction.user, interaction.guild);
+      const errorPayload = {
+        logType: 'error',
+        details: `Failed attempting to handle interaction: ${interaction.toString()}`,
+        error,
+        user: interaction.user,
+        guild: interaction.guild,
+      };
+
+      sendLog(client, errorPayload);
     }
   },
 };

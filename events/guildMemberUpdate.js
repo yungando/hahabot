@@ -18,7 +18,15 @@ module.exports = {
         guild.systemChannel.send(`<@${newMember.id}> unboosted the server.`);
       }
     } catch (error) {
-      sendLog(client, error.toString(), client.user);
+      const errorPayload = {
+        logType: 'error',
+        details: `Failed attempting to send 'User Updated' notification for <@${oldMember.id} in ${oldMember.guild.name}`,
+        error,
+        user: oldMember.user,
+        guild: oldMember.guild,
+      };
+
+      sendLog(client, errorPayload);
     }
   },
 };

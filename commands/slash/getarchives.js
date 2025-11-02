@@ -1,5 +1,8 @@
 const {
-  ApplicationCommandType, MessageFlags, InteractionContextType, EmbedBuilder,
+  ApplicationCommandType,
+  MessageFlags,
+  InteractionContextType,
+  EmbedBuilder,
 } = require('discord.js');
 
 const sendLog = require('../../utils/sendLog.js');
@@ -37,8 +40,9 @@ module.exports = {
       const timeLeftArray = [];
 
       for (const { channelId, timeout } of sortedTimerArray) {
-        // eslint-disable-next-line max-len
-        const archivesOn = Math.ceil((timeout._idleStart + timeout._idleTimeout + nowTimestamp) / 1000);
+        const { _idleStart: idleStart, _idleTimeout: idleTimeout } = timeout;
+
+        const archivesOn = Math.ceil((idleStart + idleTimeout + nowTimestamp) / 1000);
         channelIdArray.push(`<#${channelId}>`);
         timeLeftArray.push(`<t:${archivesOn}:R>`);
       }
@@ -53,8 +57,25 @@ module.exports = {
         .setFooter({ text: '/getarchives' });
 
       interaction.reply({ embeds: [archivesEmbed], flags: MessageFlags.Ephemeral });
+
+      const logPayload = {
+        logType: 'command',
+        message: '/getArchives',
+        user: interaction.user,
+        guild: interaction.guild,
+      };
+
+      sendLog(client, logPayload);
     } catch (error) {
-      sendLog(client, error, client.user);
+      const errorPayload = {
+        logType: 'error',
+        details: 'Failed attempting to get archive timers',
+        error,
+        user: interaction.user,
+        guild: interaction.guild,
+      };
+
+      sendLog(client, errorPayload);
     }
   },
 };

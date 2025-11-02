@@ -13,8 +13,9 @@ module.exports = {
   ],
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
+    const channelToArchive = interaction.channel;
+
     try {
-      const channelToArchive = interaction.channel;
       if (channelToArchive.partial) await channelToArchive.fetch();
 
       const gamesCategoryId = '785540936457125888';
@@ -34,8 +35,25 @@ module.exports = {
 
         interaction.reply({ content: `Moved <#${channelToArchive.id}> to \`#${retiredCategory.name}\``, flags: MessageFlags.Ephemeral });
       }
+
+      const logPayload = {
+        logType: 'command',
+        message: `/archive: <#${channelToArchive.id}>`,
+        user: interaction.user,
+        guild: interaction.guild,
+      };
+
+      sendLog(client, logPayload);
     } catch (error) {
-      sendLog(client, error, client.user);
+      const errorPayload = {
+        logType: 'error',
+        details: `Failed attempting to archive <#${channelToArchive.id}>`,
+        error,
+        user: interaction.user,
+        guild: interaction.guild,
+      };
+
+      sendLog(client, errorPayload);
     }
   },
 };

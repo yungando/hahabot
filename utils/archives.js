@@ -3,8 +3,8 @@ const sendLog = require('./sendLog.js');
 const threeWeeksInMs = 1000 * 60 * 60 * 24 * 21;
 
 const sortCategory = async (channelCategory) => {
-  // eslint-disable-next-line max-len
-  const sortedCategory = channelCategory.children.cache.sorted((a, b) => a.name.localeCompare(b.name));
+  const sortedCategory = channelCategory.children.cache
+    .sorted((a, b) => a.name.localeCompare(b.name));
   const categoryPositions = [];
 
   for (let i = 0; i < sortedCategory.size; i += 1) {
@@ -26,7 +26,7 @@ const scheduleArchive = async (client, channelToArchive, timeElapsed = 0) => {
 
       sortCategory(archivedCategory);
 
-      sendLog(client, `Archived <#${channelToArchive.id}>`, client.user);
+      sendLog(client, { logtype: 'string', message: `Archived <#${channelToArchive.id}>` });
     },
     (threeWeeksInMs) + timeElapsed,
   );
@@ -43,7 +43,7 @@ const restoreChannel = async (client, channelToRestore) => {
 
   scheduleArchive(client, channelToRestore);
 
-  sendLog(client, `Restored <#${channelToRestore.id}>`, client.user);
+  sendLog(client, { logtype: 'string', message: `Restored <#${channelToRestore.id}>` });
 };
 
 const initArchives = async (client) => {
@@ -68,5 +68,8 @@ const initArchives = async (client) => {
 };
 
 module.exports = {
-  initArchives, sortCategory, scheduleArchive, restoreChannel,
+  initArchives,
+  sortCategory,
+  scheduleArchive,
+  restoreChannel,
 };

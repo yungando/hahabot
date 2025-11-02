@@ -1,4 +1,5 @@
 const { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags } = require('discord.js');
+const sendLog = require('../../utils/sendLog.js');
 
 module.exports = {
   name: 'bird',
@@ -23,6 +24,15 @@ module.exports = {
 
     dmUser.send(bird);
 
-    return interaction.reply({ content: '( ͡° ͜ʖ ͡°)', flags: MessageFlags.Ephemeral });
+    interaction.reply({ content: '( ͡° ͜ʖ ͡°)', flags: MessageFlags.Ephemeral });
+
+    const logPayload = {
+      logType: 'command',
+      message: `/bird: <@${dmUser.id}>`,
+      user: interaction.user,
+      guild: interaction.guild,
+    };
+
+    sendLog(client, logPayload);
   },
 };

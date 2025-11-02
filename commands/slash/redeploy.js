@@ -1,6 +1,7 @@
 const { ApplicationCommandType, MessageFlags, InteractionContextType } = require('discord.js');
 
 const { clearCommands, registerCommands, loadCommands } = require('../../utils/interactions.js');
+const sendLog = require('../../utils/sendLog.js');
 
 module.exports = {
   name: 'redeploy',
@@ -19,5 +20,14 @@ module.exports = {
     await registerCommands(client);
 
     await interaction.editReply({ content: 'Successfully redeployed all commands.', flags: MessageFlags.Ephemeral });
+
+    const logPayload = {
+      logType: 'command',
+      message: '/redeploy',
+      user: interaction.user,
+      guild: interaction.guild,
+    };
+
+    sendLog(client, logPayload);
   },
 };

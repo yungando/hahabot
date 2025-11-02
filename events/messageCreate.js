@@ -5,16 +5,21 @@ const hahaDM = new WebhookClient({ id: WEBHOOK_DM_ID, token: WEBHOOK_DM_TOKEN })
 
 const sendLog = require('../utils/sendLog.js');
 const { scheduleArchive, restoreChannel } = require('../utils/archives.js');
-const { redditVideos } = require('../utils/redditVideos.js');
+const redditVideos = require('../utils/redditVideos.js');
+
+const { QuickDB } = require('quick.db');
+const db = new QuickDB();
+const servers = db.table('servers');
 
 module.exports = {
   async execute(client, message) {
     if (message.partial) await message.fetch();
 
-    try {
-      // disable all embeds in bot log category
-      if (message.channel.parentId === '664182618828308491') message.suppressEmbeds(true);
+    if (await servers.get(`${message.guild?.id}.serverName`) !== message.guild?.name) {
+      await servers.set(`${message.guild.id}.serverName`, message.guild.name);
+    }
 
+    try {
       if (message.content.includes('🦀')) message.react('🦀');
       if (message.content.includes('🤝')) message.react('🤝');
       if (message.content.includes('<:salute:719485363558809600>')) message.react('719485363558809600');
@@ -30,7 +35,14 @@ module.exports = {
           message.channel.send('im calling the police');
         }
 
-        sendLog(client, message.content, message.author, message.guild);
+        const logPayload = {
+          logType: 'string',
+          message: message.content,
+          user: message.author,
+          guild: message.guild,
+        };
+
+        sendLog(client, logPayload);
       }
 
       // schedule archive game channel
@@ -63,7 +75,15 @@ module.exports = {
         }
       }
     } catch (error) {
-      sendLog(client, error.toString(), client.user);
+      const errorPayload = {
+        logType: 'error',
+        message,
+        error,
+        user: message.author,
+        guild: message.guild,
+      };
+
+      sendLog(client, errorPayload);
     }
   },
 };
