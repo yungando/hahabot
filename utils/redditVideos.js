@@ -3,6 +3,7 @@ const { AttachmentBuilder, ChannelType } = require('discord.js');
 const FfmpegCommand = require('fluent-ffmpeg');
 const fs = require('node:fs');
 const fetch = require('node-fetch');
+const { xml2json } = require('xml-js');
 
 const { REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_REFRESH_TOKEN } = process.env;
 const Snoowrap = require('snoowrap');
@@ -33,20 +34,39 @@ const getAudioMetadata = async (mediaId) => {
   return { url: '', size: 0 };
 };
 
-const getVideoUrl = async (mediaId, audioFileSize) => {
-  const resolutionArray = ['1080', '720', '480', '360', '240', '140', '120'];
+const getVideoUrl = async (mediaId, audioFileSize, client) => {
   const fileSizeLimitInBytes = 10000000;
 
-  for (const resolution of resolutionArray) {
-    const testUrl = await fetch(`https://v.redd.it/${mediaId}/DASH_${resolution}.mp4`);
+  try {
+    const dashPlaylistResponse = await fetch(`https://v.redd.it/${mediaId}/DASHPlaylist.mpd`);
+    const dashText = await dashPlaylistResponse.text();
 
-    if (testUrl.ok) {
-      const videoFileSize = parseInt(testUrl.headers.get('content-length'), 10);
-      const { url } = testUrl;
-      if ((videoFileSize + audioFileSize) <= fileSizeLimitInBytes) return url;
+    const dashPlaylist = await JSON.parse(xml2json(dashText, { compact: true }));
+    const dashSets = dashPlaylist.MPD.Period.AdaptationSet;
+    // eslint-disable-next-line no-underscore-dangle
+    const dashVideoSet = dashSets.find((set) => set._attributes.contentType === 'video');
+
+    const dashVideoResolutions = dashVideoSet.Representation.map((rep) => {
+      // eslint-disable-next-line no-underscore-dangle
+      const base = rep.BaseURL._text;
+      const match = base.match(/DASH_(\d+)\.mp4/);
+      return match ? match[1] : null;
+    })
+      .filter((res) => res !== null)
+      .sort((a, b) => Number(b) - Number(a));
+
+    for (const resolution of dashVideoResolutions) {
+      const testUrl = await fetch(`https://v.redd.it/${mediaId}/DASH_${resolution}.mp4`);
+
+      if (testUrl.ok) {
+        const videoFileSize = parseInt(testUrl.headers.get('content-length'), 10);
+        const { url } = testUrl;
+        if ((videoFileSize + audioFileSize) <= fileSizeLimitInBytes) return url;
+      }
     }
+  } catch (error) {
+    sendLog(client, error, client.user);
   }
-
   return null;
 };
 
@@ -113,8 +133,12 @@ module.exports = async (client, message, redditUrl) => {
     const audioMetadata = await getAudioMetadata(mediaId);
     if (audioMetadata.url.length) ffmpeg.addInput(audioMetadata.url);
 
-    const videoURL = await getVideoUrl(mediaId, audioMetadata.size);
-    if (!videoURL) return;
+    const videoURL = await getVideoUrl(mediaId, audioMetadata.size, client);
+    if (!videoURL) {
+      const messageReaction = await message.reactions.cache.get('592076212256374784');
+      if (messageReaction) messageReaction.users.remove(client.user);
+      return;
+    }
 
     ffmpeg.addInput(videoURL);
 

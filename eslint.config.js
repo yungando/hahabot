@@ -60,6 +60,7 @@ const eslintBaseConfigRuleOverrides = {
     'error',
     'always',
   ],
+  'no-console': 'off',
   'no-empty-function': [
     'error',
     {
@@ -232,7 +233,6 @@ const eslintBaseConfigRuleOverrides = {
     },
   ],
   strict: 'off',
-  'no-console': 'off',
 };
 
 const eslintFormattingConfigRuleOverrides = {
