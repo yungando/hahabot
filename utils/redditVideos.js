@@ -115,7 +115,21 @@ const getMediaId = async (redditUrlInfo) => {
   return URL.parse(fallbackURL).pathname.split('/')[1];
 };
 
+const ffmpegPromise = (filePath, videoURL, audioURL) => (
+  new Promise((resolve, reject) => {
+    const ffmpeg = new FfmpegCommand();
+
+    ffmpeg.addInput(videoURL)
+      .addInput(audioURL)
+      .output(filePath)
+      .on('end', () => resolve())
+      .on('error', (err) => reject(err))
+      .run();
+  }));
+
 module.exports = async (client, message, redditUrl) => {
+  let filePath;
+
   try {
     const redditUrlInfo = parseRedditUrl(redditUrl);
     if (redditUrlInfo.type === 'unknown') return;
@@ -128,11 +142,7 @@ module.exports = async (client, message, redditUrl) => {
 
     message.react('<a:dance:592076212256374784>');
 
-    const ffmpeg = new FfmpegCommand();
-
     const audioMetadata = await getAudioMetadata(mediaId);
-    if (audioMetadata.url.length) ffmpeg.addInput(audioMetadata.url);
-
     const videoURL = await getVideoUrl(mediaId, audioMetadata.size, client);
     if (!videoURL) {
       const messageReaction = await message.reactions.cache.get('592076212256374784');
@@ -140,23 +150,13 @@ module.exports = async (client, message, redditUrl) => {
       return;
     }
 
-    ffmpeg.addInput(videoURL);
-
     const dir = './redditvideos';
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    filePath = `${dir}/${mediaId}.mp4`;
 
-    await ffmpeg.output(`${dir}/${mediaId}.mp4`)
-      .on('err', (err) => {
-        fs.unlink(`${dir}/${mediaId}.mp4`, (fsErr) => {
-          if (fsErr) throw fsErr;
-        });
+    await ffmpegPromise(filePath, videoURL, audioMetadata.url);
 
-        throw err;
-      })
-      .run();
-
-    const attachment = new AttachmentBuilder(`${dir}/${mediaId}.mp4`, { name: `${mediaId}.mp4` });
-
+    const attachment = new AttachmentBuilder(filePath, { name: `${mediaId}.mp4` });
     await message.reply({ files: [attachment] });
 
     if (message.channel.type === ChannelType.GuildText) message.suppressEmbeds(true);
@@ -164,10 +164,16 @@ module.exports = async (client, message, redditUrl) => {
     const messageReaction = await message.reactions.cache.get('592076212256374784');
     if (messageReaction) messageReaction.users.remove(client.user);
 
-    fs.unlink(`${dir}/${mediaId}.mp4`);
+    fs.unlink(filePath, (err) => {
+      if (err) throw err;
+    });
   } catch (error) {
     const messageReaction = await message.reactions.cache.get('592076212256374784');
     if (messageReaction) messageReaction.users.remove(client.user);
+
+    fs.unlink(filePath, (err) => {
+      if (err) throw err;
+    });
 
     const errorPayload = {
       logType: 'error',
