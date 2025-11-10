@@ -97,7 +97,6 @@ module.exports = async (client, payload) => {
       }
 
       default: {
-        sendLog(client, { content: `Invalid sendLog payload: typeof ${payload.logType}` });
         const errorEmbed = new EmbedBuilder()
           .setAuthor(await buildEmbedAuthor(client))
           .setColor('Red')
