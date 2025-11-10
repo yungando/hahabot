@@ -98,6 +98,18 @@ module.exports = async (client, payload) => {
 
       default: {
         sendLog(client, { content: `Invalid sendLog payload: typeof ${payload.logType}` });
+        const errorEmbed = new EmbedBuilder()
+          .setAuthor(await buildEmbedAuthor(client))
+          .setColor('Red')
+          .addFields({ name: 'Details', value: `Invalid sendLog payload: typeof ${payload.logType}` })
+          .setFooter({ text: 'Error' })
+          .setTimestamp(new Date());
+
+        if (payload.message) errorEmbed.addFields({ name: 'Message', value: payload.message.url });
+
+        errorEmbed.addFields({ name: 'Payload', value: `\`\`\`${payload}\`\`\`` });
+
+        sendLog(client, { embeds: [errorEmbed] });
       }
     }
   } catch (error) {

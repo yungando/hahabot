@@ -26,7 +26,7 @@ const scheduleArchive = async (client, channelToArchive, timeElapsed = 0) => {
 
       sortCategory(archivedCategory);
 
-      sendLog(client, { logtype: 'string', message: `Archived <#${channelToArchive.id}>` });
+      sendLog(client, { logType: 'string', message: `Archived <#${channelToArchive.id}>` });
     },
     (threeWeeksInMs) + timeElapsed,
   );
@@ -43,7 +43,7 @@ const restoreChannel = async (client, channelToRestore) => {
 
   scheduleArchive(client, channelToRestore);
 
-  sendLog(client, { logtype: 'string', message: `Restored <#${channelToRestore.id}>` });
+  sendLog(client, { logType: 'string', message: `Restored <#${channelToRestore.id}>` });
 };
 
 const initArchives = async (client) => {
