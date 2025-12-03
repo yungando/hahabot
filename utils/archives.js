@@ -15,8 +15,7 @@ const sortCategory = async (channelCategory) => {
 };
 
 const scheduleArchive = async (client, channelToArchive, timeElapsed = 0) => {
-  const pollo = await client.guilds.fetch('534915212760055819');
-  const archivedCategory = await pollo.channels.fetch('917120901584150589');
+  const archivedCategory = await channelToArchive.guild.channels.fetch('917120901584150589');
 
   clearTimeout(client.archiveTimers.get(`${channelToArchive.id}`));
 
@@ -26,7 +25,7 @@ const scheduleArchive = async (client, channelToArchive, timeElapsed = 0) => {
 
       sortCategory(archivedCategory);
 
-      sendLog(client, { logType: 'string', message: `Archived <#${channelToArchive.id}>` });
+      sendLog(client, { logType: 'string', message: `Archived <#${channelToArchive.id}>`, guild: channelToArchive.guild });
     },
     (threeWeeksInMs) + timeElapsed,
   );
@@ -43,7 +42,7 @@ const restoreChannel = async (client, channelToRestore) => {
 
   scheduleArchive(client, channelToRestore);
 
-  sendLog(client, { logType: 'string', message: `Restored <#${channelToRestore.id}>` });
+  sendLog(client, { logType: 'string', message: `Restored <#${channelToRestore.id}>`, guild: channelToRestore.guild });
 };
 
 const initArchives = async (client) => {

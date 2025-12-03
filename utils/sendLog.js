@@ -59,7 +59,16 @@ module.exports = async (client, payload) => {
   try {
     switch (payload.logType) {
       case 'string': {
-        sendLog(client, { content: payload.message.slice(0, 2000) });
+        sendLog(client, {
+          embeds: [
+            new EmbedBuilder()
+              .setAuthor(await buildEmbedAuthor(client))
+              .setColor(await getGuildMemberColour(client.user))
+              .setDescription(payload.message)
+              .setFooter({ text: payload.guild?.name || 'hahabot' })
+              .setTimestamp(new Date()),
+          ],
+        });
 
         return;
       }
