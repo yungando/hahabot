@@ -5,7 +5,7 @@ const hahaDM = new WebhookClient({ id: WEBHOOK_DM_ID, token: WEBHOOK_DM_TOKEN })
 
 const sendLog = require('../utils/sendLog.js');
 const { scheduleArchive, restoreChannel } = require('../utils/archives.js');
-const redditVideos = require('../utils/redditVideos.js');
+const redditPosts = require('../utils/redditPosts.js');
 
 const { QuickDB } = require('quick.db');
 const db = new QuickDB();
@@ -53,7 +53,7 @@ module.exports = {
 
       // Reddit Videos
       const [redditURLMatch] = message.content.match(/https?:\/\/(?:www\.|old\.)?(?:reddit\.com\/r\/[^/\s]+\/(?:s\/[a-zA-Z0-9]+|comments\/[a-z0-9]+(?:\/[^\s/?#]*)?)|redd\.it\/[a-z0-9]+|v\.redd\.it\/[a-zA-Z0-9]+)/gi) || [];
-      if (redditURLMatch) redditVideos(client, message, redditURLMatch);
+      if (redditURLMatch) redditPosts(client, message, redditURLMatch);
 
       // dm webhook
       if (message.channel.type === ChannelType.DM) {
