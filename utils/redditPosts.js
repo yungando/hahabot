@@ -31,7 +31,7 @@ const getFullPostUrl = async (url) => {
 
   if (shortMatch || videoMatch) return getRedirectUrl(cleanUrl);
 
-  return getPostIdFromUrl(cleanUrl)[1];
+  return cleanUrl;
 };
 
 const getPostById = async (postId) => {
