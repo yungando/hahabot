@@ -1,5 +1,5 @@
 const { ChannelType, MessageFlags, ContainerBuilder } = require('discord.js');
-const fetch = require('node-fetch');
+const axios = require('axios');
 const { xml2json } = require('xml-js');
 
 const { REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_REFRESH_TOKEN } = process.env;
@@ -7,32 +7,34 @@ const Snoowrap = require('snoowrap');
 
 const sendLog = require('./sendLog.js');
 
-const getRedditPostIdByShortLink = async (url) => {
-  const response = await fetch(url, { redirect: 'follow' });
-  const destinationUrl = response.url;
+const removeUrlParams = (url) => {
+  const urlObject = new URL(url);
 
-  const [, postMatch] = destinationUrl.match(/\/comments\/([a-z0-9]+)/i);
-
-  return postMatch;
+  return `${urlObject.origin}${urlObject.pathname}`;
 };
 
-const parseRedditUrl = async (redditUrl) => {
-  const cleanUrl = redditUrl.split(/[?#]/)[0];
+const getRedirectUrl = async (sourceUrl) => {
+  const { pathname } = new URL(sourceUrl);
 
-  const shortMatch = cleanUrl.match(/\/r\/[^/]+\/s\/([a-zA-Z0-9]+)/);
-  const postMatch = cleanUrl.match(/(?:https?:\/\/)?(?:www\.|old\.)?reddit\.com\/r\/[^/]+\/comments\/([a-z0-9]+)/i);
-  const shareMatch = cleanUrl.match(/^https:\/\/redd\.it\/([a-z0-9]+)/i);
-  const videoMatch = cleanUrl.match(/^https:\/\/v\.redd\.it\/([a-zA-Z0-9]+)/);
+  const response = await axios.get(`https://reddit.ando.ws${pathname}`);
 
-  if (shortMatch) return { url: cleanUrl, type: 'shortLink', id: await getRedditPostIdByShortLink(cleanUrl) };
-  if (postMatch) return { url: cleanUrl, type: 'post', id: postMatch[1] };
-  if (shareMatch) return { url: cleanUrl, type: 'post', id: shareMatch[1] };
-  if (videoMatch) return { url: cleanUrl, type: 'video', id: videoMatch[1] };
-
-  return undefined;
+  return removeUrlParams(response.data.targetUrl);
 };
 
-const getRedditPostById = async (postId) => {
+const getPostIdFromUrl = (url) => (url.match(/\/r\/[^/]+\/comments\/([a-z0-9]+)/i)[1]);
+
+const getFullPostUrl = async (url) => {
+  const cleanUrl = removeUrlParams(url);
+
+  const shortMatch = cleanUrl.match(/\/r\/[^/]+\/s\/([a-z0-9]+)/i);
+  const videoMatch = cleanUrl.match(/v\.redd\.it\/([a-z0-9]+)/i);
+
+  if (shortMatch || videoMatch) return getRedirectUrl(cleanUrl);
+
+  return getPostIdFromUrl(cleanUrl)[1];
+};
+
+const getPostById = async (postId) => {
   const redditApiClient = new Snoowrap({
     userAgent: 'hahabot by u/couldie',
     clientId: REDDIT_CLIENT_ID,
@@ -73,8 +75,8 @@ const getHighestQualityMediaUrl = async (dashSet, mediaId) => {
 };
 
 const buildVxRedditUrl = async (mediaId) => {
-  const dashPlaylistResponse = await fetch(`https://v.redd.it/${mediaId}/DASHPlaylist.mpd`);
-  const dashText = await dashPlaylistResponse.text();
+  const dashPlaylistResponse = await axios.get(`https://v.redd.it/${mediaId}/DASHPlaylist.mpd`);
+  const dashText = await dashPlaylistResponse.data;
 
   const dashPlaylist = await JSON.parse(xml2json(dashText, { compact: true }));
   const dashSets = dashPlaylist.MPD.Period.AdaptationSet;
@@ -96,7 +98,7 @@ const buildGalleryImageUrl = (imageMetadata) => {
   return `https://i.redd.it/${imageMetadata.id}.${fileExtension}`;
 };
 
-const mapRedditPostContainer = async (redditPost) => {
+const mapPostContainer = async (redditPost) => {
   const redditPostPermalink = `https://reddit.com${[redditPost.permalink]}`;
 
   const redditPostContainer = new ContainerBuilder()
@@ -152,21 +154,21 @@ const mapRedditPostContainer = async (redditPost) => {
 };
 
 module.exports = async (client, message, redditUrl) => {
-  if (message.channel.type === ChannelType.GuildText) message.suppressEmbeds(true);
-
   try {
-    const redditUrlInfo = await parseRedditUrl(redditUrl);
-    if (!redditUrlInfo) return;
+    const postUrl = await getFullPostUrl(redditUrl);
+    const postId = getPostIdFromUrl(postUrl);
 
-    const redditPost = await getRedditPostById(redditUrlInfo.id);
+    const redditPost = await getPostById(postId);
     if (!redditPost) return;
 
-    const redditPostContainer = await mapRedditPostContainer(redditPost);
+    const redditPostContainer = await mapPostContainer(redditPost);
 
     await message.reply({
       components: [redditPostContainer],
       flags: MessageFlags.IsComponentsV2,
     });
+
+    if (message.channel.type === ChannelType.GuildText) message.suppressEmbeds(true);
   } catch (error) {
     const errorPayload = {
       logType: 'error',

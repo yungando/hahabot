@@ -5,10 +5,10 @@
   "main": "index.js",
   "dependencies": {
     "@dotenvx/dotenvx": "^1.39.1",
+    "axios": "^1.13.2",
     "better-sqlite3": "^11.8.1",
     "discord.js": "^14.25.1",
     "globals": "^16.2.0",
-    "node-fetch": "^2.7.0",
     "pm2": "^5.1.2",
     "quick.db": "^9.1.7",
     "snoowrap": "^1.23.0",
