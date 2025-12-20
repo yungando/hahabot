@@ -13,13 +13,13 @@ const servers = db.table('servers');
 
 module.exports = {
   async execute(client, message) {
-    if (message.partial) await message.fetch();
-
-    if (await servers.get(`${message.guild?.id}.serverName`) !== message.guild?.name) {
-      await servers.set(`${message.guild.id}.serverName`, message.guild.name);
-    }
-
     try {
+      if (message.partial) await message.fetch();
+
+      if (await servers.get(`${message.guild?.id}.serverName`) !== message.guild?.name) {
+        await servers.set(`${message.guild.id}.serverName`, message.guild.name);
+      }
+
       if (message.content.includes('🦀')) message.react('🦀');
       if (message.content.includes('🤝')) message.react('🤝');
       if (message.content.includes('<:salute:719485363558809600>')) message.react('719485363558809600');

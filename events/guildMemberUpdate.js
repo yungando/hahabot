@@ -2,13 +2,13 @@ const sendLog = require('../utils/sendLog.js');
 
 module.exports = {
   async execute(client, oldMember, newMember) {
-    if (oldMember.partial) await oldMember.fetch();
-    if (newMember.partial) await newMember.fetch();
-
-    const polloId = '534915212760055819';
-    const nitroRoleId = '585548115243696170';
-
     try {
+      if (oldMember.partial) await oldMember.fetch();
+      if (newMember.partial) await newMember.fetch();
+
+      const polloId = '534915212760055819';
+      const nitroRoleId = '585548115243696170';
+
       const { guild } = oldMember;
 
       if (guild.id !== polloId) return; // pollo

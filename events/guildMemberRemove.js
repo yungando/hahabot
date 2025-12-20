@@ -8,9 +8,9 @@ const sendLog = require('../utils/sendLog.js');
 
 module.exports = {
   async execute(client, member) {
-    if (member.partial) await member.fetch();
-
     try {
+      if (member.partial) await member.fetch();
+
       const channelId = await servers.get(`${member.guild.id}.leaveMessagesID`);
 
       if (channelId !== null) {

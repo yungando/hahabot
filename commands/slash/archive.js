@@ -13,9 +13,8 @@ module.exports = {
   ],
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
-    const channelToArchive = interaction.channel;
-
     try {
+      const channelToArchive = interaction.channel;
       if (channelToArchive.partial) await channelToArchive.fetch();
 
       const gamesCategoryId = '785540936457125888';
@@ -47,7 +46,7 @@ module.exports = {
     } catch (error) {
       const errorPayload = {
         logType: 'error',
-        details: `Failed attempting to archive <#${channelToArchive.id}>`,
+        details: `Failed attempting to archive <#${interaction.channel.id}>`,
         error,
         user: interaction.user,
         guild: interaction.guild,

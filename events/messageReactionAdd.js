@@ -6,14 +6,14 @@ const sendLog = require('../utils/sendLog.js');
 
 module.exports = {
   async execute(client, messageReaction, user) {
-    if (messageReaction.partial) await messageReaction.fetch();
-    if (user.partial) await user.fetch();
-
-    if (user.bot) return;
-
-    const { message, emoji } = messageReaction;
-
     try {
+      if (messageReaction.partial) await messageReaction.fetch();
+      if (user.partial) await user.fetch();
+
+      if (user.bot) return;
+
+      const { message, emoji } = messageReaction;
+
       if (await servers.get(`${message.guild.id}.serverName`) !== message.guild.name) {
         await servers.set(`${message.guild.id}.serverName`, message.guild.name);
       }
@@ -35,10 +35,10 @@ module.exports = {
       const errorPayload = {
         logType: 'error',
         details: 'Failed attempting to add reaction to message.',
-        message,
+        message: messageReaction.message,
         error,
         user,
-        guild: message.guild,
+        guild: messageReaction.message.guild,
       };
 
       sendLog(client, errorPayload);
