@@ -15,7 +15,7 @@ const getUsername = async (user, guild) => {
       const displayLength = username.length - 80;
 
       if (displayLength > 0) {
-        return `${displayName.toString().slice(0, (displayName.length - displayLength - 1))}… - ${user.username} - ${user.id}`;
+        return `${displayName.toString().slice(0, (displayName.length - displayLength - 1))}… - ${user.globalName} - ${user.id}`;
       }
 
       return username;

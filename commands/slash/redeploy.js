@@ -13,21 +13,31 @@ module.exports = {
   ],
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    try {
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    await clearCommands(client);
-    await loadCommands(client);
-    await registerCommands(client);
+      await clearCommands(client);
+      await loadCommands(client);
+      await registerCommands(client);
 
-    await interaction.editReply({ content: 'Successfully redeployed all commands.', flags: MessageFlags.Ephemeral });
+      await interaction.editReply({ content: 'Successfully redeployed all commands.', flags: MessageFlags.Ephemeral });
 
-    const logPayload = {
-      logType: 'command',
-      message: '/redeploy',
-      user: interaction.user,
-      guild: interaction.guild,
-    };
+      const logPayload = {
+        logType: 'command',
+        message: '/redeploy',
+        user: interaction.user,
+        guild: interaction.guild,
+      };
 
-    sendLog(client, logPayload);
+      sendLog(client, logPayload);
+    } catch (error) {
+      const errorPayload = {
+        logType: 'error',
+        details: 'Failed attempting to redeploy commands.',
+        error,
+      };
+
+      sendLog(client, errorPayload);
+    }
   },
 };

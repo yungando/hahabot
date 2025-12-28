@@ -21,20 +21,16 @@ const syncEvents = async (client) => {
 };
 
 const clearCommands = async (client) => {
-  try {
-    console.log('Starting clearing old commands.');
+  console.log('Starting clearing old commands.');
 
-    client.commands.clear();
-    client.contextMenus.clear();
-    // eslint-disable-next-line no-param-reassign
-    client.globalCommands = [];
-    // eslint-disable-next-line no-param-reassign
-    client.guildCommands = [];
+  client.commands.clear();
+  client.contextMenus.clear();
+  // eslint-disable-next-line no-param-reassign
+  client.globalCommands = [];
+  // eslint-disable-next-line no-param-reassign
+  client.guildCommands = [];
 
-    console.log('Successfully cleared old commands.');
-  } catch (error) {
-    console.log(error);
-  }
+  console.log('Successfully cleared old commands.');
 };
 
 const reduceGuildCommands = async (guildCommands) => {
@@ -56,23 +52,19 @@ const reduceGuildCommands = async (guildCommands) => {
 const registerCommands = async (client) => {
   const clientId = client.application.id;
 
-  try {
-    console.log('Started registering application commands.');
+  console.log('Started registering application commands.');
 
-    await rest.put(Routes.applicationCommands(clientId), {
-      body: client.globalCommands,
+  await rest.put(Routes.applicationCommands(clientId), {
+    body: client.globalCommands,
+  });
+
+  for (const guild of client.guildCommands) {
+    await rest.put(Routes.applicationGuildCommands(clientId, guild.guildId), {
+      body: guild.commands,
     });
-
-    for (const guild of client.guildCommands) {
-      await rest.put(Routes.applicationGuildCommands(clientId, guild.guildId), {
-        body: guild.commands,
-      });
-    }
-
-    console.log('Successfully registered application commands.');
-  } catch (error) {
-    console.log(error);
   }
+
+  console.log('Successfully registered application commands.');
 };
 
 const loadCommands = async (client) => {

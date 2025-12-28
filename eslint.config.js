@@ -286,12 +286,12 @@ const eslintFormattingConfigRuleOverrides = {
     'error',
     {
       ObjectExpression: {
-        minProperties: 4,
+        minProperties: 6,
         multiline: true,
         consistent: true,
       },
       ObjectPattern: {
-        minProperties: 4,
+        minProperties: 6,
         multiline: true,
         consistent: true,
       },
