@@ -14,44 +14,20 @@ module.exports = {
   type: ApplicationCommandType.ChatInput,
   options: [
     {
-      name: 'default',
-      description: 'Return to the server\'s default theme.',
-      type: ApplicationCommandOptionType.Subcommand,
-    },
-    {
-      name: 'halloween',
-      description: 'Apply the server\'s halloween theme.',
-      type: ApplicationCommandOptionType.Subcommand,
-    },
-    {
-      name: 'christmas',
-      description: 'Apply the server\'s christmas theme.',
-      type: ApplicationCommandOptionType.Subcommand,
-    },
-    {
-      name: 'christmasday',
-      description: 'Apply the server\'s christmasDay theme.',
-      type: ApplicationCommandOptionType.Subcommand,
-    },
-    {
-      name: 'partyhat',
-      description: 'Apply the server\'s partyhat theme.',
-      type: ApplicationCommandOptionType.Subcommand,
-    },
-    {
-      name: 'minecraft',
-      description: 'Apply the server\'s minecraft theme.',
-      type: ApplicationCommandOptionType.Subcommand,
-    },
-    {
-      name: 'original',
-      description: 'Apply the server\'s original theme.',
-      type: ApplicationCommandOptionType.Subcommand,
-    },
-    {
-      name: 'realistic',
-      description: 'Apply the server\'s realistic theme.',
-      type: ApplicationCommandOptionType.Subcommand,
+      name: 'theme',
+      description: 'Select the desired server theme.',
+      type: ApplicationCommandOptionType.String,
+      required: true,
+      choices: [
+        { name: 'default', value: 'default' },
+        { name: 'halloween', value: 'halloween' },
+        { name: 'christmas', value: 'christmas' },
+        { name: 'christmas day', value: 'christmasDay' },
+        { name: 'partyhat', value: 'partyhat' },
+        { name: 'minecraft', value: 'minecraft' },
+        { name: 'original', value: 'original' },
+        { name: 'realistic', value: 'realistic' },
+      ],
     },
   ],
   default_member_permissions: '0',
@@ -65,9 +41,9 @@ module.exports = {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       const { guild } = interaction;
-      const subcommand = await interaction.options.getSubcommand();
+      const theme = await interaction.options.getString('theme', true);
 
-      const serverThemeResponse = await setServerTheme(client, guild, subcommand);
+      const serverThemeResponse = await setServerTheme(client, guild, theme);
 
       await interaction.editReply({ content: serverThemeResponse, flags: MessageFlags.Ephemeral });
 
