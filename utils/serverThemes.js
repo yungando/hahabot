@@ -6,7 +6,7 @@ const POLLO_SERVER_ID = '534915212760055819';
 const HAHABOT_SERVER_ID = '568227296767639552';
 
 const setServerTheme = async (client, guild, theme) => {
-  const newIconPath = `./serverIcons/${guild.name}/${theme}.png`;
+  const newIconPath = `./serverthemes/${guild.name}/icons/${theme}.png`;
 
   if (!fs.existsSync(newIconPath)) return 'Invalid server theme.';
 
@@ -17,6 +17,20 @@ const setServerTheme = async (client, guild, theme) => {
   }
 
   return 'Successfully changed server theme.';
+};
+
+const sendServerBanner = async (client, guild, theme) => {
+  const bannerPath = `./serverthemes/${guild.name}/banners/${theme}.png`;
+  const generalChannel = guild.channels.cache.find((channel) => channel.name === 'general');
+
+  if (!fs.existsSync(bannerPath)) return 'Invalid server theme.';
+  if (!generalChannel) return 'Couldn\'t find general channel.';
+
+  return generalChannel.send({
+    files: [{
+      attachement: bannerPath,
+    }],
+  });
 };
 
 const initThemeSchedules = async (client) => {
@@ -37,6 +51,8 @@ const initThemeSchedules = async (client) => {
       await setServerTheme(client, pollo, 'halloween');
       await setServerTheme(client, hahabot, 'halloween');
 
+      await sendServerBanner(client, pollo, 'halloween');
+
       sendLog(client, { logType: 'string', message: 'Set server themes to halloween.' });
     });
 
@@ -51,11 +67,13 @@ const initThemeSchedules = async (client) => {
       await setServerTheme(client, pollo, 'christmas');
       await setServerTheme(client, hahabot, 'christmas');
 
+      await sendServerBanner(client, pollo, 'christmas');
+
       sendLog(client, { logType: 'string', message: 'Set server themes to christmas.' });
     });
 
     scheduleJob(christmasDay, async () => {
-      await setServerTheme(client, hahabot, 'christmasday');
+      await setServerTheme(client, hahabot, 'christmasDay');
 
       sendLog(client, { logType: 'string', message: 'Set server themes to christmas day.' });
     });
@@ -63,6 +81,8 @@ const initThemeSchedules = async (client) => {
     scheduleJob(newYearsStart, async () => {
       await setServerTheme(client, pollo, 'default');
       await setServerTheme(client, hahabot, 'partyhat');
+
+      await sendServerBanner(client, pollo, 'default');
 
       sendLog(client, { logType: 'string', message: 'Set server themes to new years.' });
     });
