@@ -46,31 +46,38 @@ module.exports = {
   name: 'transmog',
   description: 'Set your name\'s colour in the server.',
   type: ApplicationCommandType.ChatInput,
-  options: [{
-    name: 'role',
-    description: 'Activate transmog (change your name\'s colour in the server) using a colour from an earned role.',
-    type: ApplicationCommandOptionType.Subcommand,
-    options: [{
+  options: [
+    {
       name: 'role',
-      description: 'Select the role you want to transmog and copy the colour from.',
-      type: ApplicationCommandOptionType.Role,
-      required: true,
-    }],
-  }, {
-    name: 'hex',
-    description: 'Activate transmog (change your name\'s colour in the server) using a hex colour code.',
-    type: ApplicationCommandOptionType.Subcommand,
-    options: [{
-      name: 'input',
-      description: 'Input a hex colour code. Can be with or without the #. Examples: "#1a1a1a", "efefef".',
-      type: ApplicationCommandOptionType.String,
-      required: true,
-    }],
-  }, {
-    name: 'off',
-    description: 'Deactivate transmog and remove any vanity role.',
-    type: ApplicationCommandOptionType.Subcommand,
-  }],
+      description: 'Activate transmog (change your name\'s colour in the server) using a colour from an earned role.',
+      type: ApplicationCommandOptionType.Subcommand,
+      options: [
+        {
+          name: 'role',
+          description: 'Select the role you want to transmog and copy the colour from.',
+          type: ApplicationCommandOptionType.Role,
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'hex',
+      description: 'Activate transmog (change your name\'s colour in the server) using a hex colour code.',
+      type: ApplicationCommandOptionType.Subcommand,
+      options: [
+        {
+          name: 'input',
+          description: 'Input a hex colour code. Can be with or without the #. Examples: "#1a1a1a", "efefef".',
+          type: ApplicationCommandOptionType.String,
+          required: true,
+        },
+      ],
+    }, {
+      name: 'off',
+      description: 'Deactivate transmog and remove any vanity role.',
+      type: ApplicationCommandOptionType.Subcommand,
+    },
+  ],
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
     try {

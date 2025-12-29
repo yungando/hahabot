@@ -5,12 +5,14 @@ module.exports = {
   name: 'bird',
   description: 'would a bot send you this',
   type: ApplicationCommandType.ChatInput,
-  options: [{
-    name: 'user',
-    description: 'who\'s getting birded',
-    type: ApplicationCommandOptionType.User,
-    required: true,
-  }],
+  options: [
+    {
+      name: 'user',
+      description: 'who\'s getting birded',
+      type: ApplicationCommandOptionType.User,
+      required: true,
+    },
+  ],
   default_member_permissions: '0',
   guilds: [
     '534915212760055819',

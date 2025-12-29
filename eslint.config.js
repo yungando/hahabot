@@ -129,9 +129,6 @@ const eslintBaseConfigRuleOverrides = {
     'error',
     'always',
   ],
-  'no-return-await': [
-    'error',
-  ],
   'no-spaced-func': [
     'error',
   ],
@@ -265,7 +262,7 @@ const eslintFormattingConfigRuleOverrides = {
   'lines-around-comment': 'off',
   'max-len': [
     'error',
-    100,
+    150,
     2,
     {
       ignoreComments: true,
