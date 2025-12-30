@@ -22,15 +22,20 @@ const setServerTheme = async (client, guild, theme) => {
   return 'Successfully changed server theme.';
 };
 
-const sendServerBanner = async (guild, theme) => {
-  const bannerPath = `./serverthemes/${guild.name}/banners/${theme}.png`;
-  const generalChannel = guild.channels.cache.find((channel) => channel.name === 'general');
+const sendToGeneral = async (guild, message) => {
+  const generalChannel = await guild.channels.cache.find((channel) => channel.name === 'general');
 
-  if (!fs.existsSync(bannerPath)) return 'Invalid server theme.';
   if (!generalChannel) return 'Couldn\'t find general channel.';
 
+  return await generalChannel.send(message);
+};
+
+const sendServerBanner = async (guild, theme) => {
+  const bannerPath = `./serverthemes/${guild.name}/banners/${theme}.png`;
+  if (!fs.existsSync(bannerPath)) return 'Invalid server theme.';
+
   const bannerAttachment = new AttachmentBuilder(bannerPath, { name: `${guild.name}-${theme}.png` });
-  return await generalChannel.send({ files: [bannerAttachment] });
+  return await sendToGeneral(guild, { files: [bannerAttachment] });
 };
 
 const createThemeRole = async (guild, roleName, roleColour) => {
@@ -57,12 +62,15 @@ const initThemeSchedules = async (client) => {
     const hahabot = await client.guilds.fetch(HAHABOT_SERVER_ID);
 
     const halloweenStart = '0 0 1 10 *';
+    const halloweenDay = '0 0 31 10 *';
     const halloweenEnd = '0 0 1 11 *';
 
     const christmasStart = '0 0 1 12 *';
+    const christmasEve = '0 0 24 12 *';
     const christmasDay = '0 0 25 12 *';
 
     const newYearsStart = '0 0 30 12 *';
+    const newYearsDay = '0 0 1 1 *';
     const newYearsEnd = '0 0 2 1 *';
 
     schedule(halloweenStart, { timezone: 'Europe/London' }, async () => {
@@ -73,6 +81,10 @@ const initThemeSchedules = async (client) => {
       await sendServerBanner(pollo, 'halloween');
 
       sendLog(client, { logType: 'string', message: 'Set server themes to halloween.' });
+    });
+
+    schedule(halloweenDay, { timezone: 'Europe/London' }, async () => {
+      await sendToGeneral(pollo, { content: 'hh' });
     });
 
     schedule(halloweenEnd, { timezone: 'Europe/London' }, async () => {
@@ -95,8 +107,13 @@ const initThemeSchedules = async (client) => {
       sendLog(client, { logType: 'string', message: 'Set server themes to christmas.' });
     });
 
+    schedule(christmasEve, { timezone: 'Europe/London' }, async () => {
+      await sendToGeneral(pollo, 'mce');
+    });
+
     schedule(christmasDay, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'christmasDay');
+      await sendToGeneral(pollo, 'mc');
 
       sendLog(client, { logType: 'string', message: 'Set server themes to christmas day.' });
     });
@@ -109,6 +126,10 @@ const initThemeSchedules = async (client) => {
       await setHahabotNickname(pollo);
 
       sendLog(client, { logType: 'string', message: 'Set server themes to new years.' });
+    });
+
+    schedule(newYearsDay, { timezone: 'Europe/London' }, async () => {
+      await sendToGeneral(pollo, 'hny');
     });
 
     schedule(newYearsEnd, { timezone: 'Europe/London' }, async () => {

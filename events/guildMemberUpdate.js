@@ -11,9 +11,8 @@ module.exports = {
 
       const { guild } = oldMember;
 
-      if (guild.id !== polloId) return; // pollo
+      if (guild.id !== polloId) return;
 
-      // eslint-disable-next-line max-len
       if (oldMember.roles.cache.some((role) => role.id === nitroRoleId) && !newMember.roles.cache.some((role) => role.id === nitroRoleId)) {
         guild.systemChannel.send(`<@${newMember.id}> unboosted the server.`);
       }
