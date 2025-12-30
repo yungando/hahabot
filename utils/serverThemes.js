@@ -62,7 +62,7 @@ const initThemeSchedules = async (client) => {
     const christmasStart = '0 0 1 12 *';
     const christmasDay = '0 0 25 12 *';
 
-    const newYearsStart = '12 1 30 12 *';
+    const newYearsStart = '0 0 30 12 *';
     const newYearsEnd = '0 0 2 1 *';
 
     schedule(halloweenStart, { timezone: 'Europe/London' }, async () => {
