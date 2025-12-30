@@ -38,7 +38,7 @@ const createThemeRole = async (guild, roleName, roleColour) => {
   const themeRole = await guild.roles.create(
     {
       name: roleName,
-      color: roleColour,
+      colors: { primaryColor: roleColour },
       position: hahaRole.position,
       permissions: [],
     },
@@ -67,7 +67,6 @@ const initThemeSchedules = async (client) => {
 
     schedule(halloweenStart, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'halloween');
-      await setServerTheme(client, pollo, 'halloween');
 
       await createThemeRole(pollo, 'hahalloween', '#e67e22');
       await setHahabotNickname(pollo, 'hahalloween');
@@ -78,7 +77,6 @@ const initThemeSchedules = async (client) => {
 
     schedule(halloweenEnd, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'default');
-      await setServerTheme(client, pollo, 'default');
 
       await deleteThemeRole(pollo, 'hahalloween');
       await setHahabotNickname(pollo);

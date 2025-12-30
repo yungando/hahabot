@@ -12,7 +12,7 @@ const createNewRole = async (name, colour, guild) => {
   const newRole = await guild.roles.create(
     {
       name: `${name} - vanity`,
-      color: `${colour}`,
+      colors: { primaryColor: `${colour}` },
       position: hahaRole.position,
       permissions: [],
     },
