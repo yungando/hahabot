@@ -75,25 +75,27 @@ const initThemeSchedules = async (client) => {
 
     schedule(halloweenStart, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'halloween');
+      await setServerTheme(client, pollo, 'halloween');
 
       await createThemeRole(pollo, 'hahalloween', '#e67e22');
       await setHahabotNickname(pollo, 'hahalloween');
       await sendServerBanner(pollo, 'halloween');
 
-      sendLog(client, { logType: 'string', message: 'Set server themes to halloween.' });
+      sendLog(client, { logType: 'string', message: 'Set server themes to Halloween.' });
     });
 
     schedule(halloweenDay, { timezone: 'Europe/London' }, async () => {
-      await sendToGeneral(pollo, { content: 'hh' });
+      await sendToGeneral(pollo, 'hh');
     });
 
     schedule(halloweenEnd, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'default');
+      await setServerTheme(client, pollo, 'default');
 
       await deleteThemeRole(pollo, 'hahalloween');
       await setHahabotNickname(pollo);
 
-      sendLog(client, { logType: 'string', message: 'Set server themes to default.' });
+      sendLog(client, { logType: 'string', message: 'Set server themes to Default.' });
     });
 
     schedule(christmasStart, { timezone: 'Europe/London' }, async () => {
@@ -104,7 +106,7 @@ const initThemeSchedules = async (client) => {
       await setHahabotNickname(pollo, 'hoho');
       await sendServerBanner(pollo, 'christmas');
 
-      sendLog(client, { logType: 'string', message: 'Set server themes to christmas.' });
+      sendLog(client, { logType: 'string', message: 'Set server themes to Christmas.' });
     });
 
     schedule(christmasEve, { timezone: 'Europe/London' }, async () => {
@@ -113,19 +115,21 @@ const initThemeSchedules = async (client) => {
 
     schedule(christmasDay, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'christmasDay');
+
       await sendToGeneral(pollo, 'mc');
 
-      sendLog(client, { logType: 'string', message: 'Set server themes to christmas day.' });
+      sendLog(client, { logType: 'string', message: 'Set server themes to Christmas Day.' });
     });
 
     schedule(newYearsStart, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'partyhat');
-      await setServerTheme(client, pollo, 'default');
+      await setServerTheme(client, pollo, 'partyhat');
 
       await deleteThemeRole(pollo, 'hohobot');
       await setHahabotNickname(pollo);
+      await sendServerBanner(pollo, 'partyhat');
 
-      sendLog(client, { logType: 'string', message: 'Set server themes to new years.' });
+      sendLog(client, { logType: 'string', message: 'Set server themes to New Years.' });
     });
 
     schedule(newYearsDay, { timezone: 'Europe/London' }, async () => {
@@ -134,8 +138,9 @@ const initThemeSchedules = async (client) => {
 
     schedule(newYearsEnd, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'default');
+      await setServerTheme(client, pollo, 'default');
 
-      sendLog(client, { logType: 'string', message: 'Set server themes to default.' });
+      sendLog(client, { logType: 'string', message: 'Set server themes to Default.' });
     });
   } catch (error) {
     const errorPayload = {
