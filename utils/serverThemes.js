@@ -9,7 +9,7 @@ const HAHABOT_SERVER_ID = '568227296767639552';
 const schedule = (...args) => new Cron(...args);
 
 const setServerTheme = async (client, guild, theme) => {
-  const newIconPath = `./serverthemes/${guild.name}/icons/${theme}.png`;
+  const newIconPath = `./serverThemes/${guild.name}/icons/${theme}.png`;
 
   if (!fs.existsSync(newIconPath)) return 'Invalid server theme.';
 
@@ -31,7 +31,7 @@ const sendToGeneral = async (guild, message) => {
 };
 
 const sendServerBanner = async (guild, theme) => {
-  const bannerPath = `./serverthemes/${guild.name}/banners/${theme}.png`;
+  const bannerPath = `./serverThemes/${guild.name}/banners/${theme}.png`;
   if (!fs.existsSync(bannerPath)) return 'Invalid server theme.';
 
   const bannerAttachment = new AttachmentBuilder(bannerPath, { name: `${guild.name}-${theme}.png` });
