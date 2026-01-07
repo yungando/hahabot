@@ -1,4 +1,4 @@
-const { WebhookClient, EmbedBuilder } = require('discord.js');
+import { WebhookClient, EmbedBuilder } from 'discord.js';
 
 const { WEBHOOK_LOG_ID, WEBHOOK_LOG_TOKEN } = process.env;
 const hahaLOG = new WebhookClient({ id: WEBHOOK_LOG_ID, token: WEBHOOK_LOG_TOKEN });
@@ -55,7 +55,7 @@ const sendLog = async (client, { content, embeds }) => {
   });
 };
 
-module.exports = async (client, payload) => {
+const sendLogPayload = async (client, payload) => {
   try {
     switch (payload.logType) {
       case 'string': {
@@ -137,3 +137,5 @@ module.exports = async (client, payload) => {
     });
   }
 };
+
+export default sendLogPayload;

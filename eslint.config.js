@@ -1,6 +1,6 @@
-const eslintBaseConfig = require('eslint-config-eslint/base');
-const eslintFormattingConfig = require('eslint-config-eslint/formatting');
-const globals = require('globals');
+import eslintBaseConfig from 'eslint-config-eslint/base';
+import eslintFormattingConfig from 'eslint-config-eslint/formatting';
+import globals from 'globals';
 
 const eslintBaseConfigRuleOverrides = {
   '@eslint-community/eslint-comments/require-description': 'off',
@@ -329,13 +329,13 @@ const eslintFormattingConfigRuleOverrides = {
   ],
 };
 
-module.exports = [
+export default [
   ...eslintBaseConfig,
   eslintFormattingConfig,
   {
     languageOptions: {
       ecmaVersion: 'latest',
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: globals.node,
     },
     rules: {

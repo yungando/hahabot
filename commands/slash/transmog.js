@@ -1,11 +1,6 @@
-const {
-  ApplicationCommandOptionType,
-  ApplicationCommandType,
-  MessageFlags,
-  InteractionContextType,
-} = require('discord.js');
+import { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags, InteractionContextType } from 'discord.js';
 
-const sendLog = require('../../utils/sendLog.js');
+import sendLog from '../../utils/sendLog.js';
 
 const createNewRole = async (name, colour, guild) => {
   const hahaRole = await guild.members.me.roles.botRole;
@@ -42,7 +37,7 @@ const handleRemoveRole = async (member) => {
   }
 };
 
-module.exports = {
+export default {
   name: 'transmog',
   description: 'Set your name\'s colour in the server.',
   type: ApplicationCommandType.ChatInput,

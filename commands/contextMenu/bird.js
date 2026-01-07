@@ -1,7 +1,7 @@
-const { ApplicationCommandType, MessageFlags, InteractionContextType } = require('discord.js');
-const sendLog = require('../../utils/sendLog.js');
+import { ApplicationCommandType, MessageFlags, InteractionContextType } from 'discord.js';
+import sendLog from '../../utils/sendLog.js';
 
-module.exports = {
+export default {
   name: 'bird',
   type: ApplicationCommandType.User,
   default_member_permissions: '0',

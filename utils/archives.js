@@ -1,10 +1,9 @@
-const sendLog = require('./sendLog.js');
+import sendLog from './sendLog.js';
 
 const threeWeeksInMs = 1000 * 60 * 60 * 24 * 21;
 
 const sortCategory = async (channelCategory) => {
-  const sortedCategory = channelCategory.children.cache
-    .sorted((a, b) => a.name.localeCompare(b.name));
+  const sortedCategory = channelCategory.children.cache.sorted((a, b) => a.name.localeCompare(b.name));
   const categoryPositions = [];
 
   for (let i = 0; i < sortedCategory.size; i += 1) {
@@ -66,7 +65,7 @@ const initArchives = async (client) => {
   });
 };
 
-module.exports = {
+export {
   initArchives,
   sortCategory,
   scheduleArchive,

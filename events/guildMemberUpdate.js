@@ -1,6 +1,6 @@
-const sendLog = require('../utils/sendLog.js');
+import sendLog from '../utils/sendLog.js';
 
-module.exports = {
+export default {
   async execute(client, oldMember, newMember) {
     try {
       if (oldMember.partial) await oldMember.fetch();
@@ -13,7 +13,8 @@ module.exports = {
 
       if (guild.id !== polloId) return;
 
-      if (oldMember.roles.cache.some((role) => role.id === nitroRoleId) && !newMember.roles.cache.some((role) => role.id === nitroRoleId)) {
+      if (oldMember.roles.cache.some((role) => role.id === nitroRoleId)
+        && !newMember.roles.cache.some((role) => role.id === nitroRoleId)) {
         guild.systemChannel.send(`<@${newMember.id}> unboosted the server.`);
       }
     } catch (error) {

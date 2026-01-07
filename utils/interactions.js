@@ -1,16 +1,19 @@
-const fs = require('node:fs');
-const { DISCORD_TOKEN } = process.env;
+import { readdirSync } from 'node:fs';
+import { REST, Routes, ApplicationCommandType } from 'discord.js';
 
-const { REST, Routes, ApplicationCommandType } = require('discord.js');
+const { DISCORD_TOKEN } = process.env;
 const rest = new REST().setToken(DISCORD_TOKEN);
 
+const eventsDir = new URL('../events/', import.meta.url);
+const commandsDir = new URL('../commands/', import.meta.url);
+
 const syncEvents = async (client) => {
-  const eventFiles = fs.readdirSync('./events').filter((file) => file.endsWith('.js'));
+  const eventFiles = readdirSync(eventsDir).filter((file) => file.endsWith('.js'));
 
   for (const file of eventFiles) {
     const [eventName] = file.split('.');
-    // eslint-disable-next-line global-require
-    const event = require(`../events/${file}`);
+    const eventUrl = new URL(file, eventsDir);
+    const { default: event } = await import(eventUrl.href);
 
     if (event.once) {
       client.once(eventName, (...args) => event.execute(client, ...args));
@@ -70,16 +73,17 @@ const registerCommands = async (client) => {
 const loadCommands = async (client) => {
   const guildCommands = [];
 
-  const commandFiles = fs
-    .readdirSync('./commands')
-    .flatMap((folder) => fs
-      .readdirSync(`./commands/${folder}`)
-      .filter((file) => file.endsWith('.js'))
-      .map((file) => `./commands/${folder}/${file}`));
+  const commandFiles = readdirSync(commandsDir)
+    .flatMap((folder) => {
+      const folderUrl = new URL(`${folder}/`, commandsDir);
+
+      return readdirSync(folderUrl)
+        .filter((file) => file.endsWith('.js'))
+        .map((file) => new URL(file, folderUrl));
+    });
 
   for (const file of commandFiles) {
-    // eslint-disable-next-line global-require
-    const command = require(`.${file}`);
+    const { default: command } = await import(file.href);
 
     if (command.guilds) {
       for (const commandsGuildId of command.guilds) {
@@ -100,7 +104,7 @@ const loadCommands = async (client) => {
   client.guildCommands.push(...reducedGuildCommands);
 };
 
-module.exports = {
+export {
   syncEvents,
   clearCommands,
   registerCommands,

@@ -1,7 +1,7 @@
-const { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags } = require('discord.js');
-const sendLog = require('../../utils/sendLog.js');
+import { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags } from 'discord.js';
+import sendLog from '../../utils/sendLog.js';
 
-module.exports = {
+export default {
   name: 'bird',
   description: 'would a bot send you this',
   type: ApplicationCommandType.ChatInput,

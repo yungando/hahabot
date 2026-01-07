@@ -1,9 +1,8 @@
-const { ApplicationCommandType, MessageFlags, InteractionContextType } = require('discord.js');
+import { ApplicationCommandType, MessageFlags, InteractionContextType } from 'discord.js';
+import { clearCommands, registerCommands, loadCommands } from '../../utils/interactions.js';
+import sendLog from '../../utils/sendLog.js';
 
-const { clearCommands, registerCommands, loadCommands } = require('../../utils/interactions.js');
-const sendLog = require('../../utils/sendLog.js');
-
-module.exports = {
+export default {
   name: 'redeploy',
   description: 'Redeploy all of hahabot\'s commands.',
   type: ApplicationCommandType.ChatInput,

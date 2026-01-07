@@ -1,7 +1,8 @@
-const { Cron } = require('croner');
-const fs = require('node:fs');
-const sendLog = require('./sendLog');
-const { AttachmentBuilder } = require('discord.js');
+import { Cron } from 'croner';
+import fs from 'node:fs';
+import { AttachmentBuilder } from 'discord.js';
+
+import sendLog from './sendLog.js';
 
 const POLLO_SERVER_ID = '534915212760055819';
 const HAHABOT_SERVER_ID = '568227296767639552';
@@ -153,7 +154,7 @@ const initThemeSchedules = async (client) => {
   }
 };
 
-module.exports = {
+export {
   initThemeSchedules,
   setServerTheme,
 };

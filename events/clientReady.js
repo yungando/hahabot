@@ -1,10 +1,9 @@
-const sendLog = require('../utils/sendLog.js');
+import sendLog from '../utils/sendLog.js';
+import { initArchives } from '../utils/archives.js';
+import { loadCommands } from '../utils/interactions.js';
+import { initThemeSchedules } from '../utils/serverThemes.js';
 
-const { initArchives } = require('../utils/archives.js');
-const { loadCommands } = require('../utils/interactions.js');
-const { initThemeSchedules } = require('../utils/serverThemes.js');
-
-module.exports = {
+export default {
   once: true,
   async execute(client) {
     await loadCommands(client);

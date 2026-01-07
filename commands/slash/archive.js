@@ -1,9 +1,8 @@
-const { ApplicationCommandType, MessageFlags, InteractionContextType } = require('discord.js');
+import { ApplicationCommandType, MessageFlags, InteractionContextType } from 'discord.js';
+import { sortCategory } from '../../utils/archives.js';
+import sendLog from '../../utils/sendLog.js';
 
-const { sortCategory } = require('../../utils/archives.js');
-const sendLog = require('../../utils/sendLog.js');
-
-module.exports = {
+export default {
   name: 'archive',
   description: 'Archive this channel.',
   type: ApplicationCommandType.ChatInput,

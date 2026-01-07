@@ -1,14 +1,9 @@
-const {
-  ApplicationCommandOptionType,
-  ApplicationCommandType,
-  MessageFlags,
-  InteractionContextType,
-} = require('discord.js');
+import { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags, InteractionContextType } from 'discord.js';
 
-const sendLog = require('../../utils/sendLog.js');
-const { setServerTheme } = require('../../utils/serverThemes.js');
+import sendLog from '../../utils/sendLog.js';
+import { setServerTheme } from '../../utils/serverThemes.js';
 
-module.exports = {
+export default {
   name: 'theme',
   description: 'Set the server\'s theme.',
   type: ApplicationCommandType.ChatInput,

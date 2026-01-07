@@ -1,12 +1,11 @@
-const { EmbedBuilder } = require('discord.js');
+import { EmbedBuilder } from 'discord.js';
+import { QuickDB } from 'quick.db';
 
-const { QuickDB } = require('quick.db');
+import sendLog from '../utils/sendLog.js';
 const db = new QuickDB();
 const servers = db.table('servers');
 
-const sendLog = require('../utils/sendLog.js');
-
-module.exports = {
+export default {
   async execute(client, member) {
     try {
       if (member.partial) await member.fetch();

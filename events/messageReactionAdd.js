@@ -1,10 +1,11 @@
-const { QuickDB } = require('quick.db');
+import { QuickDB } from 'quick.db';
+
+import sendLog from '../utils/sendLog.js';
+
 const db = new QuickDB();
 const servers = db.table('servers');
 
-const sendLog = require('../utils/sendLog.js');
-
-module.exports = {
+export default {
   async execute(client, messageReaction, user) {
     try {
       if (messageReaction.partial) await messageReaction.fetch();
@@ -26,7 +27,9 @@ module.exports = {
         const downvote = message.reactions.cache.get(downvoteId);
 
         if (downvote) downvote.users.remove(user);
-      } else if (emoji.id === downvoteId) {
+      }
+
+      if (emoji.id === downvoteId) {
         const upvote = message.reactions.cache.get(upvoteId);
 
         if (upvote) upvote.users.remove(user);

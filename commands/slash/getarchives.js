@@ -1,13 +1,8 @@
-const {
-  ApplicationCommandType,
-  MessageFlags,
-  InteractionContextType,
-  EmbedBuilder,
-} = require('discord.js');
+import { ApplicationCommandType, MessageFlags, InteractionContextType, EmbedBuilder } from 'discord.js';
 
-const sendLog = require('../../utils/sendLog.js');
+import sendLog from '../../utils/sendLog.js';
 
-module.exports = {
+export default {
   name: 'getarchives',
   description: 'Output all pending channel archive timeouts.',
   type: ApplicationCommandType.ChatInput,

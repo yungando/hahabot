@@ -1,11 +1,11 @@
-const { ChannelType, MessageFlags, ContainerBuilder } = require('discord.js');
-const axios = require('axios');
-const { xml2json } = require('xml-js');
+import { ChannelType, MessageFlags, ContainerBuilder } from 'discord.js';
+import axios from 'axios';
+import { xml2json } from 'xml-js';
+import Snoowrap from 'snoowrap';
+
+import sendLog from './sendLog.js';
 
 const { REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_REFRESH_TOKEN } = process.env;
-const Snoowrap = require('snoowrap');
-
-const sendLog = require('./sendLog.js');
 
 const removeUrlParams = (url) => {
   const urlObject = new URL(url);
@@ -153,7 +153,7 @@ const mapPostContainer = async (redditPost) => {
   return redditPostContainer;
 };
 
-module.exports = async (client, message, redditUrl) => {
+const handleRedditPost = async (client, message, redditUrl) => {
   try {
     const postUrl = await getFullPostUrl(redditUrl);
     const postId = getPostIdFromUrl(postUrl);
@@ -182,3 +182,5 @@ module.exports = async (client, message, redditUrl) => {
     sendLog(client, errorPayload);
   }
 };
+
+export default handleRedditPost;

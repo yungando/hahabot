@@ -1,7 +1,7 @@
-const { ApplicationCommandType } = require('discord.js');
-const sendLog = require('../utils/sendLog.js');
+import { ApplicationCommandType } from 'discord.js';
+import sendLog from '../utils/sendLog.js';
 
-module.exports = {
+export default {
   async execute(client, interaction) {
     if (interaction.partial) await interaction.fetch();
 

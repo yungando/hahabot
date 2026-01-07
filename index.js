@@ -1,9 +1,8 @@
-const {
-  Client, Collection, GatewayIntentBits, Partials,
-} = require('discord.js');
+import { Client, Collection, GatewayIntentBits, Partials } from 'discord.js';
+
+import { syncEvents } from './utils/interactions.js';
 
 const { DISCORD_TOKEN } = process.env;
-const { syncEvents } = require('./utils/interactions.js');
 
 const client = new Client(
   {
