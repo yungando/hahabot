@@ -5,8 +5,8 @@
   "author": "yungando",
   "main": "index.js",
   "scripts": {
-    "start": "npx dotenvx run -- pm2 start pm2.config.js",
-    "stop": "npx pm2 stop pm2.config.js",
+    "start": "npx dotenvx run -- pm2 start pm2.config.cjs",
+    "stop": "npx pm2 stop pm2.config.cjs",
     "dev": "dotenvx run -- node index.js",
     "lint": "node ./node_modules/eslint/bin/eslint.js .",
     "lint:fix": "node ./node_modules/eslint/bin/eslint.js . --fix"
