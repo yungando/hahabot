@@ -1,5 +1,4 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags, InteractionContextType } from 'discord.js';
-
+import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
 import sendLog from '../../utils/sendLog.js';
 
 const createNewRole = async (name, colour, guild) => {
@@ -12,6 +11,7 @@ const createNewRole = async (name, colour, guild) => {
       permissions: [],
     },
   );
+
   return newRole;
 };
 
@@ -20,6 +20,7 @@ const getVanityRole = async (member, vanityRoleName, vanityRoleColour = vanityRo
   if (matchingRole) return matchingRole;
 
   const newRole = await createNewRole(vanityRoleName, vanityRoleColour, member.guild);
+
   return newRole;
 };
 
@@ -93,6 +94,7 @@ export default {
       switch (subcommand) {
         case 'off': {
           await handleRemoveRole(member);
+
           return interaction.editReply({ content: 'Transmog disabled.', flags: MessageFlags.Ephemeral });
         }
         case 'hex': {

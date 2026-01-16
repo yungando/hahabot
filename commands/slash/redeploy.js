@@ -1,5 +1,5 @@
-import { ApplicationCommandType, MessageFlags, InteractionContextType } from 'discord.js';
-import { clearCommands, registerCommands, loadCommands } from '../../utils/interactions.js';
+import { ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
+import { clearCommands, loadCommands, registerCommands } from '../../utils/interactions.js';
 import sendLog from '../../utils/sendLog.js';
 
 export default {

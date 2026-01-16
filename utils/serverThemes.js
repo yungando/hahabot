@@ -1,7 +1,6 @@
-import { Cron } from 'croner';
 import fs from 'node:fs';
+import { Cron } from 'croner';
 import { AttachmentBuilder } from 'discord.js';
-
 import sendLog from './sendLog.js';
 
 const POLLO_SERVER_ID = '534915212760055819';
@@ -36,6 +35,7 @@ const sendServerBanner = async (guild, theme) => {
   if (!fs.existsSync(bannerPath)) return 'Invalid server theme.';
 
   const bannerAttachment = new AttachmentBuilder(bannerPath, { name: `${guild.name}-${theme}.png` });
+
   return await sendToGeneral(guild, { files: [bannerAttachment] });
 };
 
@@ -53,9 +53,12 @@ const createThemeRole = async (guild, roleName, roleColour) => {
   guild.members.me.roles.add(themeRole);
 };
 
-const deleteThemeRole = async (guild, roleName) => await guild.roles.cache.find((role) => role.name === roleName)?.delete();
+const deleteThemeRole = async (guild, roleName) => await guild.roles.cache
+  .find((role) => role.name === roleName)
+  ?.delete();
 
-const setHahabotNickname = async (guild, nickname = null) => await guild.members.me.setNickname(nickname);
+const setHahabotNickname = async (guild, nickname = null) => await guild.members.me
+  .setNickname(nickname);
 
 const initThemeSchedules = async (client) => {
   try {

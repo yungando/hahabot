@@ -1,5 +1,4 @@
-import { ApplicationCommandType, MessageFlags, InteractionContextType, EmbedBuilder } from 'discord.js';
-
+import { ApplicationCommandType, EmbedBuilder, InteractionContextType, MessageFlags } from 'discord.js';
 import sendLog from '../../utils/sendLog.js';
 
 export default {

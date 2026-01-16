@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { QuickDB } from 'quick.db';
-
 import sendLog from '../utils/sendLog.js';
+
 const db = new QuickDB();
 const servers = db.table('servers');
 

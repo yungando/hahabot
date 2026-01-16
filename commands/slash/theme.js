@@ -1,5 +1,4 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags, InteractionContextType } from 'discord.js';
-
+import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
 import sendLog from '../../utils/sendLog.js';
 import { setServerTheme } from '../../utils/serverThemes.js';
 

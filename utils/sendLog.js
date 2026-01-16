@@ -1,4 +1,4 @@
-import { WebhookClient, EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, WebhookClient } from 'discord.js';
 
 const { WEBHOOK_LOG_ID, WEBHOOK_LOG_TOKEN } = process.env;
 const hahaLOG = new WebhookClient({ id: WEBHOOK_LOG_ID, token: WEBHOOK_LOG_TOKEN });

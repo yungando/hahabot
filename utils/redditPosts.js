@@ -1,8 +1,7 @@
-import { ChannelType, MessageFlags, ContainerBuilder } from 'discord.js';
 import axios from 'axios';
-import { xml2json } from 'xml-js';
+import { ChannelType, ContainerBuilder, MessageFlags } from 'discord.js';
 import Snoowrap from 'snoowrap';
-
+import { xml2json } from 'xml-js';
 import sendLog from './sendLog.js';
 
 const { REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_REFRESH_TOKEN } = process.env;
@@ -133,9 +132,9 @@ const mapPostContainer = async (redditPost) => {
 
     redditPostContainer.addMediaGalleryComponents(
       (mediaGallery) => mediaGallery.addItems(
-        ...galleryItems.map((item) => (
-          (mediaGalleryItem) => mediaGalleryItem.setURL(buildGalleryImageUrl(item))
-        )),
+        ...galleryItems.map(
+          (item) => (mediaGalleryItem) => mediaGalleryItem.setURL(buildGalleryImageUrl(item)),
+        ),
       ),
     );
   }

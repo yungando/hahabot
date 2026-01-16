@@ -1,5 +1,5 @@
 import { readdirSync } from 'node:fs';
-import { REST, Routes, ApplicationCommandType } from 'discord.js';
+import { ApplicationCommandType, REST, Routes } from 'discord.js';
 
 const { DISCORD_TOKEN } = process.env;
 const rest = new REST().setToken(DISCORD_TOKEN);
@@ -24,6 +24,7 @@ const syncEvents = async (client) => {
 };
 
 const clearCommands = async (client) => {
+  // eslint-disable-next-line no-console
   console.log('Starting clearing old commands.');
 
   client.commands.clear();
@@ -33,6 +34,7 @@ const clearCommands = async (client) => {
   // eslint-disable-next-line no-param-reassign
   client.guildCommands = [];
 
+  // eslint-disable-next-line no-console
   console.log('Successfully cleared old commands.');
 };
 
@@ -55,6 +57,7 @@ const reduceGuildCommands = async (guildCommands) => {
 const registerCommands = async (client) => {
   const clientId = client.application.id;
 
+  // eslint-disable-next-line no-console
   console.log('Started registering application commands.');
 
   await rest.put(Routes.applicationCommands(clientId), {
@@ -67,6 +70,7 @@ const registerCommands = async (client) => {
     });
   }
 
+  // eslint-disable-next-line no-console
   console.log('Successfully registered application commands.');
 };
 
@@ -105,8 +109,8 @@ const loadCommands = async (client) => {
 };
 
 export {
-  syncEvents,
   clearCommands,
-  registerCommands,
   loadCommands,
+  registerCommands,
+  syncEvents,
 };

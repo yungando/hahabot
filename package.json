@@ -1,11 +1,19 @@
 {
   "name": "hahabot",
+  "type": "module",
   "version": "1.0.0",
   "author": "yungando",
   "main": "index.js",
-  "type": "module",
+  "scripts": {
+    "start": "npx dotenvx run -- pm2 start pm2.config.js",
+    "stop": "npx pm2 stop pm2.config.js",
+    "dev": "dotenvx run -- node index.js",
+    "lint": "node ./node_modules/eslint/bin/eslint.js .",
+    "lint:fix": "node ./node_modules/eslint/bin/eslint.js . --fix"
+  },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.51.4",
+    "@yungando/eslint-config": "github:yungando/eslint-config#1.0.1",
     "axios": "^1.13.2",
     "better-sqlite3": "^12.5.0",
     "croner": "^9.1.0",
@@ -16,15 +24,6 @@
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
-    "eslint": "^9.39.2",
-    "eslint-config-eslint": "^13.0.0",
-    "globals": "^17.0.0"
-  },
-  "scripts": {
-    "start": "npx dotenvx run -- pm2 start pm2.config.js",
-    "stop": "npx pm2 stop pm2.config.js",
-    "dev": "dotenvx run -- node index.js",
-    "lint": "node ./node_modules/eslint/bin/eslint.js .",
-    "lint:fix": "node ./node_modules/eslint/bin/eslint.js . --fix"
+    "eslint": "^9.39.2"
   }
 }

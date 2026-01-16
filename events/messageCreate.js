@@ -1,7 +1,6 @@
-import { WebhookClient, ChannelType } from 'discord.js';
+import { ChannelType, WebhookClient } from 'discord.js';
 import { QuickDB } from 'quick.db';
-
-import { scheduleArchive, restoreChannel } from '../utils/archives.js';
+import { restoreChannel, scheduleArchive } from '../utils/archives.js';
 import handleRedditPost from '../utils/redditPosts.js';
 import sendLog from '../utils/sendLog.js';
 
