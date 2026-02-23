@@ -68,7 +68,8 @@ export default {
           required: true,
         },
       ],
-    }, {
+    },
+    {
       name: 'off',
       description: 'Deactivate transmog and remove any vanity role.',
       type: ApplicationCommandOptionType.Subcommand,
