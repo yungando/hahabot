@@ -1,5 +1,5 @@
 import { QuickDB } from 'quick.db';
-import sendLog from '../utils/sendLog.js';
+import sendLog from '../utils/send-log.js';
 
 const db = new QuickDB();
 const servers = db.table('servers');

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { ChannelType, ContainerBuilder, MessageFlags } from 'discord.js';
 import Snoowrap from 'snoowrap';
 import { xml2json } from 'xml-js';
-import sendLog from './sendLog.js';
+import sendLog from './send-log.js';
 
 const { REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_REFRESH_TOKEN } = process.env;
 

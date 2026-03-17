@@ -1,4 +1,4 @@
-import sendLog from './sendLog.js';
+import sendLog from './send-log.js';
 
 const threeWeeksInMs = 1000 * 60 * 60 * 24 * 21;
 

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import { Cron } from 'croner';
 import { AttachmentBuilder } from 'discord.js';
-import sendLog from './sendLog.js';
+import sendLog from './send-log.js';
 
 const POLLO_SERVER_ID = '534915212760055819';
 const HAHABOT_SERVER_ID = '568227296767639552';
@@ -9,7 +9,7 @@ const HAHABOT_SERVER_ID = '568227296767639552';
 const schedule = (...args) => new Cron(...args);
 
 const setServerTheme = async (client, guild, theme) => {
-  const newIconPath = `./serverThemes/${guild.name}/icons/${theme}.png`;
+  const newIconPath = `./server-themes/${guild.name}/icons/${theme}.png`;
 
   if (!fs.existsSync(newIconPath)) return 'Invalid server theme.';
 
@@ -31,7 +31,7 @@ const sendToGeneral = async (guild, message) => {
 };
 
 const sendServerBanner = async (guild, theme) => {
-  const bannerPath = `./serverThemes/${guild.name}/banners/${theme}.png`;
+  const bannerPath = `./server-themes/${guild.name}/banners/${theme}.png`;
   if (!fs.existsSync(bannerPath)) return 'Invalid server theme.';
 
   const bannerAttachment = new AttachmentBuilder(bannerPath, { name: `${guild.name}-${theme}.png` });
@@ -118,7 +118,7 @@ const initThemeSchedules = async (client) => {
     });
 
     schedule(christmasDay, { timezone: 'Europe/London' }, async () => {
-      await setServerTheme(client, hahabot, 'christmasDay');
+      await setServerTheme(client, hahabot, 'christmas-day');
 
       await sendToGeneral(pollo, 'mc');
 

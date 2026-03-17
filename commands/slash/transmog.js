@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
-import sendLog from '../../utils/sendLog.js';
+import sendLog from '../../utils/send-log.js';
 
 const createNewRole = async (name, colour, guild) => {
   const hahaRole = await guild.members.me.roles.botRole;

@@ -1,5 +1,5 @@
 import { ApplicationCommandType } from 'discord.js';
-import sendLog from '../utils/sendLog.js';
+import sendLog from '../utils/send-log.js';
 
 export default {
   async execute(client, interaction) {

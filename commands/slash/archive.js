@@ -1,6 +1,6 @@
 import { ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
 import { sortCategory } from '../../utils/archives.js';
-import sendLog from '../../utils/sendLog.js';
+import sendLog from '../../utils/send-log.js';
 
 export default {
   name: 'archive',

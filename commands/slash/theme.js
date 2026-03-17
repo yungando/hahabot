@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
-import sendLog from '../../utils/sendLog.js';
-import { setServerTheme } from '../../utils/serverThemes.js';
+import sendLog from '../../utils/send-log.js';
+import { setServerTheme } from '../../utils/server-themes.js';
 
 export default {
   name: 'theme',
@@ -16,7 +16,7 @@ export default {
         { name: 'default', value: 'default' },
         { name: 'halloween', value: 'halloween' },
         { name: 'christmas', value: 'christmas' },
-        { name: 'christmas day', value: 'christmasDay' },
+        { name: 'christmas day', value: 'christmas-day' },
         { name: 'partyhat', value: 'partyhat' },
         { name: 'minecraft', value: 'minecraft' },
         { name: 'original', value: 'original' },

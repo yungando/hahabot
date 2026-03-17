@@ -1,8 +1,8 @@
 import { ChannelType, WebhookClient } from 'discord.js';
 import { QuickDB } from 'quick.db';
 import { restoreChannel, scheduleArchive } from '../utils/archives.js';
-import handleRedditPost from '../utils/redditPosts.js';
-import sendLog from '../utils/sendLog.js';
+import handleRedditPost from '../utils/reddit-posts.js';
+import sendLog from '../utils/send-log.js';
 
 const { WEBHOOK_DM_ID, WEBHOOK_DM_TOKEN } = process.env;
 const hahaDM = new WebhookClient({ id: WEBHOOK_DM_ID, token: WEBHOOK_DM_TOKEN });
