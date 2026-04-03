@@ -24,7 +24,7 @@
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
-    "@yungando/eslint-config": "^1.2.2",
+    "@yungando/eslint-config": "^1.2.5",
     "eslint": "^9.39.2"
   }
 }

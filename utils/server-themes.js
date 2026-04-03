@@ -57,6 +57,7 @@ const deleteThemeRole = async (guild, roleName) => await guild.roles.cache
   .find((role) => role.name === roleName)
   ?.delete();
 
+// eslint-disable-next-line unicorn/no-null
 const setHahabotNickname = async (guild, nickname = null) => await guild.members.me
   .setNickname(nickname);
 
