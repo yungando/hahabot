@@ -1,7 +1,7 @@
 import { ChannelType, WebhookClient } from 'discord.js';
 import { QuickDB } from 'quick.db';
 import { restoreChannel, scheduleArchive } from '../utils/archives.js';
-import handleRedditPost from '../utils/reddit-posts.js';
+import handleRedditLink from '../utils/reddit-posts.js';
 import sendLog from '../utils/send-log.js';
 
 const { WEBHOOK_DM_ID, WEBHOOK_DM_TOKEN } = process.env;
@@ -51,7 +51,7 @@ export default {
 
       // Reddit Videos
       const [redditURLMatch] = message.content.match(/https?:\/\/(?:www\.|old\.)?(?:reddit\.com\/r\/[^/\s]+\/(?:s\/[a-z0-9]+|comments\/[a-z0-9]+(?:\/[^\s/?#]*)?)|redd\.it\/[a-z0-9]+|v\.redd\.it\/[a-z0-9]+)/gi) || [];
-      if (redditURLMatch) handleRedditPost(client, message, redditURLMatch);
+      if (redditURLMatch) handleRedditLink(client, message, redditURLMatch);
 
       // dm webhook
       if (message.channel.type === ChannelType.DM) {

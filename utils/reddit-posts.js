@@ -6,45 +6,54 @@ import sendLog from './send-log.js';
 
 const { REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_REFRESH_TOKEN } = process.env;
 
-const removeUrlParams = (url) => {
-  const urlObject = new URL(url);
+const REDDIT_API_CLIENT = new Snoowrap({
+  userAgent: 'hahabot by u/couldie',
+  clientId: REDDIT_CLIENT_ID,
+  clientSecret: REDDIT_CLIENT_SECRET,
+  refreshToken: REDDIT_REFRESH_TOKEN,
+});
 
-  return `${urlObject.origin}${urlObject.pathname}`;
+const isVideoUrlPathname = (pathname) => pathname.match(/^\/[^/]+$/);
+const isShareUrlPathname = (pathname) => pathname.match(/\/r\/[^/]+\/s\/([a-z0-9]+)/i);
+
+const getPostIdFromPathname = (url) => url.match(/\/r\/[^/]+\/comments\/([a-z0-9]+)/i)[1];
+const getPathnameFromShareLink = async (sharePathname) => {
+  try {
+    await REDDIT_API_CLIENT.oauthRequest({ uri: sharePathname, method: 'get' });
+  } catch (error) {
+    const redirectPathname = error.response?.request?.path;
+    if (!redirectPathname) throw new Error('Expected path from share link redirect', { cause: error });
+
+    return redirectPathname;
+  }
+
+  throw new Error('Expected redirect but request succeeded');
 };
 
-const getRedirectUrl = async (sourceUrl) => {
-  const { pathname } = new URL(sourceUrl);
+const fetchPostResponse = async (pathname) => {
+  if (isVideoUrlPathname(pathname)) {
+    return REDDIT_API_CLIENT.oauthRequest({
+      uri: `video${pathname}`,
+      method: 'get',
+    });
+  };
 
-  const response = await axios.get(`https://reddit.ando.ws${pathname}`);
+  const postPathname = isShareUrlPathname(pathname)
+    ? await getPathnameFromShareLink(pathname)
+    : pathname;
 
-  return removeUrlParams(response.data.targetUrl);
+  const postId = getPostIdFromPathname(postPathname);
+
+  return REDDIT_API_CLIENT.getSubmission(postId).fetch();
 };
 
-const getPostIdFromUrl = (url) => (url.match(/\/r\/[^/]+\/comments\/([a-z0-9]+)/i)[1]);
+const getRedditPost = async (rawUrl) => {
+  const { pathname } = new URL(rawUrl);
 
-const getFullPostUrl = async (url) => {
-  const cleanUrl = removeUrlParams(url);
+  const response = await fetchPostResponse(pathname);
 
-  const shortMatch = cleanUrl.match(/\/r\/[^/]+\/s\/([a-z0-9]+)/i);
-  const videoMatch = cleanUrl.match(/v\.redd\.it\/([a-z0-9]+)/i);
-
-  if (shortMatch || videoMatch) return getRedirectUrl(cleanUrl);
-
-  return cleanUrl;
-};
-
-const getPostById = async (postId) => {
-  const redditApiClient = new Snoowrap({
-    userAgent: 'hahabot by u/couldie',
-    clientId: REDDIT_CLIENT_ID,
-    clientSecret: REDDIT_CLIENT_SECRET,
-    refreshToken: REDDIT_REFRESH_TOKEN,
-  });
-
-  const response = await redditApiClient.getSubmission(postId).fetch();
-  const postData = response.toJSON();
-
-  postData.comments = [];
+  // eslint-disable-next-line no-unused-vars
+  const { comments, ...postData } = response.toJSON();
 
   return postData;
 };
@@ -97,6 +106,11 @@ const buildGalleryImageUrl = (imageMetadata) => {
   return `https://i.redd.it/${imageMetadata.id}.${fileExtension}`;
 };
 
+const stripEmojis = (text) => text
+  .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
+  .replace(/\s{2,}/g, ' ')
+  .trim();
+
 const mapPostContainer = async (redditPost) => {
   const redditPostPermalink = `https://reddit.com${[redditPost.permalink]}`;
 
@@ -105,7 +119,7 @@ const mapPostContainer = async (redditPost) => {
       `> u/${redditPost.author} on ${redditPost.subreddit_name_prefixed}`,
     ))
     .addTextDisplayComponents((textDisplay) => textDisplay.setContent(
-      `## [${redditPost.title}](${redditPostPermalink})`,
+      `## [${stripEmojis(redditPost.title)}](${redditPostPermalink})`,
     ));
 
   if (redditPost.is_video) {
@@ -152,12 +166,9 @@ const mapPostContainer = async (redditPost) => {
   return redditPostContainer;
 };
 
-const handleRedditPost = async (client, message, redditUrl) => {
+const handleRedditLink = async (client, message, redditUrl) => {
   try {
-    const postUrl = await getFullPostUrl(redditUrl);
-    const postId = getPostIdFromUrl(postUrl);
-
-    const redditPost = await getPostById(postId);
+    const redditPost = await getRedditPost(redditUrl);
     if (!redditPost) return;
 
     const redditPostContainer = await mapPostContainer(redditPost);
@@ -182,4 +193,4 @@ const handleRedditPost = async (client, message, redditUrl) => {
   }
 };
 
-export default handleRedditPost;
+export default handleRedditLink;
