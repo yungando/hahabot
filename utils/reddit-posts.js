@@ -142,7 +142,7 @@ const mapPostContainer = async (redditPost) => {
   }
 
   if (redditPost.is_gallery) {
-    const galleryItems = Object.values(redditPost.media_metadata);
+    const galleryItems = Object.values(redditPost.media_metadata).slice(0, 10);
 
     redditPostContainer.addMediaGalleryComponents(
       (mediaGallery) => mediaGallery.addItems(
