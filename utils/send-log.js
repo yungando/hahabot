@@ -1,7 +1,7 @@
 import { EmbedBuilder, WebhookClient } from 'discord.js';
 
-const { WEBHOOK_LOG_ID, WEBHOOK_LOG_TOKEN } = process.env;
-const hahaLOG = new WebhookClient({ id: WEBHOOK_LOG_ID, token: WEBHOOK_LOG_TOKEN });
+const { HAHA_WEBHOOK_LOG_ID, HAHA_WEBHOOK_LOG_TOKEN } = process.env;
+const hahaLOG = new WebhookClient({ id: HAHA_WEBHOOK_LOG_ID, token: HAHA_WEBHOOK_LOG_TOKEN });
 
 const getUsername = async (user, guild) => {
   if (!user || user === user.client.user) return 'hahabot';

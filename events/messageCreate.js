@@ -4,8 +4,8 @@ import { restoreChannel, scheduleArchive } from '../utils/archives.js';
 import handleRedditLink from '../utils/reddit-posts.js';
 import sendLog from '../utils/send-log.js';
 
-const { WEBHOOK_DM_ID, WEBHOOK_DM_TOKEN } = process.env;
-const hahaDM = new WebhookClient({ id: WEBHOOK_DM_ID, token: WEBHOOK_DM_TOKEN });
+const { HAHA_WEBHOOK_DM_ID, HAHA_WEBHOOK_DM_TOKEN } = process.env;
+const hahaDM = new WebhookClient({ id: HAHA_WEBHOOK_DM_ID, token: HAHA_WEBHOOK_DM_TOKEN });
 const db = new QuickDB();
 const servers = db.table('servers');
 
