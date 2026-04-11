@@ -1,8 +1,9 @@
 import { ChannelType, WebhookClient } from 'discord.js';
 import { QuickDB } from 'quick.db';
 import { restoreChannel, scheduleArchive } from '../utils/archives.js';
-import handleRedditLink from '../utils/reddit-posts.js';
+import handleRedditUrl from '../utils/reddit-posts.js';
 import sendLog from '../utils/send-log.js';
+import handleTwitterUrl from '../utils/twitter-posts.js';
 
 const { HAHA_WEBHOOK_DM_ID, HAHA_WEBHOOK_DM_TOKEN } = process.env;
 const hahaDM = new WebhookClient({ id: HAHA_WEBHOOK_DM_ID, token: HAHA_WEBHOOK_DM_TOKEN });
@@ -49,9 +50,13 @@ export default {
       // restore game channel
       if (message.channel.parentId === '917120901584150589') restoreChannel(client, message.channel);
 
-      // Reddit Videos
-      const [redditURLMatch] = message.content.match(/https?:\/\/(?:www\.|old\.)?(?:reddit\.com\/r\/[^/\s]+\/(?:s\/[a-z0-9]+|comments\/[a-z0-9]+(?:\/[^\s/?#]*)?)|redd\.it\/[a-z0-9]+|v\.redd\.it\/[a-z0-9]+)/gi) || [];
-      if (redditURLMatch) handleRedditLink(client, message, redditURLMatch);
+      // reddit posts
+      const [redditUrlMatch] = message.content.match(/https?:\/\/(?:www\.|old\.)?(?:reddit\.com\/r\/[^/\s]+\/(?:s\/[a-z0-9]+|comments\/[a-z0-9]+(?:\/[^\s/?#]*)?)|redd\.it\/[a-z0-9]+|v\.redd\.it\/[a-z0-9]+)/gi) || [];
+      if (redditUrlMatch) await handleRedditUrl(client, message, redditUrlMatch);
+
+      // twitter posts
+      const [twitterUrlMatch] = message.content.match(/https:\/\/(twitter|x).com\/.+\/status\/.+/) || [];
+      if (twitterUrlMatch) await handleTwitterUrl(client, message, twitterUrlMatch);
 
       // dm webhook
       if (message.channel.type === ChannelType.DM) {

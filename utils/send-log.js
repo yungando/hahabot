@@ -46,7 +46,7 @@ const buildEmbedAuthor = async (client, user, guild) => {
   return { name, iconURL };
 };
 
-const sendLog = async (client, { content, embeds }) => {
+const sendLogWebhook = async (client, { content, embeds }) => {
   hahaLOG.send({
     username: 'hahabot',
     avatarURL: await client.user.displayAvatarURL({ extension: 'png' }),
@@ -55,11 +55,11 @@ const sendLog = async (client, { content, embeds }) => {
   });
 };
 
-const sendLogPayload = async (client, payload) => {
+const sendLog = async (client, payload) => {
   try {
     switch (payload.logType) {
       case 'string': {
-        sendLog(client, {
+        sendLogWebhook(client, {
           embeds: [
             new EmbedBuilder()
               .setAuthor(await buildEmbedAuthor(client))
@@ -74,7 +74,7 @@ const sendLogPayload = async (client, payload) => {
       }
 
       case 'command': {
-        sendLog(client, {
+        sendLogWebhook(client, {
           embeds: [
             new EmbedBuilder()
               .setAuthor(await buildEmbedAuthor(client, payload.user, payload.guild))
@@ -100,7 +100,7 @@ const sendLogPayload = async (client, payload) => {
 
         errorEmbed.addFields({ name: 'Error', value: `\`\`\`${payload.error.stack}\`\`\`` });
 
-        sendLog(client, { embeds: [errorEmbed] });
+        sendLogWebhook(client, { embeds: [errorEmbed] });
 
         return;
       }
@@ -117,11 +117,11 @@ const sendLogPayload = async (client, payload) => {
 
         errorEmbed.addFields({ name: 'Payload', value: `\`\`\`${payload}\`\`\`` });
 
-        sendLog(client, { embeds: [errorEmbed] });
+        sendLogWebhook(client, { embeds: [errorEmbed] });
       }
     }
   } catch (error) {
-    sendLog(client, {
+    sendLogWebhook(client, {
       embeds: [
         new EmbedBuilder()
           .setAuthor(await buildEmbedAuthor(client))
@@ -138,4 +138,4 @@ const sendLogPayload = async (client, payload) => {
   }
 };
 
-export default sendLogPayload;
+export default sendLog;

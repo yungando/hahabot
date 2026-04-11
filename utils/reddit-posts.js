@@ -3,6 +3,7 @@ import { ChannelType, ContainerBuilder, MessageFlags } from 'discord.js';
 import Snoowrap from 'snoowrap';
 import { xml2json } from 'xml-js';
 import sendLog from './send-log.js';
+import stripEmojis from './strip-emojis.js';
 
 const { REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_REFRESH_TOKEN } = process.env;
 
@@ -88,16 +89,26 @@ const buildVxRedditUrl = async (mediaId) => {
 
   const dashPlaylist = await JSON.parse(xml2json(dashText, { compact: true }));
   const dashSets = dashPlaylist.MPD.Period.AdaptationSet;
+  const dashSetArray = Array.isArray(dashSets)
+    ? dashSets
+    : [dashSets];
 
   // eslint-disable-next-line no-underscore-dangle
-  const dashVideoSet = dashSets.find((set) => set._attributes.contentType === 'video');
+  const dashVideoSet = dashSetArray.find((set) => set._attributes.contentType === 'video');
   // eslint-disable-next-line no-underscore-dangle
-  const dashAudioSet = dashSets.find((set) => set._attributes.contentType === 'audio');
+  const dashAudioSet = dashSetArray.find((set) => set._attributes.contentType === 'audio');
 
   const videoUrl = await getHighestQualityMediaUrl(dashVideoSet, mediaId);
-  const audioUrl = await getHighestQualityMediaUrl(dashAudioSet, mediaId);
+  const audioUrl = dashAudioSet
+    ? await getHighestQualityMediaUrl(dashAudioSet, mediaId)
+    : undefined;
 
-  return `https://vxreddit.com/redditvideo.mp4?video_url=${encodeURIComponent(videoUrl)}&audio_url=${encodeURIComponent(audioUrl)}`;
+  const encodedVideoUriParam = `video_url=${encodeURIComponent(videoUrl)}`;
+  const encodedAudioUriParam = audioUrl
+    ? `&audio_url=${encodeURIComponent(audioUrl)}`
+    : '';
+
+  return `https://vxreddit.com/redditvideo.mp4?${encodedVideoUriParam}${encodedAudioUriParam}`;
 };
 
 const buildGalleryImageUrl = (imageMetadata) => {
@@ -106,15 +117,11 @@ const buildGalleryImageUrl = (imageMetadata) => {
   return `https://i.redd.it/${imageMetadata.id}.${fileExtension}`;
 };
 
-const stripEmojis = (text) => text
-  .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
-  .replace(/\s{2,}/g, ' ')
-  .trim();
-
 const mapPostContainer = async (redditPost) => {
   const redditPostPermalink = `https://reddit.com${[redditPost.permalink]}`;
 
   const redditPostContainer = new ContainerBuilder()
+    .setAccentColor(0xFF4500)
     .addTextDisplayComponents((textDisplay) => textDisplay.setContent(
       `> u/${redditPost.author} on ${redditPost.subreddit_name_prefixed}`,
     ))
@@ -166,7 +173,7 @@ const mapPostContainer = async (redditPost) => {
   return redditPostContainer;
 };
 
-const handleRedditLink = async (client, message, redditUrl) => {
+const handleRedditUrl = async (client, message, redditUrl) => {
   try {
     const redditPost = await getRedditPost(redditUrl);
     if (!redditPost) return;
@@ -193,4 +200,4 @@ const handleRedditLink = async (client, message, redditUrl) => {
   }
 };
 
-export default handleRedditLink;
+export default handleRedditUrl;
