@@ -12,7 +12,7 @@ const getTwitterPost = async (pathname) => {
 const mapPostContainer = async (tweet) => {
   const { author, media, quote } = tweet;
 
-  const authorNameDisplay = `> [${stripEmojis(author.name)} (@${author.screen_name})](${tweet.url})`;
+  const authorNameDisplay = `[${stripEmojis(author.name)} (@${author.screen_name})](${tweet.url})`;
 
   const twitterPostContainer = new ContainerBuilder()
     .setAccentColor(0x1DA1F2)
