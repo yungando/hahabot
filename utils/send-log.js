@@ -1,7 +1,15 @@
 import { EmbedBuilder, WebhookClient } from 'discord.js';
 
-const { HAHA_WEBHOOK_LOG_ID, HAHA_WEBHOOK_LOG_TOKEN } = process.env;
+const {
+  HAHA_WEBHOOK_LOG_ID,
+  HAHA_WEBHOOK_LOG_TOKEN,
+  HAHA_WEBHOOK_ERROR_ID,
+  HAHA_WEBHOOK_ERROR_TOKEN,
+} = process.env;
 const hahaLOG = new WebhookClient({ id: HAHA_WEBHOOK_LOG_ID, token: HAHA_WEBHOOK_LOG_TOKEN });
+const hahaERROR = new WebhookClient({ id: HAHA_WEBHOOK_ERROR_ID, token: HAHA_WEBHOOK_ERROR_TOKEN });
+
+const maxDiscordEmbedTextLength = 1012;
 
 const getUsername = async (user, guild) => {
   if (!user || user === user.client.user) return 'hahabot';
@@ -55,6 +63,15 @@ const sendLogWebhook = async (client, { content, embeds }) => {
   });
 };
 
+const sendErrorWebhook = async (client, { content, embeds }) => {
+  hahaERROR.send({
+    username: 'hahabot',
+    avatarURL: await client.user.displayAvatarURL({ extension: 'png' }),
+    content,
+    embeds,
+  });
+};
+
 const sendLog = async (client, payload) => {
   try {
     switch (payload.logType) {
@@ -98,9 +115,11 @@ const sendLog = async (client, payload) => {
         if (payload.details) errorEmbed.addFields({ name: 'Details', value: payload.details });
         if (payload.message) errorEmbed.addFields({ name: 'Message', value: payload.message.url });
 
-        errorEmbed.addFields({ name: 'Error', value: `\`\`\`${payload.error.stack}\`\`\`` });
+        const errorStack = payload.error.stack.slice(0, maxDiscordEmbedTextLength);
 
-        sendLogWebhook(client, { embeds: [errorEmbed] });
+        errorEmbed.addFields({ name: 'Error', value: `\`\`\`${errorStack}\`\`\`` });
+
+        sendErrorWebhook(client, { embeds: [errorEmbed] });
 
         return;
       }
@@ -121,12 +140,14 @@ const sendLog = async (client, payload) => {
       }
     }
   } catch (error) {
-    sendLogWebhook(client, {
+    const errorStack = error.stack.slice(0, maxDiscordEmbedTextLength);
+
+    sendErrorWebhook(client, {
       embeds: [
         new EmbedBuilder()
           .setAuthor(await buildEmbedAuthor(client))
           .setColor('Red')
-          .addFields({ name: 'Error', value: `\`\`\`${error.stack}\`\`\`` })
+          .addFields({ name: 'Error', value: `\`\`\`${errorStack}\`\`\`` })
           .setFooter({
             text: payload.guild
               ? payload.guild?.name

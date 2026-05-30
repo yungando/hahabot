@@ -1,6 +1,6 @@
 import axios from 'axios';
 import EasyTable from 'easy-table';
-import { dmmItems, leaguesItems } from './runescape-items.js';
+import { dmmItems, leaguesItems } from '../config/runescape-items.js';
 
 const userAgent = 'hahabot discord bot by @yungando';
 const maxDiscordMessageLength = 1980;

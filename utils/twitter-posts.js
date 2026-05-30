@@ -10,20 +10,32 @@ const getTwitterPost = async (pathname) => {
 };
 
 const mapPostContainer = async (tweet) => {
-  const { author, media, quote } = tweet;
+  const {
+    author,
+    media,
+    quote,
+    text,
+  } = tweet;
 
   const authorNameDisplay = `[${stripEmojis(author.name)} (@${author.screen_name})](${tweet.url})`;
 
   const twitterPostContainer = new ContainerBuilder()
     .setAccentColor(0x1DA1F2)
-    .addSectionComponents((section) => section
-      .setThumbnailAccessory({ media: { url: author.avatar_url, width: 10 } })
-      .addTextDisplayComponents(
-        (textDisplay) => textDisplay.setContent(authorNameDisplay),
-      )
-      .addTextDisplayComponents(
-        (textDisplay) => textDisplay.setContent(tweet.text),
-      ));
+    .addSectionComponents((section) => {
+      section
+        .setThumbnailAccessory({ media: { url: author.avatar_url, width: 10 } })
+        .addTextDisplayComponents(
+          (textDisplay) => textDisplay.setContent(authorNameDisplay),
+        );
+
+      if (text) {
+        section.addTextDisplayComponents(
+          (textDisplay) => textDisplay.setContent(text),
+        );
+      }
+
+      return section;
+    });
 
   if (media) {
     twitterPostContainer.addMediaGalleryComponents(
