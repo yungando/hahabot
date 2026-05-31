@@ -54,13 +54,15 @@ const initArchives = async (client) => {
   const nowTimestamp = Date.now();
 
   gamesCategory.forEach(async (channel) => {
-    await channel.messages.fetch();
+    await channel.messages.fetch({ limit: 1 });
     const lastMessage = await channel.messages.cache.first();
 
     if ((threeWeeksInMs + lastMessage.createdTimestamp - nowTimestamp) < 0) {
       await channel.setParent(archivedCategory, { lockPermissions: true });
 
       sortCategory(archivedCategory);
+
+      sendLog(client, { logType: 'string', message: `Archived <#${channel.id}>`, guild: channel.guild });
     } else {
       scheduleArchive(client, channel, lastMessage.createdTimestamp - nowTimestamp);
     }
