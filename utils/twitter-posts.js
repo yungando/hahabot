@@ -4,62 +4,75 @@ import sendLog from './send-log.js';
 import stripEmojis from './strip-emojis.js';
 
 const getTwitterPost = async (pathname) => {
-  const response = await axios.get(`https://api.fxtwitter.com${pathname}`);
+  const [requestPath] = pathname.match(/^((?:\/[^/]+){3})/);
+  const response = await axios.get(`https://api.fxtwitter.com${requestPath}`);
 
   return response.data.tweet;
 };
 
 const mapPostContainer = async (tweet) => {
-  const {
-    author,
-    media,
-    quote,
-    text,
-  } = tweet;
-
-  const authorNameDisplay = `[${stripEmojis(author.name)} (@${author.screen_name})](${tweet.url})`;
+  const authorNameDisplay = `[${stripEmojis(tweet.author.name)} (@${tweet.author.screen_name})](${tweet.url})`;
 
   const twitterPostContainer = new ContainerBuilder()
     .setAccentColor(0x1DA1F2)
     .addSectionComponents((section) => {
       section
-        .setThumbnailAccessory({ media: { url: author.avatar_url, width: 10 } })
+        .setThumbnailAccessory({ media: { url: tweet.author.avatar_url, width: 10 } })
         .addTextDisplayComponents(
           (textDisplay) => textDisplay.setContent(authorNameDisplay),
         );
 
-      if (text) {
+      if (tweet.text) {
         section.addTextDisplayComponents(
-          (textDisplay) => textDisplay.setContent(text),
+          (textDisplay) => textDisplay.setContent(tweet.text),
         );
+      }
+
+      if (tweet.article) {
+        section
+          .addTextDisplayComponents(
+            (textDisplay) => textDisplay.setContent(`# ${tweet.article.title}`),
+          )
+          .addTextDisplayComponents(
+            (textDisplay) => textDisplay.setContent(`${tweet.article.preview_text}...`),
+          );
       }
 
       return section;
     });
 
-  if (media) {
+  if (tweet.article) {
     twitterPostContainer.addMediaGalleryComponents(
       (mediaGallery) => mediaGallery.addItems(
-        ...media.all.map(
+        (mediaGalleryItem) => mediaGalleryItem
+          .setURL(tweet.article.cover_media.media_info.original_img_url),
+      ),
+    );
+  }
+
+  if (tweet.media) {
+    twitterPostContainer.addMediaGalleryComponents(
+      (mediaGallery) => mediaGallery.addItems(
+        ...tweet.media.all.map(
           (item) => (mediaGalleryItem) => mediaGalleryItem.setURL(item.url),
         ),
       ),
     );
   }
 
-  if (quote) {
-    const quoteAuthorNameDisplay = `[${stripEmojis(quote.author.name)} (@${quote.author.screen_name})](${quote.url})`;
+  if (tweet.quote) {
+    const quoteAuthorNameDisplay = `[${stripEmojis(tweet.quote.author.name)} (@${tweet.quote.author.screen_name})](${tweet.quote.url})`;
 
     twitterPostContainer.addTextDisplayComponents(
       (textDisplay) => textDisplay.setContent(
-        `>>> ${quoteAuthorNameDisplay}\n\n${quote.text}`,
+        `>>> ${quoteAuthorNameDisplay}\n\n${tweet.quote.text}`,
       ),
     );
 
-    if (quote.media) {
+    if (tweet.quote.media) {
       twitterPostContainer.addMediaGalleryComponents(
         (mediaGallery) => mediaGallery.addItems(
-          ...quote.media.all.map(
+          ...tweet.quote.media.all.map(
             (item) => (mediaGalleryItem) => mediaGalleryItem.setURL(item.url),
           ),
         ),
