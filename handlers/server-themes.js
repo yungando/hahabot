@@ -1,15 +1,16 @@
 import fs from 'node:fs';
 import { Cron } from 'croner';
 import { AttachmentBuilder } from 'discord.js';
-import sendLog from './send-log.js';
+import sendLog from '../utils/send-log.js';
 
 const POLLO_SERVER_ID = '534915212760055819';
 const HAHABOT_SERVER_ID = '568227296767639552';
+const BASE_PATH = './config/server-themes';
 
 const schedule = (...args) => new Cron(...args);
 
 const setServerTheme = async (client, guild, theme) => {
-  const newIconPath = `./server-themes/${guild.name}/icons/${theme}.png`;
+  const newIconPath = `${BASE_PATH}/${guild.name}/icons/${theme}.png`;
 
   if (!fs.existsSync(newIconPath)) return 'Invalid server theme.';
 
@@ -31,7 +32,7 @@ const sendToGeneral = async (guild, message) => {
 };
 
 const sendServerBanner = async (guild, theme) => {
-  const bannerPath = `./server-themes/${guild.name}/banners/${theme}.png`;
+  const bannerPath = `${BASE_PATH}/${guild.name}/banners/${theme}.png`;
   if (!fs.existsSync(bannerPath)) return 'Invalid server theme.';
 
   const bannerAttachment = new AttachmentBuilder(bannerPath, { name: `${guild.name}-${theme}.png` });

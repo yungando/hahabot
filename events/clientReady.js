@@ -1,7 +1,7 @@
-import { initArchives } from '../utils/archives.js';
-import { loadCommands } from '../utils/interactions.js';
+import { initArchives } from '../handlers/archives.js';
+import { loadCommands } from '../handlers/interactions.js';
+import { initThemeSchedules } from '../handlers/server-themes.js';
 import sendLog from '../utils/send-log.js';
-import { initThemeSchedules } from '../utils/server-themes.js';
 
 export default {
   once: true,

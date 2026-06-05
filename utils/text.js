@@ -3,4 +3,6 @@ const stripEmojis = (text) => text
   .replace(/\s{2,}/g, ' ')
   .trim();
 
-export default stripEmojis;
+const collapseNewlines = (text) => text.replace(/\n+/g, '\n');
+
+export { collapseNewlines, stripEmojis };

@@ -1,5 +1,5 @@
 import { Client, Collection, GatewayIntentBits, Partials } from 'discord.js';
-import { syncEvents } from './utils/interactions.js';
+import { syncEvents } from './handlers/interactions.js';
 
 const { DISCORD_TOKEN } = process.env;
 

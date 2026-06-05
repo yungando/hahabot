@@ -10,7 +10,8 @@
     "dev": "dotenvx run -- node index.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "env": "dotenvx encrypt"
+    "env": "dotenvx encrypt",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.51.4",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@yungando/eslint-config": "^1.3.0",
-    "eslint": "^9.39.2"
+    "eslint": "^9.39.2",
+    "patch-package": "^8.0.1"
   }
 }

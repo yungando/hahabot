@@ -1,9 +1,9 @@
 import { ChannelType, WebhookClient } from 'discord.js';
 import { QuickDB } from 'quick.db';
-import { restoreChannel, scheduleArchive } from '../utils/archives.js';
-import handleRedditUrl from '../utils/reddit-posts.js';
+import { restoreChannel, scheduleArchive } from '../handlers/archives.js';
+import handleRedditUrl from '../handlers/reddit.js';
+import handleTwitterUrl from '../handlers/twitter.js';
 import sendLog from '../utils/send-log.js';
-import handleTwitterUrl from '../utils/twitter-posts.js';
 
 const { HAHA_WEBHOOK_DM_ID, HAHA_WEBHOOK_DM_TOKEN } = process.env;
 const hahaDM = new WebhookClient({ id: HAHA_WEBHOOK_DM_ID, token: HAHA_WEBHOOK_DM_TOKEN });
@@ -51,7 +51,7 @@ export default {
       if (message.channel.parentId === '917120901584150589') restoreChannel(client, message.channel);
 
       // reddit posts
-      const [redditUrlMatch] = message.content.match(/https?:\/\/(?:www\.|old\.)?(?:reddit\.com\/r\/[^/\s]+\/(?:s\/[a-z0-9]+|comments\/[a-z0-9]+(?:\/[^\s/?#]*)?)|redd\.it\/[a-z0-9]+|v\.redd\.it\/[a-z0-9]+)/gi) || [];
+      const [redditUrlMatch] = message.content.match(/(?:https?:\/\/)?(?:[^\s/]+\.)?(?:reddit\.com|v\.redd\.it)\S*/gi) || [];
       if (redditUrlMatch) await handleRedditUrl(client, message, redditUrlMatch);
 
       // twitter posts

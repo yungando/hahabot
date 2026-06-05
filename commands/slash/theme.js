@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
+import { setServerTheme } from '../../handlers/server-themes.js';
 import sendLog from '../../utils/send-log.js';
-import { setServerTheme } from '../../utils/server-themes.js';
 
 export default {
   name: 'theme',

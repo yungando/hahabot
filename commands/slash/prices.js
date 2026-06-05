@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
-import handleRunelitePrices from '../../utils/runescape-prices.js';
+import handleRunelitePrices from '../../handlers/runescape-prices.js';
 import sendLog from '../../utils/send-log.js';
 
 export default {

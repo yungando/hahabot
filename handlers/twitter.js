@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ChannelType, ContainerBuilder, MessageFlags } from 'discord.js';
-import sendLog from './send-log.js';
-import stripEmojis from './strip-emojis.js';
+import sendLog from '../utils/send-log.js';
+import { collapseNewlines, stripEmojis } from '../utils/text.js';
 
 const getTwitterPost = async (pathname) => {
   const [requestPath] = pathname.match(/^((?:\/[^/]+){3})/);
@@ -24,7 +24,7 @@ const mapPostContainer = async (tweet) => {
 
       if (tweet.text) {
         section.addTextDisplayComponents(
-          (textDisplay) => textDisplay.setContent(tweet.text),
+          (textDisplay) => textDisplay.setContent(collapseNewlines(tweet.text)),
         );
       }
 

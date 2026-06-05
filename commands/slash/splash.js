@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
+import { createSplashTextLeaderboard, getSplashCount } from '../../handlers/splash-texts.js';
 import sendLog from '../../utils/send-log.js';
-import { createSplashTextLeaderboard, getSplashCount } from '../../utils/splash-texts.js';
 
 export default {
   name: 'splash',

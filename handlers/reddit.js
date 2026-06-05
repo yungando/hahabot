@@ -2,8 +2,8 @@ import axios from 'axios';
 import { ChannelType, ContainerBuilder, MessageFlags } from 'discord.js';
 import Snoowrap from 'snoowrap';
 import { xml2json } from 'xml-js';
-import sendLog from './send-log.js';
-import stripEmojis from './strip-emojis.js';
+import sendLog from '../utils/send-log.js';
+import { collapseNewlines, stripEmojis } from '../utils/text.js';
 
 const { REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_REFRESH_TOKEN } = process.env;
 
@@ -17,6 +17,7 @@ const REDDIT_API_CLIENT = new Snoowrap({
 const isVideoUrlPathname = (pathname) => pathname.match(/^\/[^/]+$/);
 const isShareUrlPathname = (pathname) => pathname.match(/\/r\/[^/]+\/s\/([a-z0-9]+)/i);
 
+const getCommentId = (url) => url.match(/\/r\/[^/]+\/comments\/[^/]+\/[^/]+\/([a-z0-9]+)/)[1];
 const getPostIdFromPathname = (url) => url.match(/\/r\/[^/]+\/comments\/([a-z0-9]+)/i)[1];
 const getPathnameFromShareLink = async (sharePathname) => {
   try {
@@ -117,23 +118,45 @@ const buildGalleryImageUrl = (imageMetadata) => {
   return `https://i.redd.it/${imageMetadata.id}.${fileExtension}`;
 };
 
-const mapPostContainer = async (redditPost) => {
-  const redditPostPermalink = `https://reddit.com${[redditPost.permalink]}`;
+const sanitiseBodyText = (bodyText) => {
+  const sanitisedBodyText = collapseNewlines(bodyText);
 
-  const redditPostContainer = new ContainerBuilder()
+  return sanitisedBodyText.length > 2000
+    ? `${sanitisedBodyText.slice(0, 2000)}...`
+    : sanitisedBodyText;
+};
+
+const mapRedditContainer = async (redditPost, redditComment) => {
+  const permalink = redditComment
+    ? `https://reddit.com${[redditComment.permalink]}`
+    : `https://reddit.com${[redditPost.permalink]}`;
+
+  const authorText = redditComment
+    ? `> u/${redditComment.author.name} commented on ${redditPost.subreddit_name_prefixed}`
+    : `> u/${redditPost.author} on ${redditPost.subreddit_name_prefixed}`;
+
+  const redditContainer = new ContainerBuilder()
     .setAccentColor(0xFF4500)
+    .addTextDisplayComponents((textDisplay) => textDisplay.setContent(authorText))
     .addTextDisplayComponents((textDisplay) => textDisplay.setContent(
-      `> u/${redditPost.author} on ${redditPost.subreddit_name_prefixed}`,
-    ))
-    .addTextDisplayComponents((textDisplay) => textDisplay.setContent(
-      `## [${stripEmojis(redditPost.title)}](${redditPostPermalink})`,
+      `## [${stripEmojis(redditPost.title)}](${permalink})`,
     ));
+
+  if (redditComment) {
+    const postText = sanitiseBodyText(redditComment.body);
+
+    redditContainer.addTextDisplayComponents(
+      (textDisplay) => textDisplay.setContent(postText),
+    );
+
+    return redditContainer;
+  }
 
   if (redditPost.is_video) {
     const mediaId = getMediaId(redditPost.secure_media);
     const vxRedditUrl = await buildVxRedditUrl(mediaId);
 
-    redditPostContainer.addMediaGalleryComponents(
+    redditContainer.addMediaGalleryComponents(
       (mediaGallery) => mediaGallery.addItems(
         (mediaGalleryItem) => mediaGalleryItem.setURL(vxRedditUrl),
       ),
@@ -141,7 +164,7 @@ const mapPostContainer = async (redditPost) => {
   }
 
   if (redditPost.post_hint === 'image') {
-    redditPostContainer.addMediaGalleryComponents(
+    redditContainer.addMediaGalleryComponents(
       (mediaGallery) => mediaGallery.addItems(
         (mediaGalleryItem) => mediaGalleryItem.setURL(redditPost.url),
       ),
@@ -151,7 +174,7 @@ const mapPostContainer = async (redditPost) => {
   if (redditPost.is_gallery) {
     const galleryItems = Object.values(redditPost.media_metadata).slice(0, 10);
 
-    redditPostContainer.addMediaGalleryComponents(
+    redditContainer.addMediaGalleryComponents(
       (mediaGallery) => mediaGallery.addItems(
         ...galleryItems.map(
           (item) => (mediaGalleryItem) => mediaGalleryItem.setURL(buildGalleryImageUrl(item)),
@@ -161,27 +184,45 @@ const mapPostContainer = async (redditPost) => {
   }
 
   if (redditPost.selftext) {
-    const postText = redditPost.selftext.length > 2000
-      ? `${redditPost.selftext.slice(0, 2000)}...`
-      : redditPost.selftext;
+    const postText = sanitiseBodyText(redditPost.selftext);
 
-    redditPostContainer.addTextDisplayComponents(
+    redditContainer.addTextDisplayComponents(
       (textDisplay) => textDisplay.setContent(postText),
     );
   }
 
-  return redditPostContainer;
+  return redditContainer;
+};
+
+const handleRedditPostUrl = async (redditUrl) => {
+  const redditPost = await getRedditPost(redditUrl);
+  if (!redditPost) return undefined;
+
+  return await mapRedditContainer(redditPost);
+};
+
+const handleRedditCommentUrl = async (redditUrl, commentId) => {
+  const redditPost = await getRedditPost(redditUrl);
+  if (!redditPost) return undefined;
+
+  const redditComment = await REDDIT_API_CLIENT.getComment(commentId).fetch();
+  if (!redditComment) return undefined;
+
+  return await mapRedditContainer(redditPost, redditComment);
 };
 
 const handleRedditUrl = async (client, message, redditUrl) => {
   try {
-    const redditPost = await getRedditPost(redditUrl);
-    if (!redditPost) return;
+    const redditCommentId = getCommentId(redditUrl);
 
-    const redditPostContainer = await mapPostContainer(redditPost);
+    const redditContainer = redditCommentId
+      ? await handleRedditCommentUrl(redditUrl, redditCommentId)
+      : await handleRedditPostUrl(redditUrl);
+
+    if (!redditContainer) return;
 
     await message.reply({
-      components: [redditPostContainer],
+      components: [redditContainer],
       flags: MessageFlags.IsComponentsV2,
     });
 
@@ -189,7 +230,7 @@ const handleRedditUrl = async (client, message, redditUrl) => {
   } catch (error) {
     const errorPayload = {
       logType: 'error',
-      details: 'Failed attempting to handle reddit post.',
+      details: 'Failed attempting to handle reddit url.',
       message,
       error,
       user: message.author,

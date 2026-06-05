@@ -1,0 +1,13 @@
+diff --git a/node_modules/snoowrap/dist/request_handler.js b/node_modules/snoowrap/dist/request_handler.js
+index 5a31f40..89efc1f 100644
+--- a/node_modules/snoowrap/dist/request_handler.js
++++ b/node_modules/snoowrap/dist/request_handler.js
+@@ -180,7 +180,7 @@ function _awaitRequestDelay() {
+   var now = Date.now();
+   var waitTime = this._nextRequestTimestamp - now;
+   this._nextRequestTimestamp = Math.max(now, this._nextRequestTimestamp) + this._config.requestDelay;
+-  return _Promise.default.delay(waitTime);
++  return _Promise.default.delay(Number.isFinite(waitTime) && waitTime > 0 ? waitTime : 1);
+ }
+ /**
+ * @summary Sends a request to the reddit server, authenticated with the user's client ID and client secret.
