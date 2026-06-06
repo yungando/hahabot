@@ -17,8 +17,8 @@ const REDDIT_API_CLIENT = new Snoowrap({
 const isVideoUrlPathname = (pathname) => pathname.match(/^\/[^/]+$/);
 const isShareUrlPathname = (pathname) => pathname.match(/\/r\/[^/]+\/s\/([a-z0-9]+)/i);
 
-const getCommentId = (url) => url.match(/\/r\/[^/]+\/comments\/[^/]+\/[^/]+\/([a-z0-9]+)/)[1];
-const getPostIdFromPathname = (url) => url.match(/\/r\/[^/]+\/comments\/([a-z0-9]+)/i)[1];
+const getCommentId = (url) => url.match(/\/r\/[^/]+\/comments\/[^/]+\/[^/]+\/([a-z0-9]+)/)?.at(1);
+const getPostIdFromPathname = (url) => url.match(/\/r\/[^/]+\/comments\/([a-z0-9]+)/i)?.at(1);
 const getPathnameFromShareLink = async (sharePathname) => {
   try {
     await REDDIT_API_CLIENT.oauthRequest({ uri: sharePathname, method: 'get' });
