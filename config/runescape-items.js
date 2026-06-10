@@ -68,9 +68,9 @@ const leaguesItems = [
   { id: '30432', name: 'Raging echoes venator bow orn kit', pointCost: 10000 },
 
   { id: '33299', name: 'Demonic pacts banner', pointCost: 500 },
-  { id: '0', name: 'Demonic pacts relic hunter (t1)', pointCost: 1000 },
-  { id: '0', name: 'Demonic pacts relic hunter (t2)', pointCost: 5000 },
-  { id: '0', name: 'Demonic pacts relic hunter (t3)', pointCost: 20000 },
+  { id: '33451', name: 'Demonic pacts relic hunter (t1)', pointCost: 1000 },
+  { id: '33454', name: 'Demonic pacts relic hunter (t2)', pointCost: 5000 },
+  { id: '33457', name: 'Demonic pacts relic hunter (t3)', pointCost: 20000 },
   { id: '33362', name: 'Demonic pacts throne scroll', pointCost: 3000 },
   { id: '33359', name: 'Demonic pacts impish ritual kit', pointCost: 1000 },
   { id: '33365', name: 'Demonic pacts impish whistle', pointCost: 8000 },
