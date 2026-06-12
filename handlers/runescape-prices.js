@@ -24,12 +24,12 @@ const getLatestPrices = async () => {
 const filterPrices = (allPrices, itemSet) => {
   const filteredPrices = itemSet.map((item) => ({ ...allPrices[item.id], ...item }));
 
-  return filteredPrices.filter((item) => item.high > 0);
+  return filteredPrices.filter((item) => item.low > 0);
 };
 
 const calculateGpPerPoint = (itemPrices) => (
   itemPrices.map((item) => {
-    const gpPerPoint = item.high / item.pointCost;
+    const gpPerPoint = item.low / item.pointCost;
 
     return { ...item, gpPerPoint };
   })
@@ -53,7 +53,7 @@ const createPricesEmbed = (itemSetName, items) => {
   items.forEach((item) => {
     pricesTable.cell('Item', item.name);
     pricesTable.cell('Point cost', formatLongNumber(item.pointCost));
-    pricesTable.cell('GE price', formatLongNumber(item.high));
+    pricesTable.cell('GE price', formatLongNumber(item.low));
     pricesTable.cell('GP per point', item.gpPerPoint.toFixed(2));
     pricesTable.newRow();
   });
