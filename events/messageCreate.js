@@ -1,7 +1,6 @@
 import { ChannelType, WebhookClient } from 'discord.js';
 import { QuickDB } from 'quick.db';
 import { restoreChannel, scheduleArchive } from '../handlers/archives.js';
-import handleRedditUrl from '../handlers/reddit.js';
 import handleTwitterUrl from '../handlers/twitter.js';
 import sendLog from '../utils/send-log.js';
 
@@ -49,10 +48,6 @@ export default {
 
       // restore game channel
       if (message.channel.parentId === '917120901584150589') restoreChannel(client, message.channel);
-
-      // reddit posts
-      const [redditUrlMatch] = message.content.match(/(?:https?:\/\/)?(?:[^\s/]+\.)?(?:reddit\.com|v\.redd\.it)\S*/gi) || [];
-      if (redditUrlMatch) await handleRedditUrl(client, message, redditUrlMatch);
 
       // twitter posts
       const [twitterUrlMatch] = message.content.match(/https:\/\/(twitter|x).com\/.+\/status\/.+/) || [];

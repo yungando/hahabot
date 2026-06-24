@@ -10,8 +10,7 @@
     "dev": "dotenvx run -- node index.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "env": "dotenvx encrypt",
-    "postinstall": "patch-package"
+    "env": "dotenvx encrypt"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.51.4",
@@ -21,13 +20,10 @@
     "discord.js": "^14.25.1",
     "easy-table": "^1.2.0",
     "pm2": "^6.0.14",
-    "quick.db": "^9.1.7",
-    "snoowrap": "^1.23.0",
-    "xml-js": "^1.6.11"
+    "quick.db": "^9.1.7"
   },
   "devDependencies": {
     "@yungando/eslint-config": "^1.3.0",
-    "eslint": "^9.39.2",
-    "patch-package": "^8.0.1"
+    "eslint": "^9.39.2"
   }
 }

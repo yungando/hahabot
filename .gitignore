@@ -104,7 +104,6 @@ dist
 
 # hahabot
 json.sqlite
-redditvideos/
 .DS_Store
 .vscode/
 .env.keys
