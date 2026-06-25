@@ -1,9 +1,14 @@
-import { EmbedBuilder } from 'discord.js';
+import { Buffer } from 'node:buffer';
+import { AttachmentBuilder, EmbedBuilder } from 'discord.js';
+import { QuickDB } from 'quick.db';
+import { inlineTrim } from '../utils/text.js';
+
+const db = new QuickDB();
+const config = db.table('config');
 
 const POLLO_SERVER_ID = '534915212760055819';
 const noContextId = '1247871597080084490';
 
-// const tempCursorId = '1474577944314777682';
 const FIRST_MESSAGE_ID = '1247871734716170250';
 
 const fetchNoContextMessages = async (noContext, cursor) => {
@@ -29,18 +34,20 @@ const getNoContextMessagesSinceId = async (client, messageId) => {
   try {
     const pollo = await client.guilds.fetch(POLLO_SERVER_ID);
     const noContext = await pollo.channels.fetch(noContextId);
-    const mostRecentNoContext = noContext.lastMessageId;
+    const { lastMessageId } = noContext;
+
+    if (messageId === lastMessageId) return { messages: undefined, lastMessageId };
 
     let { messages, cursor } = await fetchNoContextMessages(noContext, messageId);
 
-    while (!messages.some((message) => message.id === mostRecentNoContext)) {
+    while (!messages.some((message) => message.id === lastMessageId)) {
       const result = await fetchNoContextMessages(noContext, cursor);
 
       messages = mergeCollections(messages, result.messages);
       cursor = result.cursor;
     }
 
-    return messages;
+    return { messages, lastMessageId };
   } catch (error) {
     console.error(error);
 
@@ -49,7 +56,7 @@ const getNoContextMessagesSinceId = async (client, messageId) => {
 };
 
 const createSplashTextLeaderboard = async (client, guild) => {
-  const messages = await getNoContextMessagesSinceId(client, FIRST_MESSAGE_ID);
+  const { messages } = await getNoContextMessagesSinceId(client, FIRST_MESSAGE_ID);
 
   const authorCountsMap = new Map();
 
@@ -86,37 +93,50 @@ const createSplashTextLeaderboard = async (client, guild) => {
 };
 
 const getSplashCount = async (client) => {
-  const messages = await getNoContextMessagesSinceId(client, FIRST_MESSAGE_ID);
+  const firstMessageId = await config.get('splash.firstMessageId');
+
+  const { messages } = await getNoContextMessagesSinceId(client, firstMessageId);
 
   return messages.size;
 };
 
-const generateSplashUpdateTxt = () => {
-  // const noContextMessagesSinceLastUpdate = await noContext.messages
-  //   .fetch({ after: tempCursorId, limit: 100 });
+const generateSplashUpdateTxt = async (client) => {
+  const previousMessageId = await config.get('splash.lastMessageId');
+  const { messages, lastMessageId } = await getNoContextMessagesSinceId(client, previousMessageId);
 
-  // console.log(noContextMessagesSinceLastUpdate.size);
+  if (!messages) return { count: 0 };
 
-  // const allNoContextMessages = await noContext.messages.cache
-  //   .sorted((messageA, messageB) => messageA.createdTimestamp - messageB.createdTimestamp);
+  const splashTexts = messages.map((message) => {
+    if (message.messageSnapshots.size) {
+      const forwardedMessage = message.messageSnapshots.first();
 
-  // const allSplashTexts = allNoContextMessages.map((message) => {
-  //   if (message.messageSnapshots.size) {
-  //     const forwardedMessage = message.messageSnapshots.first();
+      return inlineTrim(forwardedMessage.content);
+    }
 
-  //     return forwardedMessage.content;
-  //   }
+    return inlineTrim(message.content);
+  });
 
-  //   return message.content.trim();
-  // }); // .join('\n');
+  const count = splashTexts.length;
+  const splashTxt = new AttachmentBuilder(
+    Buffer.from(splashTexts.join('\n'), 'utf-8'),
+    {
+      name: 'splash.txt',
+    },
+  );
 
-  // console.log(allSplashTexts.length);
-  // console.log(allSplashTexts);
+  await config.set('splash.lastMessageId', lastMessageId);
+
+  return { splashTxt, count };
+};
+
+const setLastSplashMessageId = async (messageId) => {
+  await config.set('splash.firstMessageId', FIRST_MESSAGE_ID);
+  await config.set('splash.lastMessageId', messageId);
 };
 
 export {
   createSplashTextLeaderboard,
   generateSplashUpdateTxt,
-  getNoContextMessagesSinceId,
   getSplashCount,
+  setLastSplashMessageId,
 };

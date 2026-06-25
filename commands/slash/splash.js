@@ -1,5 +1,5 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
-import { createSplashTextLeaderboard, getSplashCount } from '../../handlers/splash-texts.js';
+import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType } from 'discord.js';
+import { createSplashTextLeaderboard, generateSplashUpdateTxt, getSplashCount, setLastSplashMessageId } from '../../handlers/splash-texts.js';
 import sendLog from '../../utils/send-log.js';
 
 export default {
@@ -16,6 +16,19 @@ export default {
       name: 'update',
       description: 'Generate a .txt of splash texts submitted since the last update.',
       type: ApplicationCommandOptionType.Subcommand,
+    },
+    {
+      name: 'seed',
+      description: 'Set the last splash message Id to update from.',
+      type: ApplicationCommandOptionType.Subcommand,
+      options: [
+        {
+          name: 'messageid',
+          description: 'The messageId to seed update from.',
+          type: ApplicationCommandOptionType.String,
+          required: true,
+        },
+      ],
     },
     {
       name: 'leaderboard',
@@ -45,7 +58,21 @@ export default {
 
       switch (subcommand) {
         case 'update': {
-          return interaction.editReply({ content: 'sorry not done that yet', flags: MessageFlags.Ephemeral });
+          const { splashTxt, count } = await generateSplashUpdateTxt(client);
+
+          return interaction.editReply(
+            {
+              content: `${count} minecraft splash texts`,
+              ...(splashTxt && { files: [splashTxt] }),
+            },
+          );
+        }
+        case 'seed': {
+          const messageId = await interaction.options.getString('messageid');
+
+          await setLastSplashMessageId(messageId);
+
+          return interaction.editReply({ content: `Set last splash message Id to \`${messageId}\`.` });
         }
         case 'leaderboard': {
           const leaderboardEmbed = await createSplashTextLeaderboard(client, interaction.guild);
@@ -58,7 +85,7 @@ export default {
           return interaction.editReply({ content: `${splashCount} minecraft splash texts` });
         }
         default: {
-          return interaction.editReply({ content: '( ͡° ͜ʖ ͡°)', flags: MessageFlags.Ephemeral });
+          return interaction.editReply({ content: '( ͡° ͜ʖ ͡°)' });
         }
       }
     } catch (error) {

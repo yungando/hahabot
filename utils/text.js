@@ -5,4 +5,6 @@ const stripEmojis = (text) => text
 
 const collapseNewlines = (text) => text.replace(/\n+/g, '\n');
 
-export { collapseNewlines, stripEmojis };
+const inlineTrim = (text) => collapseNewlines(text.trim()).replaceAll('\n', ' ');
+
+export { collapseNewlines, inlineTrim, stripEmojis };
