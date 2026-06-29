@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer';
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { QuickDB } from 'quick.db';
 import { SERVERS } from '../config/constants.js';
 import { inlineTrim } from '../utils/text.js';
@@ -27,28 +27,22 @@ const mergeCollections = (collectionA, collectionB) => (
 );
 
 const getNoContextMessagesSinceId = async (client, messageId) => {
-  try {
-    const pollo = await client.guilds.fetch(SERVERS.pollo.id);
-    const noContext = await pollo.channels.fetch(SERVERS.pollo.channels.noContext);
-    const { lastMessageId } = noContext;
+  const pollo = await client.guilds.fetch(SERVERS.pollo.id);
+  const noContext = await pollo.channels.fetch(SERVERS.pollo.channels.noContext.id);
+  const { lastMessageId } = noContext;
 
-    if (messageId === lastMessageId) return { messages: undefined, lastMessageId };
+  if (messageId === lastMessageId) return { messages: undefined, lastMessageId };
 
-    let { messages, cursor } = await fetchNoContextMessages(noContext, messageId);
+  let { messages, cursor } = await fetchNoContextMessages(noContext, messageId);
 
-    while (!messages.some((message) => message.id === lastMessageId)) {
-      const result = await fetchNoContextMessages(noContext, cursor);
+  while (!messages.some((message) => message.id === lastMessageId)) {
+    const result = await fetchNoContextMessages(noContext, cursor);
 
-      messages = mergeCollections(messages, result.messages);
-      cursor = result.cursor;
-    }
-
-    return { messages, lastMessageId };
-  } catch (error) {
-    console.error(error);
-
-    return undefined;
+    messages = mergeCollections(messages, result.messages);
+    cursor = result.cursor;
   }
+
+  return { messages, lastMessageId };
 };
 
 const createSplashTextLeaderboard = async (client, guild) => {
@@ -126,17 +120,24 @@ const setLastSplashMessageId = async (messageId) => {
   await config.set('splash.lastMessageId', messageId);
 };
 
-const buildSplashSeedButtonRow = (lastMessageId, disabled = false) => {
+const buildSplashUpdateMessage = (count, splashTxt, lastMessageId, disabled = false) => {
   const seedButton = new ButtonBuilder()
+    .setStyle(ButtonStyle.Primary)
     .setLabel('Seed last splash message id')
     .setCustomId(`splashseed:${lastMessageId}`)
     .setDisabled(disabled);
 
-  return new ActionRowBuilder.addComponents(seedButton);
+  const actionRow = new ActionRowBuilder().addComponents(seedButton);
+
+  return {
+    content: `${count} minecraft splash texts`,
+    ...(splashTxt && { files: [splashTxt] }),
+    ...(actionRow && { components: [actionRow], withResponse: true }),
+  };
 };
 
 export {
-  buildSplashSeedButtonRow,
+  buildSplashUpdateMessage,
   createSplashTextLeaderboard,
   generateSplashUpdateTxt,
   getSplashCount,

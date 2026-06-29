@@ -21,76 +21,44 @@ const syncEvents = async (client) => {
   }
 };
 
-const clearCommands = async (client) => {
+const clearCommands = (client) => {
   // eslint-disable-next-line no-console
-  console.log('Starting clearing old commands.');
+  console.log('Starting clearing old interactions.');
 
   client.commands.clear();
   client.contextMenus.clear();
-  // eslint-disable-next-line no-param-reassign
-  client.globalCommands = [];
-  // eslint-disable-next-line no-param-reassign
-  client.guildCommands = [];
 
   // eslint-disable-next-line no-console
-  console.log('Successfully cleared old commands.');
+  console.log('Successfully cleared old interactions.');
 };
 
-const reduceGuildCommands = async (guildCommands) => {
-  const reducedGuildCommands = guildCommands.reduce((commandsArray, value) => {
-    const guildIndex = commandsArray.findIndex((guild) => guild.guildId === value.guildId);
-
-    guildIndex > -1
-      ? commandsArray[guildIndex].commands.push(...value.commands)
-      : commandsArray.push(value);
-
-    return commandsArray;
-  }, []);
-
-  return reducedGuildCommands;
-};
-
-const registerCommands = async (client) => {
-  const clientId = client.application.id;
-
-  // eslint-disable-next-line no-console
-  console.log('Started registering application commands.');
-
-  await rest.put(Routes.applicationCommands(clientId), {
-    body: client.globalCommands,
-  });
-
-  for (const guild of client.guildCommands) {
-    await rest.put(Routes.applicationGuildCommands(clientId, guild.guildId), {
-      body: guild.commands,
-    });
-  }
-
-  // eslint-disable-next-line no-console
-  console.log('Successfully registered application commands.');
+const addGuildCommand = (guildCommands, guildId, command) => {
+  const commandSet = guildCommands.get(guildId) ?? [];
+  commandSet.push(command);
+  guildCommands.set(guildId, commandSet);
 };
 
 const loadCommands = async (client) => {
-  const guildCommands = [];
+  const globalCommands = [];
+  const guildCommands = new Map();
 
-  const commandFiles = readdirSync(commandsDir)
-    .flatMap((folder) => {
-      const folderUrl = new URL(`${folder}/`, commandsDir);
+  const commandFiles = readdirSync(commandsDir).flatMap((folder) => {
+    const folderUrl = new URL(`${folder}/`, commandsDir);
 
-      return readdirSync(folderUrl)
-        .filter((file) => file.match(/(?:slash|contextMenu).*\.js$/))
-        .map((file) => new URL(file, folderUrl));
-    });
+    return readdirSync(folderUrl)
+      .filter((file) => file.endsWith('.js'))
+      .map((file) => new URL(file, folderUrl));
+  });
 
   for (const file of commandFiles) {
     const { default: command } = await import(file.href);
 
     if (command.guilds) {
-      for (const commandsGuildId of command.guilds) {
-        guildCommands.push({ guildId: commandsGuildId, commands: [command] });
+      for (const guildId of command.guilds) {
+        addGuildCommand(guildCommands, guildId, command);
       }
     } else {
-      client.globalCommands.push(command);
+      globalCommands.push(command);
     }
 
     command.type === ApplicationCommandType.ChatInput
@@ -98,8 +66,27 @@ const loadCommands = async (client) => {
       : client.contextMenus.set(command.name, command);
   }
 
-  const reducedGuildCommands = await reduceGuildCommands(guildCommands);
-  client.guildCommands.push(...reducedGuildCommands);
+  return { globalCommands, guildCommands };
+};
+
+const registerCommands = async (client, { globalCommands, guildCommands }) => {
+  const clientId = client.application.id;
+
+  // eslint-disable-next-line no-console
+  console.log('Started registering application interactions.');
+
+  await rest.put(Routes.applicationCommands(clientId), {
+    body: globalCommands,
+  });
+
+  for (const [guildId, commands] of guildCommands) {
+    await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
+      body: commands,
+    });
+  }
+
+  // eslint-disable-next-line no-console
+  console.log('Successfully registered application interactions.');
 };
 
 export {

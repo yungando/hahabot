@@ -36,10 +36,10 @@ export default {
         sendLog(client, logPayload);
       }
 
-      if (message.channel.parentId === SERVERS.pollo.categories.games) {
+      if (message.channel.parentId === SERVERS.pollo.categories.games.id) {
         scheduleArchive(client, message.channel);
       }
-      if (message.channel.parentId === SERVERS.pollo.categories.archivedGames) {
+      if (message.channel.parentId === SERVERS.pollo.categories.archivedGames.id) {
         restoreChannel(client, message.channel);
       }
 

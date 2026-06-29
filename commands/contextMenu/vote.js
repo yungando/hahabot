@@ -10,7 +10,7 @@ export default {
     InteractionContextType.PrivateChannel,
   ],
   async execute(client, interaction) {
-    const message = interaction.options.getMessage('message');
+    const message = interaction.targetMessage;
 
     await message.react(EMOJI.upvote.id);
     await message.react(EMOJI.downvote.id);

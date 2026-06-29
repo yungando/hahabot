@@ -8,8 +8,8 @@ const userAgent = 'hahabot discord bot by @yungando';
 const maxDiscordMessageLength = 1980;
 
 const itemSets = [
-  { name: 'Deadman', itemSet: dmmItems },
-  { name: 'Leagues', itemSet: leaguesItems },
+  { name: 'deadman', itemSet: dmmItems },
+  { name: 'leagues', itemSet: leaguesItems },
 ];
 
 const getLatestPrices = async () => {

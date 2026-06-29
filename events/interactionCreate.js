@@ -1,4 +1,3 @@
-import { ApplicationCommandType } from 'discord.js';
 import sendLog from '../utils/send-log.js';
 
 export default {
@@ -6,24 +5,16 @@ export default {
     try {
       if (interaction.partial) await interaction.fetch();
 
-      switch (interaction.commandType) {
-        case ApplicationCommandType.ChatInput: {
-          const command = client.commands.get(interaction.commandName);
+      if (interaction.isChatInputCommand()) {
+        const command = client.commands.get(interaction.commandName);
 
-          return command.execute(client, interaction);
-        }
-        case ApplicationCommandType.User: {
-          const contextMenu = client.contextMenus.get(interaction.commandName);
+        command.execute(client, interaction);
+      }
 
-          return contextMenu.execute(client, interaction);
-        }
-        case ApplicationCommandType.Message: {
-          const [buttonName, ...buttonData] = interaction.data.custom_id.split(':');
-          const button = client.buttons.get(buttonName);
+      if (interaction.isContextMenuCommand()) {
+        const contextMenu = client.contextMenus.get(interaction.commandName);
 
-          return button.execute(client, interaction, buttonData);
-        }
-        default: return undefined;
+        contextMenu.execute(client, interaction);
       }
     } catch (error) {
       const errorPayload = {
@@ -34,7 +25,7 @@ export default {
         guild: interaction.guild,
       };
 
-      return sendLog(client, errorPayload);
+      sendLog(client, errorPayload);
     }
   },
 };

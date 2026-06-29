@@ -1,9 +1,7 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, PermissionFlagsBits } from 'discord.js';
 import { SERVERS } from '../../config/constants.js';
-import { buildSplashSeedButtonRow, createSplashTextLeaderboard, generateSplashUpdateTxt, getSplashCount, setLastSplashMessageId } from '../../handlers/splash-texts.js';
+import { buildSplashUpdateMessage, createSplashTextLeaderboard, generateSplashUpdateTxt, getSplashCount, setLastSplashMessageId } from '../../handlers/splash-texts.js';
 import sendLog from '../../utils/send-log.js';
-
-const FIVE_MINS_IN_MS = 300000;
 
 export default {
   name: 'splash',
@@ -61,33 +59,23 @@ export default {
 
       switch (subcommand) {
         case 'update': {
-          const { splashTxt, count, lastMessageId } = await generateSplashUpdateTxt(client);
-          const actionRow = buildSplashSeedButtonRow(lastMessageId);
+          const { count, splashTxt, lastMessageId } = await generateSplashUpdateTxt(client);
+          const splashUpdateMessage = buildSplashUpdateMessage(count, splashTxt, lastMessageId);
+          const splashButtonId = `splashseed:${lastMessageId}`;
 
-          const res = await interaction.editReply(
-            {
-              content: `${count} minecraft splash texts`,
-              ...(splashTxt && { files: [splashTxt] }),
-              ...(actionRow && { components: [actionRow], withResponse: true }),
-            },
+          const response = await interaction.editReply(splashUpdateMessage);
+
+          const interactionFilter = (i) => (
+            i.customId === splashButtonId && i.user.id === interaction.user.id
           );
+          const buttonPressInteraction = await response
+            .awaitMessageComponent({ filter: interactionFilter, time: 300_000 });
 
-          const confirmation = await res.resource.message
-            .awaitMessageComponent({ time: FIVE_MINS_IN_MS });
+          await setLastSplashMessageId(lastMessageId);
 
-          if (confirmation.customId === `splashseed:${lastMessageId}`) {
-            const updateActionRow = buildSplashSeedButtonRow(lastMessageId, true);
+          const messageUpdate = buildSplashUpdateMessage(count, splashTxt, lastMessageId, true);
 
-            return interaction.editReply(
-              {
-                content: `${count} minecraft splash texts`,
-                ...(splashTxt && { files: [splashTxt] }),
-                ...(updateActionRow && { components: [updateActionRow], withResponse: true }),
-              },
-            );
-          }
-
-          return interaction.editReply({ content: '( ͡° ͜ʖ ͡°)' });
+          return buttonPressInteraction.update(messageUpdate);
         }
         case 'seed': {
           const messageId = await interaction.options.getString('messageid');

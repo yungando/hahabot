@@ -59,7 +59,7 @@ const initArchives = async (client) => {
 
   const nowTimestamp = Date.now();
 
-  await gamesCategoryChannels.forEach(async (channel) => {
+  for (const channel of gamesCategoryChannels.values()) {
     await channel.messages.fetch({ limit: 1 });
     const lastMessage = await channel.messages.cache.first();
 
@@ -72,7 +72,7 @@ const initArchives = async (client) => {
     } else {
       await scheduleArchive(client, channel, lastMessage.createdTimestamp - nowTimestamp);
     }
-  });
+  }
 };
 
 export {

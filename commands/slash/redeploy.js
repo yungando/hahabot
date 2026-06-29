@@ -17,8 +17,8 @@ export default {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
       await clearCommands(client);
-      await loadCommands(client);
-      await registerCommands(client);
+      const commands = await loadCommands(client);
+      await registerCommands(client, commands);
 
       await interaction.editReply({ content: 'Successfully redeployed all commands.', flags: MessageFlags.Ephemeral });
 

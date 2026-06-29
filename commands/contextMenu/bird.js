@@ -16,17 +16,15 @@ export default {
     InteractionContextType.PrivateChannel,
   ],
   async execute(client, interaction) {
-    const dmUser = interaction.options.getUser('user');
-
     const bird = '＜￣｀ヽ、　　　　　　　／￣>\n　ゝ、　　＼　／⌒ヽ,ノ 　/´\n　　　ゝ、　`（ ( ͡° ͜ʖ ͡°) ／\n　　 　　>　 　 　,ノ\n　　　　　∠_,,,/´”\nWould a bot send you that\n?';
 
-    dmUser.send(bird);
+    interaction.targetUser.send(bird);
 
     interaction.reply({ content: '( ͡° ͜ʖ ͡°)', flags: MessageFlags.Ephemeral });
 
     const logPayload = {
       logType: 'command',
-      message: `/bird: ${userMention(dmUser.id)}`,
+      message: `/bird: ${userMention(interaction.targetUser.id)}`,
       user: interaction.user,
       guild: interaction.guild,
     };
