@@ -1,4 +1,5 @@
-import { ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
+import { ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { SERVERS } from '../../config/constants.js';
 import { clearCommands, loadCommands, registerCommands } from '../../handlers/interactions.js';
 import sendLog from '../../utils/send-log.js';
 
@@ -6,9 +7,9 @@ export default {
   name: 'redeploy',
   description: 'Redeploy all of hahabot\'s commands.',
   type: ApplicationCommandType.ChatInput,
-  default_member_permissions: '0',
+  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
-    '568227296767639552',
+    SERVERS.hahabot.id,
   ],
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {

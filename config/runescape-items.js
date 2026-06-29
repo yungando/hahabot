@@ -1,4 +1,4 @@
-const dmmItems = [
+const dmmItems = Object.freeze([
   { id: '33015', name: 'Annihilation blueprints', pointCost: 15000 },
   { id: '33018', name: 'Annihilation teleport scroll', pointCost: 10000 },
   { id: '33012', name: 'Annihilation weapon scroll', pointCost: 12000 },
@@ -7,9 +7,9 @@ const dmmItems = [
   { id: '29619', name: 'Armageddon rug', pointCost: 3000 },
   { id: '29622', name: 'Armageddon teleport scroll', pointCost: 9000 },
   { id: '29625', name: 'Armageddon weapon scroll', pointCost: 12000 },
-];
+]);
 
-const leaguesItems = [
+const leaguesItems = Object.freeze([
   { id: '24413', name: 'Twisted banner', pointCost: 750 },
   { id: '24460', name: 'Twisted teleport scroll', pointCost: 750 },
   { id: '24463', name: 'Twisted blueprints', pointCost: 4000 },
@@ -80,6 +80,6 @@ const leaguesItems = [
   { id: '33302', name: 'Demonic pacts skin contract', pointCost: 3000 },
   { id: '33368', name: 'Demonic pacts demon butler scroll', pointCost: 4000 },
   { id: '33308', name: 'Demonic pacts staff ornament kit', pointCost: 2000 },
-];
+]);
 
 export { dmmItems, leaguesItems };

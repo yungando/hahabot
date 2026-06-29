@@ -1,8 +1,5 @@
-import { QuickDB } from 'quick.db';
+import { EMOJI } from '../config/constants.js';
 import sendLog from '../utils/send-log.js';
-
-const db = new QuickDB();
-const servers = db.table('servers');
 
 export default {
   async execute(client, messageReaction, user) {
@@ -14,22 +11,15 @@ export default {
 
       const { message, emoji } = messageReaction;
 
-      if (await servers.get(`${message.guild.id}.serverName`) !== message.guild.name) {
-        await servers.set(`${message.guild.id}.serverName`, message.guild.name);
-      }
-
-      const upvoteId = '594816363722309645';
-      const downvoteId = '594816363533565991';
-
       // Upvote/Downvote system
-      if (emoji.id === upvoteId) {
-        const downvote = message.reactions.cache.get(downvoteId);
+      if (emoji.id === EMOJI.upvote.id) {
+        const downvote = message.reactions.cache.get(EMOJI.downvote.id);
 
         if (downvote) downvote.users.remove(user);
       }
 
-      if (emoji.id === downvoteId) {
-        const upvote = message.reactions.cache.get(upvoteId);
+      if (emoji.id === EMOJI.downvote.id) {
+        const upvote = message.reactions.cache.get(EMOJI.upvote.id);
 
         if (upvote) upvote.users.remove(user);
       }

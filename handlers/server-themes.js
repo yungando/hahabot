@@ -1,10 +1,9 @@
 import fs from 'node:fs';
 import { Cron } from 'croner';
 import { AttachmentBuilder } from 'discord.js';
+import { SERVERS } from '../config/constants.js';
 import sendLog from '../utils/send-log.js';
 
-const POLLO_SERVER_ID = '534915212760055819';
-const HAHABOT_SERVER_ID = '568227296767639552';
 const BASE_PATH = './config/server-themes';
 
 const schedule = (...args) => new Cron(...args);
@@ -16,7 +15,7 @@ const setServerTheme = async (client, guild, theme) => {
 
   await guild.setIcon(newIconPath);
 
-  if (guild.id === HAHABOT_SERVER_ID) {
+  if (guild.id === SERVERS.hahabot.id) {
     await client.user.setAvatar(newIconPath);
   }
 
@@ -64,8 +63,8 @@ const setHahabotNickname = async (guild, nickname = null) => await guild.members
 
 const initThemeSchedules = async (client) => {
   try {
-    const pollo = await client.guilds.fetch(POLLO_SERVER_ID);
-    const hahabot = await client.guilds.fetch(HAHABOT_SERVER_ID);
+    const pollo = await client.guilds.fetch(SERVERS.pollo.id);
+    const hahabot = await client.guilds.fetch(SERVERS.hahabot.id);
 
     const halloweenStart = '0 0 1 10 *';
     const halloweenDay = '0 0 31 10 *';

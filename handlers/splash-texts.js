@@ -1,15 +1,11 @@
 import { Buffer } from 'node:buffer';
 import { AttachmentBuilder, EmbedBuilder } from 'discord.js';
 import { QuickDB } from 'quick.db';
+import { SERVERS } from '../config/constants.js';
 import { inlineTrim } from '../utils/text.js';
 
 const db = new QuickDB();
 const config = db.table('config');
-
-const POLLO_SERVER_ID = '534915212760055819';
-const noContextId = '1247871597080084490';
-
-const FIRST_MESSAGE_ID = '1247871734716170250';
 
 const fetchNoContextMessages = async (noContext, cursor) => {
   const result = await noContext.messages.fetch({ after: cursor, limit: 100 });
@@ -32,8 +28,8 @@ const mergeCollections = (collectionA, collectionB) => (
 
 const getNoContextMessagesSinceId = async (client, messageId) => {
   try {
-    const pollo = await client.guilds.fetch(POLLO_SERVER_ID);
-    const noContext = await pollo.channels.fetch(noContextId);
+    const pollo = await client.guilds.fetch(SERVERS.pollo.id);
+    const noContext = await pollo.channels.fetch(SERVERS.pollo.channels.noContext);
     const { lastMessageId } = noContext;
 
     if (messageId === lastMessageId) return { messages: undefined, lastMessageId };
@@ -56,7 +52,8 @@ const getNoContextMessagesSinceId = async (client, messageId) => {
 };
 
 const createSplashTextLeaderboard = async (client, guild) => {
-  const { messages } = await getNoContextMessagesSinceId(client, FIRST_MESSAGE_ID);
+  const firstMessageId = await config.get('splash.firstMessageId');
+  const { messages } = await getNoContextMessagesSinceId(client, firstMessageId);
 
   const authorCountsMap = new Map();
 
@@ -130,7 +127,6 @@ const generateSplashUpdateTxt = async (client) => {
 };
 
 const setLastSplashMessageId = async (messageId) => {
-  await config.set('splash.firstMessageId', FIRST_MESSAGE_ID);
   await config.set('splash.lastMessageId', messageId);
 };
 

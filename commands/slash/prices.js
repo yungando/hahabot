@@ -1,4 +1,5 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
+import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { SERVERS } from '../../config/constants.js';
 import handleRunelitePrices from '../../handlers/runescape-prices.js';
 import sendLog from '../../utils/send-log.js';
 
@@ -6,9 +7,9 @@ export default {
   name: 'prices',
   description: 'Get prices from Old School Runescape',
   type: ApplicationCommandType.ChatInput,
-  default_member_permissions: '0',
+  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
-    '534915212760055819',
+    SERVERS.pollo.id,
   ],
   contexts: [InteractionContextType.Guild],
   options: [

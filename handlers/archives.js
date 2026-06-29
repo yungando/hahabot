@@ -1,3 +1,4 @@
+import { SERVERS } from '../config/constants.js';
 import sendLog from '../utils/send-log.js';
 
 const threeWeeksInMs = 1000 * 60 * 60 * 24 * 21;
@@ -12,11 +13,12 @@ const sortCategory = async (channelCategory) => {
     categoryPositions.push({ channel: sortedCategory.at(i).id, position: i });
   }
 
-  channelCategory.guild.channels.setPositions(categoryPositions);
+  await channelCategory.guild.channels.setPositions(categoryPositions);
 };
 
 const scheduleArchive = async (client, channelToArchive, timeElapsed = 0) => {
-  const archivedCategory = await channelToArchive.guild.channels.fetch('917120901584150589');
+  const archivedCategory = await channelToArchive.guild.channels
+    .fetch(SERVERS.pollo.categories.archivedGames.id);
 
   clearTimeout(client.archiveTimers.get(`${channelToArchive.id}`));
 
@@ -24,7 +26,7 @@ const scheduleArchive = async (client, channelToArchive, timeElapsed = 0) => {
     async () => {
       await channelToArchive.setParent(archivedCategory, { lockPermissions: true });
 
-      sortCategory(archivedCategory);
+      await sortCategory(archivedCategory);
 
       sendLog(client, { logType: 'string', message: `Archived <#${channelToArchive.id}>`, guild: channelToArchive.guild });
     },
@@ -35,36 +37,39 @@ const scheduleArchive = async (client, channelToArchive, timeElapsed = 0) => {
 };
 
 const restoreChannel = async (client, channelToRestore) => {
-  const gamesCategory = await channelToRestore.guild.channels.fetch('785540936457125888');
+  const gamesCategory = await channelToRestore.guild.channels
+    .fetch(SERVERS.pollo.categories.games.id);
 
   await channelToRestore.setParent(gamesCategory, { lockPermissions: true });
 
-  sortCategory(gamesCategory);
+  await sortCategory(gamesCategory);
 
-  scheduleArchive(client, channelToRestore);
+  await scheduleArchive(client, channelToRestore);
 
   sendLog(client, { logType: 'string', message: `Restored <#${channelToRestore.id}>`, guild: channelToRestore.guild });
 };
 
 const initArchives = async (client) => {
-  const pollo = await client.guilds.fetch('534915212760055819');
-  const gamesCategory = await pollo.channels.cache.filter((channel) => channel.parentId === '785540936457125888');
-  const archivedCategory = await pollo.channels.fetch('917120901584150589');
+  const pollo = await client.guilds.fetch(SERVERS.pollo.id);
+  const gamesCategoryChannels = await pollo.channels.cache
+    .filter((channel) => channel.parentId === SERVERS.pollo.categories.games.id);
+  const archivedCategory = await pollo.channels
+    .fetch(SERVERS.pollo.categories.archivedGames.id);
 
   const nowTimestamp = Date.now();
 
-  gamesCategory.forEach(async (channel) => {
+  await gamesCategoryChannels.forEach(async (channel) => {
     await channel.messages.fetch({ limit: 1 });
     const lastMessage = await channel.messages.cache.first();
 
     if ((threeWeeksInMs + lastMessage.createdTimestamp - nowTimestamp) < 0) {
       await channel.setParent(archivedCategory, { lockPermissions: true });
 
-      sortCategory(archivedCategory);
+      await sortCategory(archivedCategory);
 
       sendLog(client, { logType: 'string', message: `Archived <#${channel.id}>`, guild: channel.guild });
     } else {
-      scheduleArchive(client, channel, lastMessage.createdTimestamp - nowTimestamp);
+      await scheduleArchive(client, channel, lastMessage.createdTimestamp - nowTimestamp);
     }
   });
 };

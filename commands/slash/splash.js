@@ -1,4 +1,5 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType } from 'discord.js';
+import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, PermissionFlagsBits } from 'discord.js';
+import SERVERS from '../../config/servers.js';
 import { createSplashTextLeaderboard, generateSplashUpdateTxt, getSplashCount, setLastSplashMessageId } from '../../handlers/splash-texts.js';
 import sendLog from '../../utils/send-log.js';
 
@@ -6,9 +7,9 @@ export default {
   name: 'splash',
   description: '#no-context-allowed',
   type: ApplicationCommandType.ChatInput,
-  default_member_permissions: '0',
+  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
-    '534915212760055819',
+    SERVERS.pollo.id,
   ],
   contexts: [InteractionContextType.Guild],
   options: [

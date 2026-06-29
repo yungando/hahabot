@@ -1,13 +1,14 @@
-import { ApplicationCommandType, EmbedBuilder, InteractionContextType, MessageFlags } from 'discord.js';
+import { ApplicationCommandType, EmbedBuilder, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { SERVERS } from '../../config/constants.js';
 import sendLog from '../../utils/send-log.js';
 
 export default {
   name: 'getarchives',
   description: 'Output all pending channel archive timeouts.',
   type: ApplicationCommandType.ChatInput,
-  default_member_permissions: '0',
+  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
-    '534915212760055819',
+    SERVERS.pollo.id,
   ],
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {

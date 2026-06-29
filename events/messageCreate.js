@@ -1,26 +1,20 @@
 import { ChannelType, WebhookClient } from 'discord.js';
-import { QuickDB } from 'quick.db';
+import { EMOJI, SERVERS } from '../config/constants.js';
 import { restoreChannel, scheduleArchive } from '../handlers/archives.js';
 import handleTwitterUrl from '../handlers/twitter.js';
 import sendLog from '../utils/send-log.js';
 
 const { HAHA_WEBHOOK_DM_ID, HAHA_WEBHOOK_DM_TOKEN } = process.env;
 const hahaDM = new WebhookClient({ id: HAHA_WEBHOOK_DM_ID, token: HAHA_WEBHOOK_DM_TOKEN });
-const db = new QuickDB();
-const servers = db.table('servers');
 
 export default {
   async execute(client, message) {
     try {
       if (message.partial) await message.fetch();
 
-      if (await servers.get(`${message.guild?.id}.serverName`) !== message.guild?.name) {
-        await servers.set(`${message.guild.id}.serverName`, message.guild.name);
-      }
-
       if (message.content.includes('🦀')) message.react('🦀');
       if (message.content.includes('🤝')) message.react('🤝');
-      if (message.content.includes('<:salute:719485363558809600>')) message.react('719485363558809600');
+      if (message.content.includes(EMOJI.salute.text)) message.react(EMOJI.salute.id);
 
       if (message.author.bot) return;
 
@@ -43,11 +37,12 @@ export default {
         sendLog(client, logPayload);
       }
 
-      // schedule archive game channel
-      if (message.channel.parentId === '785540936457125888') scheduleArchive(client, message.channel);
-
-      // restore game channel
-      if (message.channel.parentId === '917120901584150589') restoreChannel(client, message.channel);
+      if (message.channel.parentId === SERVERS.pollo.categories.games) {
+        scheduleArchive(client, message.channel);
+      }
+      if (message.channel.parentId === SERVERS.pollo.categories.archivedGames) {
+        restoreChannel(client, message.channel);
+      }
 
       // twitter posts
       const [twitterUrlMatch] = message.content.match(/https:\/\/(twitter|x).com\/.+\/status\/.+/) || [];

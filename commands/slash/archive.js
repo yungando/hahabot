@@ -1,4 +1,5 @@
-import { ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
+import { ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { SERVERS } from '../../config/constants.js';
 import { sortCategory } from '../../handlers/archives.js';
 import sendLog from '../../utils/send-log.js';
 
@@ -6,9 +7,9 @@ export default {
   name: 'archive',
   description: 'Archive this channel.',
   type: ApplicationCommandType.ChatInput,
-  default_member_permissions: '0',
+  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
-    '534915212760055819',
+    SERVERS.pollo.id,
   ],
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
@@ -16,11 +17,12 @@ export default {
       const channelToArchive = interaction.channel;
       if (channelToArchive.partial) await channelToArchive.fetch();
 
-      const gamesCategoryId = '785540936457125888';
-      const archivedCategory = await interaction.guild.channels.fetch('917120901584150589');
-      const retiredCategory = await interaction.guild.channels.fetch('562373109555134496');
+      const archivedCategory = await interaction.guild.channels
+        .fetch(SERVERS.pollo.categories.archivedGames.id);
+      const retiredCategory = await interaction.guild.channels
+        .fetch(SERVERS.pollo.categories.retiredThreads.id);
 
-      if (channelToArchive.parent.id === gamesCategoryId) {
+      if (channelToArchive.parent.id === SERVERS.pollo.categories.gamesCategory.id) {
         clearTimeout(client.archiveTimers.get(`${channelToArchive.id}`));
 
         await channelToArchive.setParent(archivedCategory, { lockPermissions: true });

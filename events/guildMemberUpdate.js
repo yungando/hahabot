@@ -1,4 +1,9 @@
+import { SERVERS } from '../config/constants.js';
 import sendLog from '../utils/send-log.js';
+
+const memberHasNitroRole = (member) => (
+  member.roles.cache.some((role) => role.id === SERVERS.pollo.roles.nitro.id)
+);
 
 export default {
   async execute(client, oldMember, newMember) {
@@ -6,15 +11,11 @@ export default {
       if (oldMember.partial) await oldMember.fetch();
       if (newMember.partial) await newMember.fetch();
 
-      const polloId = '534915212760055819';
-      const nitroRoleId = '585548115243696170';
-
       const { guild } = oldMember;
 
-      if (guild.id !== polloId) return;
+      if (guild.id !== SERVERS.pollo.id) return;
 
-      if (oldMember.roles.cache.some((role) => role.id === nitroRoleId)
-        && !newMember.roles.cache.some((role) => role.id === nitroRoleId)) {
+      if (memberHasNitroRole(oldMember) && !memberHasNitroRole(newMember)) {
         guild.systemChannel.send(`<@${newMember.id}> unboosted the server.`);
       }
     } catch (error) {

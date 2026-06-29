@@ -1,4 +1,5 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
+import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { SERVERS } from '../../config/constants.js';
 import { setServerTheme } from '../../handlers/server-themes.js';
 import sendLog from '../../utils/send-log.js';
 
@@ -6,6 +7,11 @@ export default {
   name: 'theme',
   description: 'Set the server\'s theme.',
   type: ApplicationCommandType.ChatInput,
+  default_member_permissions: PermissionFlagsBits.Administrator,
+  guilds: [
+    SERVERS.pollo.id,
+    SERVERS.hahabot.id,
+  ],
   options: [
     {
       name: 'theme',
@@ -23,11 +29,6 @@ export default {
         { name: 'realistic', value: 'realistic' },
       ],
     },
-  ],
-  default_member_permissions: '0',
-  guilds: [
-    '534915212760055819',
-    '568227296767639552',
   ],
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {

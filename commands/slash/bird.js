@@ -1,10 +1,17 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags } from 'discord.js';
+import { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { SERVERS } from '../../config/constants.js';
 import sendLog from '../../utils/send-log.js';
 
 export default {
   name: 'bird',
   description: 'would a bot send you this',
   type: ApplicationCommandType.ChatInput,
+  default_member_permissions: PermissionFlagsBits.Administrator,
+  guilds: [
+    SERVERS.pollo.id,
+    SERVERS.hahabot.id,
+    SERVERS.mariachi.id,
+  ],
   options: [
     {
       name: 'user',
@@ -12,12 +19,6 @@ export default {
       type: ApplicationCommandOptionType.User,
       required: true,
     },
-  ],
-  default_member_permissions: '0',
-  guilds: [
-    '534915212760055819',
-    '568227296767639552',
-    '358046343803174912',
   ],
   async execute(client, interaction) {
     const dmUser = interaction.options.getUser('user');

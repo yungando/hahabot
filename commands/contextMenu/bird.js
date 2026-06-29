@@ -1,14 +1,15 @@
-import { ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
+import { ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { SERVERS } from '../../config/constants.js';
 import sendLog from '../../utils/send-log.js';
 
 export default {
   name: 'bird',
   type: ApplicationCommandType.User,
-  default_member_permissions: '0',
+  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
-    '534915212760055819',
-    '568227296767639552',
-    '358046343803174912',
+    SERVERS.pollo.id,
+    SERVERS.hahabot.id,
+    SERVERS.mariachi.id,
   ],
   contexts: [
     InteractionContextType.Guild,

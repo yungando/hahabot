@@ -1,4 +1,5 @@
 import { ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
+import { EMOJI } from '../../config/constants.js';
 import sendLog from '../../utils/send-log.js';
 
 export default {
@@ -11,8 +12,8 @@ export default {
   async execute(client, interaction) {
     const message = interaction.options.getMessage('message');
 
-    await message.react('594816363722309645');
-    await message.react('594816363533565991');
+    await message.react(EMOJI.upvote.id);
+    await message.react(EMOJI.downvote.id);
 
     interaction.reply({ content: 'Added vote reactions to message.', flags: MessageFlags.Ephemeral });
 
