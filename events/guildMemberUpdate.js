@@ -1,9 +1,6 @@
-import { SERVERS } from '../config/constants.js';
+import { userMention } from 'discord.js';
+import { getMemberLogId } from '../utils/constants.js';
 import sendLog from '../utils/send-log.js';
-
-const memberHasNitroRole = (member) => (
-  member.roles.cache.some((role) => role.id === SERVERS.pollo.roles.nitro.id)
-);
 
 export default {
   async execute(client, oldMember, newMember) {
@@ -11,17 +8,19 @@ export default {
       if (oldMember.partial) await oldMember.fetch();
       if (newMember.partial) await newMember.fetch();
 
-      const { guild } = oldMember;
+      const memberLogId = getMemberLogId(oldMember.guild.id);
+      if (!memberLogId) return;
 
-      if (guild.id !== SERVERS.pollo.id) return;
+      const memberLog = await oldMember.guild.channels.fetch(memberLogId);
+      if (!memberLog) return;
 
-      if (memberHasNitroRole(oldMember) && !memberHasNitroRole(newMember)) {
-        guild.systemChannel.send(`<@${newMember.id}> unboosted the server.`);
+      if (oldMember.premiumSince && !newMember.premiumSince) {
+        memberLog.send(`${userMention(newMember.id)} unboosted the server.`);
       }
     } catch (error) {
       const errorPayload = {
         logType: 'error',
-        details: `Failed attempting to send 'User Updated' notification for <@${oldMember.id} in ${oldMember.guild.name}`,
+        details: `Failed attempting to send 'User Updated' notification for ${userMention(oldMember.id)} in ${oldMember.guild.name}`,
         error,
         user: oldMember.user,
         guild: oldMember.guild,

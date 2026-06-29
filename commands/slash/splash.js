@@ -1,16 +1,18 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, PermissionFlagsBits } from 'discord.js';
-import SERVERS from '../../config/servers.js';
-import { createSplashTextLeaderboard, generateSplashUpdateTxt, getSplashCount, setLastSplashMessageId } from '../../handlers/splash-texts.js';
+import { SERVERS } from '../../config/constants.js';
+import { buildSplashSeedButtonRow, createSplashTextLeaderboard, generateSplashUpdateTxt, getSplashCount, setLastSplashMessageId } from '../../handlers/splash-texts.js';
 import sendLog from '../../utils/send-log.js';
+
+const FIVE_MINS_IN_MS = 300000;
 
 export default {
   name: 'splash',
   description: '#no-context-allowed',
-  type: ApplicationCommandType.ChatInput,
-  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
     SERVERS.pollo.id,
   ],
+  default_member_permissions: PermissionFlagsBits.Administrator.toString(),
+  type: ApplicationCommandType.ChatInput,
   contexts: [InteractionContextType.Guild],
   options: [
     {
@@ -59,14 +61,33 @@ export default {
 
       switch (subcommand) {
         case 'update': {
-          const { splashTxt, count } = await generateSplashUpdateTxt(client);
+          const { splashTxt, count, lastMessageId } = await generateSplashUpdateTxt(client);
+          const actionRow = buildSplashSeedButtonRow(lastMessageId);
 
-          return interaction.editReply(
+          const res = await interaction.editReply(
             {
               content: `${count} minecraft splash texts`,
               ...(splashTxt && { files: [splashTxt] }),
+              ...(actionRow && { components: [actionRow], withResponse: true }),
             },
           );
+
+          const confirmation = await res.resource.message
+            .awaitMessageComponent({ time: FIVE_MINS_IN_MS });
+
+          if (confirmation.customId === `splashseed:${lastMessageId}`) {
+            const updateActionRow = buildSplashSeedButtonRow(lastMessageId, true);
+
+            return interaction.editReply(
+              {
+                content: `${count} minecraft splash texts`,
+                ...(splashTxt && { files: [splashTxt] }),
+                ...(updateActionRow && { components: [updateActionRow], withResponse: true }),
+              },
+            );
+          }
+
+          return interaction.editReply({ content: '( ͡° ͜ʖ ͡°)' });
         }
         case 'seed': {
           const messageId = await interaction.options.getString('messageid');

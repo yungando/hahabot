@@ -6,11 +6,11 @@ import sendLog from '../../utils/send-log.js';
 export default {
   name: 'redeploy',
   description: 'Redeploy all of hahabot\'s commands.',
-  type: ApplicationCommandType.ChatInput,
-  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
     SERVERS.hahabot.id,
   ],
+  default_member_permissions: PermissionFlagsBits.Administrator.toString(),
+  type: ApplicationCommandType.ChatInput,
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
     try {

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import { Cron } from 'croner';
 import { AttachmentBuilder } from 'discord.js';
-import { SERVERS } from '../config/constants.js';
+import { DATES, SERVERS } from '../config/constants.js';
 import sendLog from '../utils/send-log.js';
 
 const BASE_PATH = './config/server-themes';
@@ -66,19 +66,7 @@ const initThemeSchedules = async (client) => {
     const pollo = await client.guilds.fetch(SERVERS.pollo.id);
     const hahabot = await client.guilds.fetch(SERVERS.hahabot.id);
 
-    const halloweenStart = '0 0 1 10 *';
-    const halloweenDay = '0 0 31 10 *';
-    const halloweenEnd = '0 0 1 11 *';
-
-    const christmasStart = '0 0 1 12 *';
-    const christmasEve = '0 0 24 12 *';
-    const christmasDay = '0 0 25 12 *';
-
-    const newYearsStart = '0 0 30 12 *';
-    const newYearsDay = '0 0 1 1 *';
-    const newYearsEnd = '0 0 2 1 *';
-
-    schedule(halloweenStart, { timezone: 'Europe/London' }, async () => {
+    schedule(DATES.halloween.start, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'halloween');
       await setServerTheme(client, pollo, 'halloween');
 
@@ -89,11 +77,11 @@ const initThemeSchedules = async (client) => {
       sendLog(client, { logType: 'string', message: 'Set server themes to Halloween.' });
     });
 
-    schedule(halloweenDay, { timezone: 'Europe/London' }, async () => {
+    schedule(DATES.halloween.day, { timezone: 'Europe/London' }, async () => {
       await sendToGeneral(pollo, 'hh');
     });
 
-    schedule(halloweenEnd, { timezone: 'Europe/London' }, async () => {
+    schedule(DATES.halloween.end, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'default');
       await setServerTheme(client, pollo, 'default');
 
@@ -103,7 +91,7 @@ const initThemeSchedules = async (client) => {
       sendLog(client, { logType: 'string', message: 'Set server themes to Default.' });
     });
 
-    schedule(christmasStart, { timezone: 'Europe/London' }, async () => {
+    schedule(DATES.christmas.start, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'christmas');
       await setServerTheme(client, pollo, 'christmas');
 
@@ -114,11 +102,11 @@ const initThemeSchedules = async (client) => {
       sendLog(client, { logType: 'string', message: 'Set server themes to Christmas.' });
     });
 
-    schedule(christmasEve, { timezone: 'Europe/London' }, async () => {
+    schedule(DATES.christmas.eve, { timezone: 'Europe/London' }, async () => {
       await sendToGeneral(pollo, 'mce');
     });
 
-    schedule(christmasDay, { timezone: 'Europe/London' }, async () => {
+    schedule(DATES.christmas.day, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'christmas-day');
 
       await sendToGeneral(pollo, 'mc');
@@ -126,7 +114,7 @@ const initThemeSchedules = async (client) => {
       sendLog(client, { logType: 'string', message: 'Set server themes to Christmas Day.' });
     });
 
-    schedule(newYearsStart, { timezone: 'Europe/London' }, async () => {
+    schedule(DATES.newYears.start, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'partyhat');
       await setServerTheme(client, pollo, 'partyhat');
 
@@ -137,11 +125,11 @@ const initThemeSchedules = async (client) => {
       sendLog(client, { logType: 'string', message: 'Set server themes to New Years.' });
     });
 
-    schedule(newYearsDay, { timezone: 'Europe/London' }, async () => {
+    schedule(DATES.newYears.day, { timezone: 'Europe/London' }, async () => {
       await sendToGeneral(pollo, 'hny');
     });
 
-    schedule(newYearsEnd, { timezone: 'Europe/London' }, async () => {
+    schedule(DATES.newYears.end, { timezone: 'Europe/London' }, async () => {
       await setServerTheme(client, hahabot, 'default');
       await setServerTheme(client, pollo, 'default');
 

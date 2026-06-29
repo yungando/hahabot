@@ -1,16 +1,16 @@
-import { ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits, userMention } from 'discord.js';
 import { SERVERS } from '../../config/constants.js';
 import sendLog from '../../utils/send-log.js';
 
 export default {
   name: 'bird',
-  type: ApplicationCommandType.User,
-  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
     SERVERS.pollo.id,
     SERVERS.hahabot.id,
     SERVERS.mariachi.id,
   ],
+  default_member_permissions: PermissionFlagsBits.Administrator.toString(),
+  type: ApplicationCommandType.User,
   contexts: [
     InteractionContextType.Guild,
     InteractionContextType.PrivateChannel,
@@ -26,7 +26,7 @@ export default {
 
     const logPayload = {
       logType: 'command',
-      message: `/bird: <@${dmUser.id}>`,
+      message: `/bird: ${userMention(dmUser.id)}`,
       user: interaction.user,
       guild: interaction.guild,
     };

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags } from 'discord.js';
+import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags, roleMention } from 'discord.js';
 import { getVanityRole, handleRemoveRole } from '../../handlers/transmog.js';
 import sendLog from '../../utils/send-log.js';
 
@@ -64,7 +64,9 @@ export default {
         }
         case 'hex': {
           const input = await interaction.options.getString('input').toUpperCase();
-          const hexInput = input.startsWith('#') ? input.slice(1) : input;
+          const hexInput = input.startsWith('#')
+            ? input.slice(1)
+            : input;
           const hexRegex = /^[0-9A-F]{6}$/i;
 
           if (!hexRegex.test(hexInput)) return interaction.editReply({ content: 'Invalid hex colour code.', flags: MessageFlags.Ephemeral });
@@ -74,7 +76,7 @@ export default {
 
           await member.roles.add(vanityRole);
 
-          return interaction.editReply({ content: `Applied vanity role: <@&${vanityRole.id}>`, flags: MessageFlags.Ephemeral });
+          return interaction.editReply({ content: `Applied vanity role: ${roleMention(vanityRole.id)}`, flags: MessageFlags.Ephemeral });
         }
         case 'role': {
           const selectedRole = await interaction.options.getRole('role');
@@ -96,7 +98,7 @@ export default {
 
           await member.roles.add(vanityRole);
 
-          return interaction.editReply({ content: `Applied vanity role: <@&${vanityRole.id}>`, flags: MessageFlags.Ephemeral });
+          return interaction.editReply({ content: `Applied vanity role: ${roleMention(vanityRole.id)}`, flags: MessageFlags.Ephemeral });
         }
         default: {
           return interaction.editReply({ content: '( ͡° ͜ʖ ͡°)', flags: MessageFlags.Ephemeral });

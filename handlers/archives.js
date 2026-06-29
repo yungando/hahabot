@@ -1,3 +1,4 @@
+import { channelMention } from 'discord.js';
 import { SERVERS } from '../config/constants.js';
 import sendLog from '../utils/send-log.js';
 
@@ -28,7 +29,7 @@ const scheduleArchive = async (client, channelToArchive, timeElapsed = 0) => {
 
       await sortCategory(archivedCategory);
 
-      sendLog(client, { logType: 'string', message: `Archived <#${channelToArchive.id}>`, guild: channelToArchive.guild });
+      sendLog(client, { logType: 'string', message: `Archived ${channelMention(channelToArchive.id)}>`, guild: channelToArchive.guild });
     },
     (threeWeeksInMs) + timeElapsed,
   );
@@ -46,7 +47,7 @@ const restoreChannel = async (client, channelToRestore) => {
 
   await scheduleArchive(client, channelToRestore);
 
-  sendLog(client, { logType: 'string', message: `Restored <#${channelToRestore.id}>`, guild: channelToRestore.guild });
+  sendLog(client, { logType: 'string', message: `Restored ${channelMention(channelToRestore.id)}>`, guild: channelToRestore.guild });
 };
 
 const initArchives = async (client) => {
@@ -67,7 +68,7 @@ const initArchives = async (client) => {
 
       await sortCategory(archivedCategory);
 
-      sendLog(client, { logType: 'string', message: `Archived <#${channel.id}>`, guild: channel.guild });
+      sendLog(client, { logType: 'string', message: `Archived ${channelMention(channel.id)}>`, guild: channel.guild });
     } else {
       await scheduleArchive(client, channel, lastMessage.createdTimestamp - nowTimestamp);
     }

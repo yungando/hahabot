@@ -6,12 +6,13 @@ import sendLog from '../../utils/send-log.js';
 export default {
   name: 'theme',
   description: 'Set the server\'s theme.',
-  type: ApplicationCommandType.ChatInput,
-  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
     SERVERS.pollo.id,
     SERVERS.hahabot.id,
   ],
+  default_member_permissions: PermissionFlagsBits.Administrator.toString(),
+  type: ApplicationCommandType.ChatInput,
+  contexts: [InteractionContextType.Guild],
   options: [
     {
       name: 'theme',
@@ -30,7 +31,6 @@ export default {
       ],
     },
   ],
-  contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
     try {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });

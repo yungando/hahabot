@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, PermissionFlagsBits } from 'discord.js';
 import { SERVERS } from '../../config/constants.js';
 import handleRunelitePrices from '../../handlers/runescape-prices.js';
 import sendLog from '../../utils/send-log.js';
@@ -6,11 +6,11 @@ import sendLog from '../../utils/send-log.js';
 export default {
   name: 'prices',
   description: 'Get prices from Old School Runescape',
-  type: ApplicationCommandType.ChatInput,
-  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
     SERVERS.pollo.id,
   ],
+  default_member_permissions: PermissionFlagsBits.Administrator.toString(),
+  type: ApplicationCommandType.ChatInput,
   contexts: [InteractionContextType.Guild],
   options: [
     {
@@ -28,34 +28,18 @@ export default {
     try {
       await interaction.deferReply();
 
-      const subcommand = await interaction.options.getSubcommand();
-
       const logPayload = {
         logType: 'command',
         message: interaction.toString(),
         user: interaction.user,
         guild: interaction.guild,
       };
-
       sendLog(client, logPayload);
 
-      switch (subcommand) {
-        case 'deadman': {
-          const pricesTable = await handleRunelitePrices('Deadman');
-          const reply = `\`\`\`\n${pricesTable}\n\`\`\``;
+      const subcommand = await interaction.options.getSubcommand();
+      const pricesTable = await handleRunelitePrices(subcommand);
 
-          return interaction.editReply({ content: reply });
-        }
-        case 'leagues': {
-          const pricesTable = await handleRunelitePrices('Leagues');
-          const reply = `\`\`\`\n${pricesTable}\n\`\`\``;
-
-          return interaction.editReply({ content: reply });
-        }
-        default: {
-          return interaction.editReply({ content: '( ͡° ͜ʖ ͡°)', flags: MessageFlags.Ephemeral });
-        }
-      }
+      return interaction.editReply({ content: pricesTable });
     } catch (error) {
       const errorPayload = {
         logType: 'error',

@@ -1,4 +1,4 @@
-import { EmbedBuilder, WebhookClient } from 'discord.js';
+import { codeBlock, EmbedBuilder, WebhookClient } from 'discord.js';
 
 const {
   HAHA_WEBHOOK_LOG_ID,
@@ -117,7 +117,7 @@ const sendLog = async (client, payload) => {
 
         const errorStack = payload.error.stack.slice(0, maxDiscordEmbedTextLength);
 
-        errorEmbed.addFields({ name: 'Error', value: `\`\`\`${errorStack}\`\`\`` });
+        errorEmbed.addFields({ name: 'Error', value: codeBlock(errorStack) });
 
         sendErrorWebhook(client, { embeds: [errorEmbed] });
 
@@ -134,7 +134,7 @@ const sendLog = async (client, payload) => {
 
         if (payload.message) errorEmbed.addFields({ name: 'Message', value: payload.message.url });
 
-        errorEmbed.addFields({ name: 'Payload', value: `\`\`\`${payload}\`\`\`` });
+        errorEmbed.addFields({ name: 'Payload', value: codeBlock(payload) });
 
         sendLogWebhook(client, { embeds: [errorEmbed] });
       }
@@ -147,7 +147,7 @@ const sendLog = async (client, payload) => {
         new EmbedBuilder()
           .setAuthor(await buildEmbedAuthor(client))
           .setColor('Red')
-          .addFields({ name: 'Error', value: `\`\`\`${errorStack}\`\`\`` })
+          .addFields({ name: 'Error', value: codeBlock(errorStack) })
           .setFooter({
             text: payload.guild
               ? payload.guild?.name

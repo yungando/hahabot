@@ -11,22 +11,26 @@ const SERVERS = Object.freeze({
       retiredThreads: { id: '562373109555134496' },
     },
     roles: {
-      nitro: {
-        id: '585548115243696170',
-      },
+      nitro: { id: '585548115243696170' },
     },
   },
   hahabot: {
     id: '568227296767639552',
-    memberLog: { id: '568230745252954115' },
+    channels: {
+      memberLog: { id: '568230745252954115' },
+    },
   },
   mariachi: {
     id: '358046343803174912',
-    memberLog: { id: '502159525932171275' },
+    channels: {
+      memberLog: { id: '502159525932171275' },
+    },
   },
   gang: {
     id: '480131488764133399',
-    memberLog: '480155424037797898',
+    channels: {
+      memberLog: { id: '480155424037797898' },
+    },
   },
 });
 
@@ -39,4 +43,22 @@ const EMOJI = Object.freeze({
   },
 });
 
-export { EMOJI, SERVERS };
+const DATES = Object.freeze({
+  halloween: {
+    start: '0 0 1 10 *',
+    day: '0 0 31 10 *',
+    end: '0 0 1 11 *',
+  },
+  christmas: {
+    start: '0 0 1 12 *',
+    eve: '0 0 24 12 *',
+    day: '0 0 25 12 *',
+  },
+  newYears: {
+    start: '0 0 30 12 *',
+    day: '0 0 1 1 *',
+    end: '0 0 2 1 *',
+  },
+});
+
+export { DATES, EMOJI, SERVERS };

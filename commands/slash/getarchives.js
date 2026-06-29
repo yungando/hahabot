@@ -1,15 +1,15 @@
-import { ApplicationCommandType, EmbedBuilder, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandType, channelMention, EmbedBuilder, InteractionContextType, MessageFlags, PermissionFlagsBits, time, TimestampStyles } from 'discord.js';
 import { SERVERS } from '../../config/constants.js';
 import sendLog from '../../utils/send-log.js';
 
 export default {
   name: 'getarchives',
   description: 'Output all pending channel archive timeouts.',
-  type: ApplicationCommandType.ChatInput,
-  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
     SERVERS.pollo.id,
   ],
+  default_member_permissions: PermissionFlagsBits.Administrator.toString(),
+  type: ApplicationCommandType.ChatInput,
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
     try {
@@ -38,8 +38,8 @@ export default {
         const { _idleStart: idleStart, _idleTimeout: idleTimeout } = timeout;
 
         const archivesOn = Math.ceil((idleStart + idleTimeout + nowTimestamp) / 1000);
-        channelIdArray.push(`<#${channelId}>`);
-        timeLeftArray.push(`<t:${archivesOn}:R>`);
+        channelIdArray.push(channelMention(channelId));
+        timeLeftArray.push(time(archivesOn, TimestampStyles.RelativeTime));
       }
 
       const archivesEmbed = new EmbedBuilder()

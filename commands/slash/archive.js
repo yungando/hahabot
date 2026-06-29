@@ -1,4 +1,4 @@
-import { ApplicationCommandType, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandType, channelMention, InteractionContextType, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { SERVERS } from '../../config/constants.js';
 import { sortCategory } from '../../handlers/archives.js';
 import sendLog from '../../utils/send-log.js';
@@ -6,11 +6,11 @@ import sendLog from '../../utils/send-log.js';
 export default {
   name: 'archive',
   description: 'Archive this channel.',
-  type: ApplicationCommandType.ChatInput,
-  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
     SERVERS.pollo.id,
   ],
+  default_member_permissions: PermissionFlagsBits.Administrator.toString(),
+  type: ApplicationCommandType.ChatInput,
   contexts: [InteractionContextType.Guild],
   async execute(client, interaction) {
     try {
@@ -29,16 +29,16 @@ export default {
 
         sortCategory(archivedCategory);
 
-        interaction.reply({ content: `Moved <#${channelToArchive.id}> to \`#${archivedCategory.name}\``, flags: MessageFlags.Ephemeral });
+        interaction.reply({ content: `Moved ${channelMention(channelToArchive.id)} to \`#${archivedCategory.name}\``, flags: MessageFlags.Ephemeral });
       } else {
         channelToArchive.setParent(retiredCategory, { lockPermissions: true });
 
-        interaction.reply({ content: `Moved <#${channelToArchive.id}> to \`#${retiredCategory.name}\``, flags: MessageFlags.Ephemeral });
+        interaction.reply({ content: `Moved ${channelMention(channelToArchive.id)} to \`#${retiredCategory.name}\``, flags: MessageFlags.Ephemeral });
       }
 
       const logPayload = {
         logType: 'command',
-        message: `/archive: <#${channelToArchive.id}>`,
+        message: `/archive: ${channelMention(channelToArchive.id)}`,
         user: interaction.user,
         guild: interaction.guild,
       };
@@ -47,7 +47,7 @@ export default {
     } catch (error) {
       const errorPayload = {
         logType: 'error',
-        details: `Failed attempting to archive <#${interaction.channel.id}>`,
+        details: `Failed attempting to archive ${channelMention(interaction.channel.id)}`,
         error,
         user: interaction.user,
         guild: interaction.guild,

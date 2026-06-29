@@ -15,11 +15,9 @@ const syncEvents = async (client) => {
     const eventUrl = new URL(file, eventsDir);
     const { default: event } = await import(eventUrl.href);
 
-    if (event.once) {
-      client.once(eventName, (...args) => event.execute(client, ...args));
-    } else {
-      client.on(eventName, (...args) => event.execute(client, ...args));
-    }
+    event.once
+      ? client.once(eventName, (...args) => event.execute(client, ...args))
+      : client.on(eventName, (...args) => event.execute(client, ...args));
   }
 };
 
@@ -42,11 +40,9 @@ const reduceGuildCommands = async (guildCommands) => {
   const reducedGuildCommands = guildCommands.reduce((commandsArray, value) => {
     const guildIndex = commandsArray.findIndex((guild) => guild.guildId === value.guildId);
 
-    if (guildIndex > -1) {
-      commandsArray[guildIndex].commands.push(...value.commands);
-    } else {
-      commandsArray.push(value);
-    }
+    guildIndex > -1
+      ? commandsArray[guildIndex].commands.push(...value.commands)
+      : commandsArray.push(value);
 
     return commandsArray;
   }, []);
@@ -82,7 +78,7 @@ const loadCommands = async (client) => {
       const folderUrl = new URL(`${folder}/`, commandsDir);
 
       return readdirSync(folderUrl)
-        .filter((file) => file.endsWith('.js'))
+        .filter((file) => file.match(/(?:slash|contextMenu).*\.js$/))
         .map((file) => new URL(file, folderUrl));
     });
 
@@ -97,11 +93,9 @@ const loadCommands = async (client) => {
       client.globalCommands.push(command);
     }
 
-    if (command.type === ApplicationCommandType.ChatInput) {
-      client.commands.set(command.name, command);
-    } else {
-      client.contextMenus.set(command.name, command);
-    }
+    command.type === ApplicationCommandType.ChatInput
+      ? client.commands.set(command.name, command)
+      : client.contextMenus.set(command.name, command);
   }
 
   const reducedGuildCommands = await reduceGuildCommands(guildCommands);

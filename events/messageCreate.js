@@ -33,7 +33,6 @@ export default {
           user: message.author,
           guild: message.guild,
         };
-
         sendLog(client, logPayload);
       }
 
@@ -52,20 +51,14 @@ export default {
       if (message.channel.type === ChannelType.DM) {
         const messageContent = message.content || ' ';
 
-        if (message.attachments.size > 0) {
-          hahaDM.send({
-            content: messageContent,
-            username: `${message.author.username} - ${message.author.id}`,
-            avatarURL: message.author.displayAvatarURL({ extension: 'png' }),
+        hahaDM.send({
+          content: messageContent,
+          username: `${message.author.username} - ${message.author.id}`,
+          avatarURL: message.author.displayAvatarURL({ extension: 'png' }),
+          ...(message.attachments.size > 0 && {
             files: message.attachments,
-          });
-        } else {
-          hahaDM.send({
-            content: messageContent,
-            username: `${message.author.username} - ${message.author.id}`,
-            avatarURL: message.author.displayAvatarURL({ extension: 'png' }),
-          });
-        }
+          }),
+        });
       }
     } catch (error) {
       const errorPayload = {

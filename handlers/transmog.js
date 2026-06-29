@@ -23,16 +23,13 @@ const getVanityRole = async (member, vanityRoleName, vanityRoleColour = vanityRo
 
 const handleRemoveRole = async (member) => {
   const memberRoleToRemove = await member.roles.cache.find((role) => role.name.includes('vanity'));
-
   if (!memberRoleToRemove) return;
 
   await member.guild.members.fetch();
 
-  if (memberRoleToRemove.members.size < 2) {
-    await member.guild.roles.delete(memberRoleToRemove);
-  } else {
-    await member.roles.remove(memberRoleToRemove);
-  }
+  memberRoleToRemove.members.size < 2
+    ? await member.guild.roles.delete(memberRoleToRemove)
+    : await member.roles.remove(memberRoleToRemove);
 };
 
 export { getVanityRole, handleRemoveRole };

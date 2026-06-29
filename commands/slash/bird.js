@@ -1,17 +1,17 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandOptionType, ApplicationCommandType, MessageFlags, PermissionFlagsBits, userMention } from 'discord.js';
 import { SERVERS } from '../../config/constants.js';
 import sendLog from '../../utils/send-log.js';
 
 export default {
   name: 'bird',
   description: 'would a bot send you this',
-  type: ApplicationCommandType.ChatInput,
-  default_member_permissions: PermissionFlagsBits.Administrator,
   guilds: [
     SERVERS.pollo.id,
     SERVERS.hahabot.id,
     SERVERS.mariachi.id,
   ],
+  default_member_permissions: PermissionFlagsBits.Administrator.toString(),
+  type: ApplicationCommandType.ChatInput,
   options: [
     {
       name: 'user',
@@ -31,7 +31,7 @@ export default {
 
     const logPayload = {
       logType: 'command',
-      message: `/bird: <@${dmUser.id}>`,
+      message: `/bird: ${userMention(dmUser.id)}`,
       user: interaction.user,
       guild: interaction.guild,
     };

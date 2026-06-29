@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer';
-import { AttachmentBuilder, EmbedBuilder } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, EmbedBuilder } from 'discord.js';
 import { QuickDB } from 'quick.db';
 import { SERVERS } from '../config/constants.js';
 import { inlineTrim } from '../utils/text.js';
@@ -116,21 +116,27 @@ const generateSplashUpdateTxt = async (client) => {
   const count = splashTexts.length;
   const splashTxt = new AttachmentBuilder(
     Buffer.from(splashTexts.join('\n'), 'utf-8'),
-    {
-      name: 'splash.txt',
-    },
+    { name: 'splash.txt' },
   );
 
-  await config.set('splash.lastMessageId', lastMessageId);
-
-  return { splashTxt, count };
+  return { splashTxt, count, lastMessageId };
 };
 
 const setLastSplashMessageId = async (messageId) => {
   await config.set('splash.lastMessageId', messageId);
 };
 
+const buildSplashSeedButtonRow = (lastMessageId, disabled = false) => {
+  const seedButton = new ButtonBuilder()
+    .setLabel('Seed last splash message id')
+    .setCustomId(`splashseed:${lastMessageId}`)
+    .setDisabled(disabled);
+
+  return new ActionRowBuilder.addComponents(seedButton);
+};
+
 export {
+  buildSplashSeedButtonRow,
   createSplashTextLeaderboard,
   generateSplashUpdateTxt,
   getSplashCount,

@@ -1,6 +1,8 @@
 import axios from 'axios';
+import { codeBlock } from 'discord.js';
 import EasyTable from 'easy-table';
 import { dmmItems, leaguesItems } from '../config/runescape-items.js';
+import { formatLongNumber } from '../utils/text.js';
 
 const userAgent = 'hahabot discord bot by @yungando';
 const maxDiscordMessageLength = 1980;
@@ -35,8 +37,6 @@ const calculateGpPerPoint = (itemPrices) => (
   })
 );
 
-const formatLongNumber = (number = 0) => number.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ',');
-
 const truncateTable = (pricesTable) => {
   if (pricesTable.length < maxDiscordMessageLength) return pricesTable;
 
@@ -47,7 +47,7 @@ const truncateTable = (pricesTable) => {
   return slicedTable.slice(0, lastNewline);
 };
 
-const createPricesEmbed = (itemSetName, items) => {
+const createPricesTable = (itemSetName, items) => {
   const pricesTable = new EasyTable();
 
   items.forEach((item) => {
@@ -70,7 +70,9 @@ const handleRunelitePrices = async (itemSetName) => {
   const itemGpPerPoint = calculateGpPerPoint(itemPrices);
   const sortedItems = itemGpPerPoint.toSorted((a, b) => b.gpPerPoint - a.gpPerPoint);
 
-  return createPricesEmbed(itemSetName, sortedItems);
+  const pricesTable = createPricesTable(itemSetName, sortedItems);
+
+  return codeBlock(pricesTable);
 };
 
 export default handleRunelitePrices;
