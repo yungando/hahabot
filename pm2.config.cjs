@@ -4,7 +4,9 @@ module.exports = {
     script: './index.js',
     watch: [
       'commands',
+      'config',
       'events',
+      'handlers',
       'utils',
       'index.js',
     ],
