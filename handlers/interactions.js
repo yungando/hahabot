@@ -1,3 +1,4 @@
+import { log } from 'node:console';
 import { readdirSync } from 'node:fs';
 import { ApplicationCommandType, REST, Routes } from 'discord.js';
 
@@ -22,14 +23,12 @@ const syncEvents = async (client) => {
 };
 
 const clearCommands = (client) => {
-  // eslint-disable-next-line no-console
-  console.log('Starting clearing old interactions.');
+  log('Starting clearing old interactions.');
 
   client.commands.clear();
   client.contextMenus.clear();
 
-  // eslint-disable-next-line no-console
-  console.log('Successfully cleared old interactions.');
+  log('Successfully cleared old interactions.');
 };
 
 const addGuildCommand = (guildCommands, guildId, command) => {
@@ -72,8 +71,7 @@ const loadCommands = async (client) => {
 const registerCommands = async (client, { globalCommands, guildCommands }) => {
   const clientId = client.application.id;
 
-  // eslint-disable-next-line no-console
-  console.log('Started registering application interactions.');
+  log('Started registering application interactions.');
 
   await rest.put(Routes.applicationCommands(clientId), {
     body: globalCommands,
@@ -85,8 +83,7 @@ const registerCommands = async (client, { globalCommands, guildCommands }) => {
     });
   }
 
-  // eslint-disable-next-line no-console
-  console.log('Successfully registered application interactions.');
+  log('Successfully registered application interactions.');
 };
 
 export {

@@ -1,3 +1,4 @@
+import { log } from 'node:console';
 import { initArchives } from '../handlers/archives.js';
 import { loadCommands } from '../handlers/interactions.js';
 import { initThemeSchedules } from '../handlers/server-themes.js';
@@ -10,8 +11,7 @@ export default {
     await initArchives(client);
     await initThemeSchedules(client);
 
-    // eslint-disable-next-line no-console
-    console.log('ready');
+    log('ready');
     sendLog(client, { logType: 'string', message: 'ready' });
   },
 };
